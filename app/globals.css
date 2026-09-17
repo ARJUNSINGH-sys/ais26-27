@@ -1,26 +1,176 @@
 @import "tailwindcss";
 
+/* ─── BLACK & WHITE MINIMALIST DESIGN SYSTEM ───────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Color Palette — Pure Monochrome */
+  --bg-page:           #F7F7F5;
+  --bg-surface:        #EEEEEC;
+  --bg-surface-dark:   #0D0D0D;
+  --bg-card-light:     #FFFFFF;
+  --text-primary:      #0A0A0A;
+  --text-secondary:    #666663;
+  --text-tertiary:     #9E9E99;
+  --border-light:      #E2E2DE;
+  --border-dark:       #262626;
+
+  /* Typography Scale */
+  --font-display-hero: clamp(40px, 6.5vw, 84px);
+  --font-display-h1:   clamp(30px, 4.2vw, 54px);
+  --font-display-h2:   clamp(22px, 2.8vw, 36px);
+  --font-body:         16px;
+  --font-small:        13px;
+  --font-micro:        11px;
+
+  /* Rounded Radii — Spacious & Curvaceous (Reference Image) */
+  --radius-xl:         32px;
+  --radius-lg:         24px;
+  --radius-md:         18px;
+  --radius-full:       9999px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+/* Selection */
+::selection {
+  background: #0A0A0A;
+  color: #FFFFFF;
+}
+
+/* Spacious Container */
+.bw-container {
+  width: 100%;
+  max-width: 1320px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(20px, 5vw, 56px);
+  padding-right: clamp(20px, 5vw, 56px);
+}
+
+/* Minimalist Pill Button */
+.btn-pill-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #0A0A0A;
+  color: #FFFFFF;
+  padding: 12px 24px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid #0A0A0A;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.btn-pill-dark:hover {
+  background-color: #262626;
+  border-color: #262626;
+  transform: scale(1.02);
+}
+
+.btn-pill-light {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #FFFFFF;
+  color: #0A0A0A;
+  padding: 12px 24px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-light);
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.btn-pill-light:hover {
+  background-color: #0A0A0A;
+  color: #FFFFFF;
+  border-color: #0A0A0A;
+  transform: scale(1.02);
+}
+
+/* Arrow Icon inside button */
+.btn-arrow-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: transform 0.25s ease;
+}
+
+.btn-pill-dark:hover .btn-arrow-circle {
+  transform: translate(2px, -2px);
+}
+
+/* Statement Chip / Tag */
+.statement-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid #0A0A0A;
+  font-size: 0.72em;
+  font-weight: 600;
+  vertical-align: middle;
+  background: #FFFFFF;
+  color: #0A0A0A;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Image Card Transitions */
+.bw-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.bw-card:hover {
+  transform: translateY(-4px);
+}
+
+.bw-card-img {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bw-card:hover .bw-card-img {
+  transform: scale(1.04);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .bw-card,
+  .bw-card-img,
+  .btn-pill-dark,
+  .btn-pill-light {
+    transition: none !important;
+    transform: none !important;
+  }
 }
