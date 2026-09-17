@@ -2,32 +2,47 @@ import Link from "next/link";
 
 export default function ResourceTeaser() {
   return (
-    <section className="py-16 md:py-20 bg-[#F7F7F5]">
-      <div className="bw-container">
-        <div className="bg-[#0A0A0A] text-white rounded-[32px] sm:rounded-[40px] p-8 sm:p-14 border border-[#262626] flex flex-col lg:flex-row lg:items-center justify-between gap-8 group bw-card">
+    <section id="resources" className="py-12 md:py-16">
+      <div className="shell">
+        <div className="flex flex-col justify-between gap-8 rounded-[32px] bg-dark p-9 text-white sm:p-14 lg:flex-row lg:items-center">
           <div className="max-w-[48ch]">
-            <span className="text-[11px] font-mono tracking-[0.16em] uppercase text-[#A1A19D] block mb-3">
-              BENNETT UNIVERSITY · OPEN ARCHIVE
+            <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/45">
+              Bennett University · Open archive
             </span>
-            <h2 className="text-[28px] sm:text-[38px] font-black tracking-tight text-white leading-tight mb-4">
+            <h2 className="mt-4 font-display text-[clamp(26px,3.2vw,40px)] font-extrabold leading-[1.08] tracking-[-0.035em]">
               AIS Learning Resource Center
             </h2>
-            <p className="text-[14px] sm:text-[15px] text-[#A1A19D] leading-relaxed">
-              Explore our dedicated interactive lab featuring real-time visualizers and
-              PyTorch implementations for Scaled Dot-Product Attention, 2D Convolutions,
-              Gradient Descent, Diffusion Schedulers, and Softmax Temperature.
+            <p className="mt-4 text-[14px] leading-[1.6] text-white/60">
+              An interactive lab of real-time visualisers and PyTorch
+              implementations for scaled dot-product attention, 2D convolutions,
+              gradient descent, diffusion schedulers, and softmax temperature.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <Link
-              href="/resources"
-              className="px-8 py-4 bg-white text-[#0A0A0A] hover:bg-[#EEEEEC] rounded-full text-[13px] font-bold tracking-wider uppercase inline-flex items-center gap-2.5 transition-all duration-200 group-hover:scale-105"
+          <Link
+            href="/resources"
+            className="inline-flex shrink-0 items-center gap-3.5 self-start rounded-full bg-white py-2 pr-2 pl-6 text-[13px] font-medium text-ink transition-colors duration-300 hover:bg-panel lg:self-auto"
+          >
+            <span>Open the lab</span>
+            <span
+              aria-hidden
+              className="grid h-9 w-9 place-items-center rounded-full bg-ink/10"
             >
-              <span>Launch Resource Center</span>
-              <span className="text-[14px]">↗</span>
-            </Link>
-          </div>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M7 17 17 7" />
+                <path d="M8 7h9v9" />
+              </svg>
+            </span>
+          </Link>
         </div>
       </div>
     </section>
