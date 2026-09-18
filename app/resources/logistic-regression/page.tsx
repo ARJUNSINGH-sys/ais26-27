@@ -17,7 +17,12 @@ function MathTex({ math, block = false }: { math: string; block?: boolean }) {
     }
   }, [math, block]);
 
-  return <span dangerouslySetInnerHTML={{ __html: html }} className={block ? "block my-2" : "inline-block"} />;
+  return (
+    <span
+      dangerouslySetInnerHTML={{ __html: html }}
+      className={block ? "block my-2" : "inline-block"}
+    />
+  );
 }
 
 export default function LogisticRegressionArticlePage() {
@@ -48,7 +53,10 @@ export default function LogisticRegressionArticlePage() {
       const prob = sigmoid(z);
       // Binary cross-entropy
       const eps = 1e-6;
-      const loss = -(pt.y * Math.log(prob + eps) + (1 - pt.y) * Math.log(1 - prob + eps));
+      const loss = -(
+        pt.y * Math.log(prob + eps) +
+        (1 - pt.y) * Math.log(1 - prob + eps)
+      );
       totalLoss += loss;
       return { ...pt, prob };
     });
@@ -68,13 +76,31 @@ export default function LogisticRegressionArticlePage() {
     <FoldLayout>
       <main className="grow pt-28 sm:pt-36 pb-32 bg-[#EFECE6] text-[#1A1816] min-h-screen">
         <div className="shell max-w-5xl">
-          {/* Top Breadcrumb */}
-          <div className="flex items-center gap-2 text-[11px] font-mono tracking-[0.16em] uppercase text-[#75716B] mb-8">
-            <Link href="/resources" className="hover:text-[#1A1816] transition-colors">
-              03 / Resources
+          {/* Back to Articles & Breadcrumb */}
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+            <Link
+              href="/resources"
+              aria-label="Return to Published Articles Archive"
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-[2px] bg-[#FAF9F5] border border-[#1A1816] text-[#1A1816] font-mono text-[12px] font-bold tracking-wider uppercase transition-all duration-200 hover:bg-[#1A1816] hover:text-[#FAF9F5] group"
+            >
+              <span className="text-[#DE5D35] group-hover:text-[#FAF9F5] transition-transform duration-200 group-hover:-translate-x-1 font-bold">
+                ←
+              </span>
+              <span>Back to 03 / Published Articles</span>
             </Link>
-            <span>/</span>
-            <span className="text-[#DE5D35] font-semibold">Classification · Logistic Regression</span>
+
+            <div className="flex items-center gap-2 text-[11px] font-mono tracking-[0.16em] uppercase text-[#75716B]">
+              <Link
+                href="/resources"
+                className="hover:text-[#1A1816] transition-colors"
+              >
+                03 / Resources
+              </Link>
+              <span>/</span>
+              <span className="text-[#DE5D35] font-semibold">
+                Classification · Logistic Regression
+              </span>
+            </div>
           </div>
 
           {/* Article Header */}
@@ -82,35 +108,49 @@ export default function LogisticRegressionArticlePage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
               <span className="text-[11px] font-mono tracking-widest uppercase text-[#75716B]">
-                Interactive Diagnostic Essay · Topic 03
+                Interactive Diagnostic Essay · Topic 02
               </span>
             </div>
             <h1 className="text-[38px] sm:text-[56px] font-black tracking-[-0.035em] leading-[1.02] uppercase font-display text-[#1A1816] mb-5">
               Logistic Regression & The Sigmoid Curve
             </h1>
             <p className="text-[16px] sm:text-[18px] text-[#75716B] max-w-2xl leading-[1.6]">
-              Projecting linear combinations onto calibrated probability bounds <MathTex math="[0, 1]" />. Exploring log-odds, decision boundaries, and binary cross-entropy loss.
+              Projecting linear combinations onto calibrated probability bounds{" "}
+              <MathTex math="[0, 1]" />. Exploring log-odds, decision
+              boundaries, and binary cross-entropy loss.
             </p>
           </header>
 
           {/* Section 01: The Sigmoidal Transformation */}
           <section className="mb-16">
             <div className="mb-6">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">01 / Probability Formulation</span>
-              <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">The Sigmoidal Probability Curve</h2>
+              <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
+                01 / Probability Formulation
+              </span>
+              <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">
+                The Sigmoidal Probability Curve
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* Left text & sliders */}
               <div className="lg:col-span-5 text-[14px] text-[#4A4742] leading-[1.7] space-y-4">
                 <p>
-                  Linear regression cannot directly predict probabilities because linear functions <MathTex math="w \cdot x + b" /> produce unbounded outputs in <MathTex math="(-\infty, \infty)" />.
+                  Linear regression cannot directly predict probabilities
+                  because linear functions <MathTex math="w \cdot x + b" />{" "}
+                  produce unbounded outputs in{" "}
+                  <MathTex math="(-\infty, \infty)" />.
                 </p>
                 <p>
-                  Logistic regression maps the unbounded linear score through the standard logistic (sigmoid) function <MathTex math="\sigma(z)" />:
+                  Logistic regression maps the unbounded linear score through
+                  the standard logistic (sigmoid) function{" "}
+                  <MathTex math="\sigma(z)" />:
                 </p>
                 <div className="p-3 bg-[#FAF9F5] border border-[#1A1816]/15 font-mono text-[13px]">
-                  <MathTex math="P(Y=1|x) = \sigma(w x + b) = \frac{1}{1 + e^{-(w x + b)}}" block />
+                  <MathTex
+                    math="P(Y=1|x) = \sigma(w x + b) = \frac{1}{1 + e^{-(w x + b)}}"
+                    block
+                  />
                 </div>
 
                 {/* Sliders */}
@@ -118,7 +158,9 @@ export default function LogisticRegressionArticlePage() {
                   <div>
                     <div className="flex justify-between text-[11px] font-mono text-[#75716B] mb-1">
                       <span>WEIGHT (w) · SLOPE SHARPNESS</span>
-                      <span className="font-bold text-[#DE5D35]">{weight.toFixed(2)}</span>
+                      <span className="font-bold text-[#DE5D35]">
+                        {weight.toFixed(2)}
+                      </span>
                     </div>
                     <input
                       type="range"
@@ -134,7 +176,9 @@ export default function LogisticRegressionArticlePage() {
                   <div>
                     <div className="flex justify-between text-[11px] font-mono text-[#75716B] mb-1">
                       <span>BIAS (b) · HORIZONTAL SHIFT</span>
-                      <span className="font-bold text-[#1A1816]">{bias.toFixed(2)}</span>
+                      <span className="font-bold text-[#1A1816]">
+                        {bias.toFixed(2)}
+                      </span>
                     </div>
                     <input
                       type="range"
@@ -150,12 +194,18 @@ export default function LogisticRegressionArticlePage() {
 
                 <div className="p-3 bg-[#FAF9F5] border border-[#1A1816]/15 text-[12px] font-mono space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-[#75716B]">DECISION BOUNDARY (z=0):</span>
-                    <span className="font-bold text-[#DE5D35]">x = {stats.boundaryX.toFixed(2)}</span>
+                    <span className="text-[#75716B]">
+                      DECISION BOUNDARY (z=0):
+                    </span>
+                    <span className="font-bold text-[#DE5D35]">
+                      x = {stats.boundaryX.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#75716B]">LOG LOSS (BCE):</span>
-                    <span className="font-bold text-[#1A1816]">{stats.bceLoss.toFixed(4)}</span>
+                    <span className="font-bold text-[#1A1816]">
+                      {stats.bceLoss.toFixed(4)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -177,17 +227,77 @@ export default function LogisticRegressionArticlePage() {
                 </div>
 
                 <div className="relative bg-[#EBF5FB]/30 border border-[#1A1816]/10 p-2 rounded-[2px] h-72 flex items-end">
-                  <svg viewBox="-60 -10 120 120" className="w-full h-full overflow-visible select-none">
+                  <svg
+                    viewBox="-60 -10 120 120"
+                    className="w-full h-full overflow-visible select-none"
+                  >
                     {/* Axes */}
-                    <line x1="-55" y1="100" x2="55" y2="100" stroke="#1A1816" strokeWidth="0.8" />
-                    <line x1="-55" y1="0" x2="55" y2="0" stroke="#1A1816" strokeWidth="0.5" strokeDasharray="2 2" />
-                    <line x1="-55" y1="50" x2="55" y2="50" stroke="#75716B" strokeWidth="0.5" strokeDasharray="2 2" />
-                    <line x1="0" y1="0" x2="0" y2="100" stroke="#1A1816" strokeWidth="0.8" />
+                    <line
+                      x1="-55"
+                      y1="100"
+                      x2="55"
+                      y2="100"
+                      stroke="#1A1816"
+                      strokeWidth="0.8"
+                    />
+                    <line
+                      x1="-55"
+                      y1="0"
+                      x2="55"
+                      y2="0"
+                      stroke="#1A1816"
+                      strokeWidth="0.5"
+                      strokeDasharray="2 2"
+                    />
+                    <line
+                      x1="-55"
+                      y1="50"
+                      x2="55"
+                      y2="50"
+                      stroke="#75716B"
+                      strokeWidth="0.5"
+                      strokeDasharray="2 2"
+                    />
+                    <line
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="100"
+                      stroke="#1A1816"
+                      strokeWidth="0.8"
+                    />
 
                     {/* Probability labels */}
-                    <text x="-58" y="3" fontSize="4" fontFamily="monospace" textAnchor="end" fill="#75716B">1.0</text>
-                    <text x="-58" y="52" fontSize="4" fontFamily="monospace" textAnchor="end" fill="#DE5D35">0.5</text>
-                    <text x="-58" y="102" fontSize="4" fontFamily="monospace" textAnchor="end" fill="#75716B">0.0</text>
+                    <text
+                      x="-58"
+                      y="3"
+                      fontSize="4"
+                      fontFamily="monospace"
+                      textAnchor="end"
+                      fill="#75716B"
+                    >
+                      1.0
+                    </text>
+                    <text
+                      x="-58"
+                      y="52"
+                      fontSize="4"
+                      fontFamily="monospace"
+                      textAnchor="end"
+                      fill="#DE5D35"
+                    >
+                      0.5
+                    </text>
+                    <text
+                      x="-58"
+                      y="102"
+                      fontSize="4"
+                      fontFamily="monospace"
+                      textAnchor="end"
+                      fill="#75716B"
+                    >
+                      0.0
+                    </text>
 
                     {/* Decision Boundary Line */}
                     {stats.boundaryX >= -5 && stats.boundaryX <= 5 && (
@@ -255,30 +365,50 @@ export default function LogisticRegressionArticlePage() {
           {/* Section 02: Maximum Likelihood & Cross-Entropy Loss */}
           <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">02 / Optimization</span>
-              <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">Maximum Likelihood & Binary Cross-Entropy</h2>
+              <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
+                02 / Optimization
+              </span>
+              <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">
+                Maximum Likelihood & Binary Cross-Entropy
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-[14px] text-[#4A4742] leading-[1.7]">
               <div className="space-y-4">
                 <p>
-                  To find optimal weights <MathTex math="w^*" /> and bias <MathTex math="b^*" />, we maximize the log-likelihood of our dataset, equivalent to minimizing binary cross-entropy loss:
+                  To find optimal weights <MathTex math="w^*" /> and bias{" "}
+                  <MathTex math="b^*" />, we maximize the log-likelihood of our
+                  dataset, equivalent to minimizing binary cross-entropy loss:
                 </p>
                 <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15">
-                  <span className="block text-[11px] font-mono uppercase text-[#75716B] mb-2">Cross-Entropy Loss Formulation</span>
-                  <MathTex math="\mathcal{L}(w, b) = -\frac{1}{N} \sum_{i=1}^N \left[ y_i \ln(\hat{y}_i) + (1 - y_i) \ln(1 - \hat{y}_i) \right]" block />
+                  <span className="block text-[11px] font-mono uppercase text-[#75716B] mb-2">
+                    Cross-Entropy Loss Formulation
+                  </span>
+                  <MathTex
+                    math="\mathcal{L}(w, b) = -\frac{1}{N} \sum_{i=1}^N \left[ y_i \ln(\hat{y}_i) + (1 - y_i) \ln(1 - \hat{y}_i) \right]"
+                    block
+                  />
                 </div>
               </div>
 
               <div className="space-y-4">
                 <p>
-                  Because this loss function is strictly convex, gradient descent is guaranteed to reach the global minimum without getting stuck in local suboptimal traps.
+                  Because this loss function is strictly convex, gradient
+                  descent is guaranteed to reach the global minimum without
+                  getting stuck in local suboptimal traps.
                 </p>
                 <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15">
-                  <span className="block text-[11px] font-mono uppercase text-[#75716B] mb-2">Log-Odds (Logit) Form</span>
-                  <MathTex math="\ln \left( \frac{p}{1 - p} \right) = w \cdot x + b" block />
+                  <span className="block text-[11px] font-mono uppercase text-[#75716B] mb-2">
+                    Log-Odds (Logit) Form
+                  </span>
+                  <MathTex
+                    math="\ln \left( \frac{p}{1 - p} \right) = w \cdot x + b"
+                    block
+                  />
                   <p className="text-[12px] text-[#75716B] mt-2">
-                    Notice the log-odds ratio is linear in <MathTex math="x" />! That is why the decision boundary remains planar in multi-dimensional space.
+                    Notice the log-odds ratio is linear in <MathTex math="x" />!
+                    That is why the decision boundary remains planar in
+                    multi-dimensional space.
                   </p>
                 </div>
               </div>

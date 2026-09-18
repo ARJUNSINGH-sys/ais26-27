@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, ReactNode } from "react";
+import { useState, useRef, ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import SmoothScroll from "@/components/SmoothScroll";
+import SmoothScroll, { resetScrollToTop } from "@/components/SmoothScroll";
 import Nav from "@/components/Nav";
 import FoldMenu from "@/components/FoldMenu";
 import Footer from "@/components/Footer";
@@ -19,16 +19,18 @@ export default function FoldLayout({
   showFooter = true,
 }: FoldLayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isNavigatingRef = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
   useGSAP(() => {
+    // Initial GPU accelerated states
     gsap.set("#page-canvas", {
-      transformOrigin: "center center",
+      transformOrigin: "center top",
       scale: 1,
-      clipPath: "inset(0% 0% 0% 0% round 0px)",
-      willChange: "transform, clip-path",
+      opacity: 1,
+      willChange: "transform, opacity",
     });
 
     gsap.set("#fold-menu-backdrop", {
@@ -37,161 +39,162 @@ export default function FoldLayout({
     });
 
     gsap.set("#menu-content", {
-      transformOrigin: "center center",
-      scale: 0.84,
-      y: 40,
-      z: -220,
-      filter: "blur(20px)",
-      autoAlpha: 0,
-      willChange: "transform, opacity, filter",
-    });
-
-    gsap.set(".menu-nav-item", {
-      y: 35,
-      autoAlpha: 0,
+      y: -20,
+      opacity: 0,
       willChange: "transform, opacity",
     });
 
-    // Master GSAP Timeline expanding and closing from the exact center of screen
+    gsap.set(".menu-nav-item", {
+      y: 20,
+      opacity: 0,
+      willChange: "transform, opacity",
+    });
+
+    // Master bi-directional timeline for smooth opening & reverse closing
     timelineRef.current = gsap
       .timeline({
         paused: true,
-        defaults: { ease: "power4.inOut" },
+        defaults: { ease: "power3.inOut" },
         onReverseComplete: () => {
           gsap.set("#fold-menu-backdrop", {
             autoAlpha: 0,
             pointerEvents: "none",
           });
+          setIsMenuOpen(false);
+          isNavigatingRef.current = false;
         },
       })
-      // Step 1: Activate backdrop visibility
+      // 1. Activate backdrop overlay
       .set("#fold-menu-backdrop", { autoAlpha: 1, pointerEvents: "auto" }, 0)
 
-      // Step 2: Fold page canvas inward from screen center
+      // 2. Gentle canvas breath (zero clip-path overhead for phone 60/120fps)
       .to(
         "#page-canvas",
         {
-          scale: 0.44,
-          clipPath: "inset(46% 46% 46% 46% round 40px)",
-          duration: 1.15,
-          ease: "power4.inOut",
+          scale: 0.985,
+          opacity: 0.85,
+          duration: 0.35,
+          ease: "power2.out",
         },
-        0
+        0,
       )
 
-      // Step 3: Expand menu content outward from center of screen with depth blur clearance
+      // 3. Slide in menu content
       .to(
         "#menu-content",
         {
-          scale: 1,
           y: 0,
-          z: 0,
-          filter: "blur(0px)",
-          autoAlpha: 1,
-          duration: 1.05,
+          opacity: 1,
+          duration: 0.36,
           ease: "power3.out",
         },
-        "-=0.85"
+        "-=0.22",
       )
 
-      // Step 4: Stagger primary navigation links
+      // 4. Stagger primary navigation links
       .to(
         ".menu-nav-item",
         {
           y: 0,
-          autoAlpha: 1,
-          duration: 0.75,
-          stagger: 0.05,
-          ease: "power3.out",
+          opacity: 1,
+          duration: 0.28,
+          stagger: 0.04,
+          ease: "power2.out",
         },
-        "-=0.75"
+        "-=0.2",
       );
   }, []);
 
-  // Bi-directional playback control
-  useEffect(() => {
-    if (!timelineRef.current) return;
+  const handleToggleMenu = () => {
+    if (isNavigatingRef.current) return;
     if (isMenuOpen) {
-      timelineRef.current.play();
+      handleCloseMenu();
     } else {
-      timelineRef.current.reverse();
+      setIsMenuOpen(true);
+      if (timelineRef.current) {
+        timelineRef.current.timeScale(1).play();
+      }
     }
-  }, [isMenuOpen]);
+  };
+
+  const handleCloseMenu = () => {
+    if (isNavigatingRef.current) return;
+    if (timelineRef.current) {
+      timelineRef.current.timeScale(1.15).reverse();
+    } else {
+      setIsMenuOpen(false);
+    }
+  };
 
   const handleNavigate = (href: string) => {
-    setIsMenuOpen(false);
+    if (isNavigatingRef.current) return;
+    isNavigatingRef.current = true;
 
-    // If navigating to the same route:
-    if (href === pathname || (href === "/" && pathname === "/")) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
+    const performTransition = () => {
+      // 1. Reset scroll immediately before loading the new page
+      resetScrollToTop();
 
-    if (href.startsWith("/#")) {
-      const targetId = href.replace("/#", "");
-      if (pathname === "/") {
-        setTimeout(() => {
+      // 2. Perform navigation
+      if (href.startsWith("/#")) {
+        const targetId = href.replace("/#", "");
+        if (pathname === "/") {
           const el = document.getElementById(targetId);
           if (el) el.scrollIntoView({ behavior: "smooth" });
-        }, 700);
-      } else {
-        setTimeout(() => {
+        } else {
           router.push(href);
-        }, 600);
-      }
-    } else {
-      setTimeout(() => {
+        }
+      } else if (href === pathname || (href === "/" && pathname === "/")) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
         router.push(href);
-      }, 600);
+      }
+    };
+
+    if (timelineRef.current) {
+      // Execute the exact same timeline in reverse smoothly
+      timelineRef.current.timeScale(1.2).reverse();
+
+      timelineRef.current.eventCallback("onReverseComplete", () => {
+        gsap.set("#fold-menu-backdrop", {
+          autoAlpha: 0,
+          pointerEvents: "none",
+        });
+        setIsMenuOpen(false);
+        isNavigatingRef.current = false;
+        performTransition();
+      });
+    } else {
+      setIsMenuOpen(false);
+      isNavigatingRef.current = false;
+      performTransition();
     }
   };
 
   return (
     <SmoothScroll isPaused={isMenuOpen}>
-      <div className="relative min-h-screen w-full overflow-hidden bg-[#0E0D0C]">
-        {/* Fixed 3D Perspective Menu Layer (Behind Page Canvas) */}
+      <div className="relative min-h-screen w-full overflow-x-hidden bg-[#0E0D0C]">
+        {/* Simple, Smooth, High-Performance Menu Overlay */}
         <FoldMenu
           isOpen={isMenuOpen}
-          onClose={() => setIsMenuOpen(false)}
+          onClose={handleCloseMenu}
           onNavigate={handleNavigate}
         />
 
-        {/* Collapsible Page Canvas (Scales from center) */}
+        {/* Main Page Canvas */}
         <div
           id="page-canvas"
-          className={`relative z-40 flex min-h-screen w-full flex-col bg-ground text-ink transition-shadow duration-500 ${
-            isMenuOpen
-              ? "cursor-pointer shadow-[0_30px_70px_-15px_rgba(0,0,0,0.8)]"
-              : ""
-          }`}
-          onClick={() => {
-            if (isMenuOpen) {
-              setIsMenuOpen(false);
-            }
-          }}
+          className="relative z-10 flex min-h-screen w-full flex-col bg-ground text-ink"
         >
           {/* Header Navigation with Menu Trigger */}
           <Nav
             isMenuOpen={isMenuOpen}
-            onToggleMenu={() => setIsMenuOpen(!isMenuOpen)}
+            onToggleMenu={handleToggleMenu}
           />
 
           {/* Page Content */}
           <div className="grow flex flex-col">{children}</div>
 
           {showFooter && <Footer />}
-
-          {/* Clickable Backdrop Shield over Canvas while Folded */}
-          {isMenuOpen && (
-            <div
-              className="absolute inset-0 z-50 bg-black/20 backdrop-blur-[1px] cursor-pointer flex items-center justify-center transition-opacity"
-              title="Click to unfold page"
-            >
-              <span className="px-4 py-2 rounded-full bg-black/75 text-white font-mono text-[11px] uppercase tracking-widest border border-white/20">
-                Click to Resume ✕
-              </span>
-            </div>
-          )}
         </div>
       </div>
     </SmoothScroll>

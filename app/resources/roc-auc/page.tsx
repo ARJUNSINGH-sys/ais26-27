@@ -17,7 +17,12 @@ function MathTex({ math, block = false }: { math: string; block?: boolean }) {
     }
   }, [math, block]);
 
-  return <span dangerouslySetInnerHTML={{ __html: html }} className={block ? "block my-2" : "inline-block"} />;
+  return (
+    <span
+      dangerouslySetInnerHTML={{ __html: html }}
+      className={block ? "block my-2" : "inline-block"}
+    />
+  );
 }
 
 export default function RocAucArticlePage() {
@@ -38,7 +43,10 @@ export default function RocAucArticlePage() {
 
     // Numerical integration of normal PDF
     const normalPdf = (x: number, mean: number, s: number) => {
-      return (1 / (s * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / s, 2));
+      return (
+        (1 / (s * Math.sqrt(2 * Math.PI))) *
+        Math.exp(-0.5 * Math.pow((x - mean) / s, 2))
+      );
     };
 
     const tauX = threshold * 100;
@@ -114,13 +122,31 @@ export default function RocAucArticlePage() {
     <FoldLayout>
       <main className="grow pt-28 sm:pt-36 pb-32 bg-[#EFECE6] text-[#1A1816] min-h-screen">
         <div className="shell max-w-5xl">
-          {/* Top Breadcrumb */}
-          <div className="flex items-center gap-2 text-[11px] font-mono tracking-[0.16em] uppercase text-[#75716B] mb-8">
-            <Link href="/resources" className="hover:text-[#1A1816] transition-colors">
-              03 / Resources
+          {/* Back to Articles & Breadcrumb */}
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+            <Link
+              href="/resources"
+              aria-label="Return to Published Articles Archive"
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-[2px] bg-[#FAF9F5] border border-[#1A1816] text-[#1A1816] font-mono text-[12px] font-bold tracking-wider uppercase transition-all duration-200 hover:bg-[#1A1816] hover:text-[#FAF9F5] group"
+            >
+              <span className="text-[#DE5D35] group-hover:text-[#FAF9F5] transition-transform duration-200 group-hover:-translate-x-1 font-bold">
+                ←
+              </span>
+              <span>Back to 03 / Published Articles</span>
             </Link>
-            <span>/</span>
-            <span className="text-[#DE5D35] font-semibold">Evaluation · ROC & AUC</span>
+
+            <div className="flex items-center gap-2 text-[11px] font-mono tracking-[0.16em] uppercase text-[#75716B]">
+              <Link
+                href="/resources"
+                className="hover:text-[#1A1816] transition-colors"
+              >
+                03 / Resources
+              </Link>
+              <span>/</span>
+              <span className="text-[#DE5D35] font-semibold">
+                Evaluation · ROC & AUC
+              </span>
+            </div>
           </div>
 
           {/* Article Header */}
@@ -128,14 +154,16 @@ export default function RocAucArticlePage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
               <span className="text-[11px] font-mono tracking-widest uppercase text-[#75716B]">
-                Interactive Diagnostic Essay · Topic 02
+                Interactive Diagnostic Essay · Topic 04
               </span>
             </div>
             <h1 className="text-[38px] sm:text-[56px] font-black tracking-[-0.035em] leading-[1.02] uppercase font-display text-[#1A1816] mb-5">
               ROC & AUC: Diagnostic Power
             </h1>
             <p className="text-[16px] sm:text-[18px] text-[#75716B] max-w-2xl leading-[1.6]">
-              Mapping the sensitivity versus specificity tradeoff across continuous decision thresholds with live probability density functions and confusion matrix projections.
+              Mapping the sensitivity versus specificity tradeoff across
+              continuous decision thresholds with live probability density
+              functions and confusion matrix projections.
             </p>
           </header>
 
@@ -143,8 +171,12 @@ export default function RocAucArticlePage() {
           <section className="mb-16">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">01 / Continuous Score Densities</span>
-                <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">Thresholding Class Distributions</h2>
+                <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
+                  01 / Continuous Score Densities
+                </span>
+                <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">
+                  Thresholding Class Distributions
+                </h2>
               </div>
             </div>
 
@@ -152,13 +184,23 @@ export default function RocAucArticlePage() {
               {/* Left explanation */}
               <div className="lg:col-span-5 text-[14px] text-[#4A4742] leading-[1.7] space-y-4">
                 <p>
-                  A binary classifier produces continuous risk scores or posterior probabilities <MathTex math="S(x) \in [0, 1]" />. To assign a discrete category (<MathTex math="\hat{y} \in \{0, 1\}" />), we apply a decision threshold <MathTex math="\tau" />:
+                  A binary classifier produces continuous risk scores or
+                  posterior probabilities <MathTex math="S(x) \in [0, 1]" />. To
+                  assign a discrete category (
+                  <MathTex math="\hat{y} \in \{0, 1\}" />
+                  ), we apply a decision threshold <MathTex math="\tau" />:
                 </p>
                 <div className="p-3 bg-[#FAF9F5] border border-[#1A1816]/15 font-mono text-[13px]">
-                  <MathTex math="\hat{y} = \begin{cases} 1 & \text{if } S(x) \ge \tau \\ 0 & \text{if } S(x) < \tau \end{cases}" block />
+                  <MathTex
+                    math="\hat{y} = \begin{cases} 1 & \text{if } S(x) \ge \tau \\ 0 & \text{if } S(x) < \tau \end{cases}"
+                    block
+                  />
                 </div>
                 <p>
-                  Moving <MathTex math="\tau" /> left captures more positive instances (higher Sensitivity) at the cost of admitting false alarms. Moving <MathTex math="\tau" /> right reduces false alarms but causes false negatives.
+                  Moving <MathTex math="\tau" /> left captures more positive
+                  instances (higher Sensitivity) at the cost of admitting false
+                  alarms. Moving <MathTex math="\tau" /> right reduces false
+                  alarms but causes false negatives.
                 </p>
 
                 {/* Sliders */}
@@ -166,7 +208,9 @@ export default function RocAucArticlePage() {
                   <div>
                     <div className="flex justify-between text-[11px] font-mono text-[#75716B] mb-1">
                       <span>THRESHOLD (τ)</span>
-                      <span className="font-bold text-[#DE5D35]">{threshold.toFixed(2)}</span>
+                      <span className="font-bold text-[#DE5D35]">
+                        {threshold.toFixed(2)}
+                      </span>
                     </div>
                     <input
                       type="range"
@@ -182,7 +226,9 @@ export default function RocAucArticlePage() {
                   <div>
                     <div className="flex justify-between text-[11px] font-mono text-[#75716B] mb-1">
                       <span>DISTRIBUTION SEPARATION (d&apos;)</span>
-                      <span className="font-bold text-[#1A1816]">{separation.toFixed(2)}</span>
+                      <span className="font-bold text-[#1A1816]">
+                        {separation.toFixed(2)}
+                      </span>
                     </div>
                     <input
                       type="range"
@@ -190,7 +236,9 @@ export default function RocAucArticlePage() {
                       max="3.0"
                       step="0.1"
                       value={separation}
-                      onChange={(e) => setSeparation(parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        setSeparation(parseFloat(e.target.value))
+                      }
                       className="w-full accent-[#1A1816] cursor-pointer"
                     />
                   </div>
@@ -210,14 +258,33 @@ export default function RocAucArticlePage() {
                       <span>Class 1 (Positive)</span>
                     </span>
                   </div>
-                  <span className="font-semibold text-[#DE5D35]">τ = {threshold.toFixed(2)}</span>
+                  <span className="font-semibold text-[#DE5D35]">
+                    τ = {threshold.toFixed(2)}
+                  </span>
                 </div>
 
                 <div className="relative bg-[#EBF5FB]/30 border border-[#1A1816]/10 p-2 rounded-[2px] h-64 flex items-end">
-                  <svg viewBox="0 0 400 200" className="w-full h-full overflow-visible select-none">
+                  <svg
+                    viewBox="0 0 400 200"
+                    className="w-full h-full overflow-visible select-none"
+                  >
                     {/* Grid lines */}
-                    <line x1="0" y1="180" x2="400" y2="180" stroke="#1A1816" strokeWidth="1" />
-                    <line x1="0" y1="20" x2="0" y2="180" stroke="#1A1816" strokeWidth="1" />
+                    <line
+                      x1="0"
+                      y1="180"
+                      x2="400"
+                      y2="180"
+                      stroke="#1A1816"
+                      strokeWidth="1"
+                    />
+                    <line
+                      x1="0"
+                      y1="20"
+                      x2="0"
+                      y2="180"
+                      stroke="#1A1816"
+                      strokeWidth="1"
+                    />
 
                     {/* Negative Gaussian Curve */}
                     <path
@@ -262,7 +329,14 @@ export default function RocAucArticlePage() {
                     </text>
 
                     {/* Axis Labels */}
-                    <text x="200" y="196" fontSize="10" fontFamily="monospace" textAnchor="middle" fill="#75716B">
+                    <text
+                      x="200"
+                      y="196"
+                      fontSize="10"
+                      fontFamily="monospace"
+                      textAnchor="middle"
+                      fill="#75716B"
+                    >
                       Classifier Score S(x) →
                     </text>
                   </svg>
@@ -271,25 +345,33 @@ export default function RocAucArticlePage() {
                 {/* Metric Readout Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
                   <div className="p-2.5 bg-[#FAF9F5] border border-[#1A1816]/15 text-center">
-                    <span className="block text-[10px] font-mono text-[#75716B]">TRUE POSITIVE RATE</span>
+                    <span className="block text-[10px] font-mono text-[#75716B]">
+                      TRUE POSITIVE RATE
+                    </span>
                     <span className="text-[18px] font-bold text-[#DE5D35] font-mono">
                       {(simData.tpr * 100).toFixed(1)}%
                     </span>
                   </div>
                   <div className="p-2.5 bg-[#FAF9F5] border border-[#1A1816]/15 text-center">
-                    <span className="block text-[10px] font-mono text-[#75716B]">FALSE POSITIVE RATE</span>
+                    <span className="block text-[10px] font-mono text-[#75716B]">
+                      FALSE POSITIVE RATE
+                    </span>
                     <span className="text-[18px] font-bold text-[#1A1816] font-mono">
                       {(simData.fpr * 100).toFixed(1)}%
                     </span>
                   </div>
                   <div className="p-2.5 bg-[#FAF9F5] border border-[#1A1816]/15 text-center">
-                    <span className="block text-[10px] font-mono text-[#75716B]">SPECIFICITY (1-FPR)</span>
+                    <span className="block text-[10px] font-mono text-[#75716B]">
+                      SPECIFICITY (1-FPR)
+                    </span>
                     <span className="text-[18px] font-bold text-[#1A1816] font-mono">
                       {((1 - simData.fpr) * 100).toFixed(1)}%
                     </span>
                   </div>
                   <div className="p-2.5 bg-[#FAF9F5] border border-[#1A1816]/15 text-center">
-                    <span className="block text-[10px] font-mono text-[#75716B]">AREA UNDER CURVE</span>
+                    <span className="block text-[10px] font-mono text-[#75716B]">
+                      AREA UNDER CURVE
+                    </span>
                     <span className="text-[18px] font-bold text-[#DE5D35] font-mono">
                       {simData.auc.toFixed(3)}
                     </span>
@@ -302,27 +384,58 @@ export default function RocAucArticlePage() {
           {/* Section 02: Interactive ROC Curve */}
           <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">02 / Parametric Space</span>
-              <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">The Receiver Operating Characteristic (ROC)</h2>
+              <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
+                02 / Parametric Space
+              </span>
+              <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">
+                The Receiver Operating Characteristic (ROC)
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Left Graph */}
               <div className="lg:col-span-7 border border-[#1A1816]/15 bg-[#FAF9F5] p-5">
                 <div className="relative aspect-square max-w-[420px] mx-auto bg-[#F4F1EA] border border-[#1A1816]/15 p-4 rounded-[2px]">
-                  <svg viewBox="0 0 300 300" className="w-full h-full overflow-visible select-none">
+                  <svg
+                    viewBox="0 0 300 300"
+                    className="w-full h-full overflow-visible select-none"
+                  >
                     {/* Background Grid */}
-                    <line x1="30" y1="270" x2="270" y2="270" stroke="#1A1816" strokeWidth="1.2" />
-                    <line x1="30" y1="30" x2="30" y2="270" stroke="#1A1816" strokeWidth="1.2" />
+                    <line
+                      x1="30"
+                      y1="270"
+                      x2="270"
+                      y2="270"
+                      stroke="#1A1816"
+                      strokeWidth="1.2"
+                    />
+                    <line
+                      x1="30"
+                      y1="30"
+                      x2="30"
+                      y2="270"
+                      stroke="#1A1816"
+                      strokeWidth="1.2"
+                    />
 
                     {/* Diagonal baseline (chance classifier, AUC = 0.5) */}
-                    <line x1="30" y1="270" x2="270" y2="30" stroke="#75716B" strokeWidth="1" strokeDasharray="4 4" />
+                    <line
+                      x1="30"
+                      y1="270"
+                      x2="270"
+                      y2="30"
+                      stroke="#75716B"
+                      strokeWidth="1"
+                      strokeDasharray="4 4"
+                    />
 
                     {/* ROC Curve Path */}
                     {simData.curvePoints.length > 1 && (
                       <path
                         d={`M 30 270 ${simData.curvePoints
-                          .map((p) => `L ${30 + p.fpr * 240} ${270 - p.tpr * 240}`)
+                          .map(
+                            (p) => `L ${30 + p.fpr * 240} ${270 - p.tpr * 240}`,
+                          )
                           .join(" ")} L 270 30`}
                         fill="rgba(222,93,53,0.08)"
                         stroke="#DE5D35"
@@ -350,11 +463,19 @@ export default function RocAucArticlePage() {
                       fontWeight="bold"
                       textAnchor="middle"
                     >
-                      (FPR: {(simData.fpr * 100).toFixed(0)}%, TPR: {(simData.tpr * 100).toFixed(0)}%)
+                      (FPR: {(simData.fpr * 100).toFixed(0)}%, TPR:{" "}
+                      {(simData.tpr * 100).toFixed(0)}%)
                     </text>
 
                     {/* Axis labels */}
-                    <text x="150" y="295" fontSize="11" fontFamily="monospace" textAnchor="middle" fill="#1A1816">
+                    <text
+                      x="150"
+                      y="295"
+                      fontSize="11"
+                      fontFamily="monospace"
+                      textAnchor="middle"
+                      fill="#1A1816"
+                    >
                       False Positive Rate (1 - Specificity) →
                     </text>
                     <text
@@ -375,21 +496,34 @@ export default function RocAucArticlePage() {
               {/* Right text & Math */}
               <div className="lg:col-span-5 text-[14px] text-[#4A4742] leading-[1.7] space-y-4">
                 <p>
-                  The ROC curve plots <MathTex math="\text{TPR}" /> against <MathTex math="\text{FPR}" /> across every continuous choice of threshold <MathTex math="\tau \in [0, 1]" />.
+                  The ROC curve plots <MathTex math="\text{TPR}" /> against{" "}
+                  <MathTex math="\text{FPR}" /> across every continuous choice
+                  of threshold <MathTex math="\tau \in [0, 1]" />.
                 </p>
 
                 <div className="space-y-2">
                   <div className="p-3 bg-[#FAF9F5] border border-[#1A1816]/15">
-                    <span className="block text-[11px] font-mono uppercase text-[#75716B] mb-1">Area Under Curve (AUC)</span>
-                    <MathTex math="\text{AUC} = \int_{0}^{1} \text{TPR}(\tau) \, d\text{FPR}(\tau) = P(S(X^+) > S(X^-))" block />
+                    <span className="block text-[11px] font-mono uppercase text-[#75716B] mb-1">
+                      Area Under Curve (AUC)
+                    </span>
+                    <MathTex
+                      math="\text{AUC} = \int_{0}^{1} \text{TPR}(\tau) \, d\text{FPR}(\tau) = P(S(X^+) > S(X^-))"
+                      block
+                    />
                   </div>
                 </div>
 
                 <p>
-                  <strong>Probabilistic Interpretation:</strong> The AUC precisely equals the probability that the classifier ranks a randomly chosen positive observation higher than a randomly chosen negative one.
+                  <strong>Probabilistic Interpretation:</strong> The AUC
+                  precisely equals the probability that the classifier ranks a
+                  randomly chosen positive observation higher than a randomly
+                  chosen negative one.
                 </p>
                 <p>
-                  Notice how increasing the distribution separation <MathTex math="d'" /> pushes the curve toward the upper-left corner <MathTex math="(0, 1)" />, driving <MathTex math="\text{AUC} \to 1.0" />.
+                  Notice how increasing the distribution separation{" "}
+                  <MathTex math="d'" /> pushes the curve toward the upper-left
+                  corner <MathTex math="(0, 1)" />, driving{" "}
+                  <MathTex math="\text{AUC} \to 1.0" />.
                 </p>
               </div>
             </div>

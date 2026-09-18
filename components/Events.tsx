@@ -120,7 +120,8 @@ export default function Events() {
               </h2>
               <p className="text-[16px] text-[#6B6860] max-w-[55ch] mt-3">
                 Six marquee events across hackathons, induction workshops, and
-                computational showcases engineered by the AI Society student cohort.
+                computational showcases engineered by the AI Society student
+                cohort.
               </p>
             </div>
 

@@ -24,7 +24,6 @@ import Image from "next/image";
  * Uniform 12px negative-space channel throughout the entire composition.
  */
 
-
 export default function Hero() {
   return (
     <section id="hero" className="pt-[124px] pb-16 md:pt-[180px] md:pb-24">

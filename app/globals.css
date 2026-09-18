@@ -25,7 +25,8 @@
 
   /* Type */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-inter-tight), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display:
+    var(--font-inter-tight), var(--font-inter), ui-sans-serif, sans-serif;
 
   /* Geometry */
   --radius-card: 32px;
@@ -114,7 +115,9 @@
     height: 34px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.14);
-    transition: transform 0.35s var(--ease-quint), background-color 0.3s var(--ease-quint);
+    transition:
+      transform 0.35s var(--ease-quint),
+      background-color 0.3s var(--ease-quint);
   }
 
   /* Up-right arrow, drawn once here instead of as an SVG per call site. */
@@ -123,7 +126,8 @@
     width: 12px;
     height: 12px;
     background-color: currentColor;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7'/%3E%3Cpath d='M8 7h9v9'/%3E%3C/svg%3E")
+    mask:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7'/%3E%3Cpath d='M8 7h9v9'/%3E%3C/svg%3E")
       center / contain no-repeat;
   }
 
@@ -159,7 +163,9 @@
     border: 1px solid var(--color-line);
     color: var(--color-ink);
     background: transparent;
-    transition: background-color 0.25s var(--ease-quint), color 0.25s var(--ease-quint),
+    transition:
+      background-color 0.25s var(--ease-quint),
+      color 0.25s var(--ease-quint),
       border-color 0.25s var(--ease-quint);
   }
 
@@ -206,40 +212,83 @@
 
   /* Single corner cuts — no compositing required. */
   .scallop-tl {
-    mask-image: radial-gradient(circle var(--scallop) at 0 0, transparent 99%, #000 100%);
+    mask-image: radial-gradient(
+      circle var(--scallop) at 0 0,
+      transparent 99%,
+      #000 100%
+    );
   }
 
   .scallop-tr {
-    mask-image: radial-gradient(circle var(--scallop) at 100% 0, transparent 99%, #000 100%);
+    mask-image: radial-gradient(
+      circle var(--scallop) at 100% 0,
+      transparent 99%,
+      #000 100%
+    );
   }
 
   .scallop-bl {
-    mask-image: radial-gradient(circle var(--scallop) at 0 100%, transparent 99%, #000 100%);
+    mask-image: radial-gradient(
+      circle var(--scallop) at 0 100%,
+      transparent 99%,
+      #000 100%
+    );
   }
 
   .scallop-br {
-    mask-image: radial-gradient(circle var(--scallop) at 100% 100%, transparent 99%, #000 100%);
+    mask-image: radial-gradient(
+      circle var(--scallop) at 100% 100%,
+      transparent 99%,
+      #000 100%
+    );
   }
 
   /* Two corner cuts — left / right edges. */
   .scallop-l {
-    mask-image: radial-gradient(circle var(--scallop) at 0 0, transparent 99%, #000 100%),
-      radial-gradient(circle var(--scallop) at 0 100%, transparent 99%, #000 100%);
+    mask-image:
+      radial-gradient(circle var(--scallop) at 0 0, transparent 99%, #000 100%),
+      radial-gradient(
+        circle var(--scallop) at 0 100%,
+        transparent 99%,
+        #000 100%
+      );
     mask-composite: intersect;
   }
 
   .scallop-r {
-    mask-image: radial-gradient(circle var(--scallop) at 100% 0, transparent 99%, #000 100%),
-      radial-gradient(circle var(--scallop) at 100% 100%, transparent 99%, #000 100%);
+    mask-image:
+      radial-gradient(
+        circle var(--scallop) at 100% 0,
+        transparent 99%,
+        #000 100%
+      ),
+      radial-gradient(
+        circle var(--scallop) at 100% 100%,
+        transparent 99%,
+        #000 100%
+      );
     mask-composite: intersect;
   }
 
   /* All four corners — the "docked" middle panel. */
   .scallop-x {
-    mask-image: radial-gradient(circle var(--scallop) at 0 0, transparent 99%, #000 100%),
-      radial-gradient(circle var(--scallop) at 100% 0, transparent 99%, #000 100%),
-      radial-gradient(circle var(--scallop) at 0 100%, transparent 99%, #000 100%),
-      radial-gradient(circle var(--scallop) at 100% 100%, transparent 99%, #000 100%);
+    mask-image:
+      radial-gradient(circle var(--scallop) at 0 0, transparent 99%, #000 100%),
+      radial-gradient(
+        circle var(--scallop) at 100% 0,
+        transparent 99%,
+        #000 100%
+      ),
+      radial-gradient(
+        circle var(--scallop) at 0 100%,
+        transparent 99%,
+        #000 100%
+      ),
+      radial-gradient(
+        circle var(--scallop) at 100% 100%,
+        transparent 99%,
+        #000 100%
+      );
     mask-composite: intersect;
   }
 
@@ -266,7 +315,8 @@
   .hero-panel-2 {
     --notch: 24px;
     border-radius: 14px 28px 28px 14px;
-    -webkit-mask-image: radial-gradient(
+    -webkit-mask-image:
+      radial-gradient(
         circle var(--notch) at 0 0,
         transparent var(--notch),
         #000 calc(var(--notch) + 1px)
@@ -281,7 +331,8 @@
         transparent var(--notch),
         #000 calc(var(--notch) + 1px)
       );
-    mask-image: radial-gradient(
+    mask-image:
+      radial-gradient(
         circle var(--notch) at 0 0,
         transparent var(--notch),
         #000 calc(var(--notch) + 1px)
@@ -362,4 +413,46 @@
   .frame:hover img {
     transform: none !important;
   }
+}
+
+/* ─── Neural Network Synaptic & Node Animations ─────────────────── */
+@keyframes synapseForward {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes synapseBackward {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 24;
+  }
+}
+
+@keyframes neuronPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.animate-dash-forward {
+  animation: synapseForward 0.65s linear infinite !important;
+}
+
+.animate-dash-backward {
+  animation: synapseBackward 0.65s linear infinite !important;
+}
+
+.animate-neuron-pulse {
+  animation: neuronPulse 1.2s ease-in-out infinite;
+  transform-origin: center;
 }

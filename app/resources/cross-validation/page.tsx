@@ -17,7 +17,12 @@ function MathTex({ math, block = false }: { math: string; block?: boolean }) {
     }
   }, [math, block]);
 
-  return <span dangerouslySetInnerHTML={{ __html: html }} className={block ? "block my-2" : "inline-block"} />;
+  return (
+    <span
+      dangerouslySetInnerHTML={{ __html: html }}
+      className={block ? "block my-2" : "inline-block"}
+    />
+  );
 }
 
 export default function CrossValidationArticlePage() {
@@ -30,8 +35,8 @@ export default function CrossValidationArticlePage() {
     // Deterministic pseudo scores depending on k
     const baseErrors: Record<number, number[]> = {
       3: [0.142, 0.168, 0.155],
-      5: [0.138, 0.152, 0.141, 0.160, 0.147],
-      10: [0.135, 0.142, 0.158, 0.139, 0.146, 0.151, 0.163, 0.140, 0.148, 0.155],
+      5: [0.138, 0.152, 0.141, 0.16, 0.147],
+      10: [0.135, 0.142, 0.158, 0.139, 0.146, 0.151, 0.163, 0.14, 0.148, 0.155],
     };
     return baseErrors[kFolds] || baseErrors[5];
   }, [kFolds]);
@@ -39,7 +44,8 @@ export default function CrossValidationArticlePage() {
   const stats = useMemo(() => {
     const mean = foldScores.reduce((acc, s) => acc + s, 0) / foldScores.length;
     const variance =
-      foldScores.reduce((acc, s) => acc + Math.pow(s - mean, 2), 0) / (foldScores.length - 1);
+      foldScores.reduce((acc, s) => acc + Math.pow(s - mean, 2), 0) /
+      (foldScores.length - 1);
     const stdErr = Math.sqrt(variance / foldScores.length);
 
     return {
@@ -61,13 +67,31 @@ export default function CrossValidationArticlePage() {
     <FoldLayout>
       <main className="grow pt-28 sm:pt-36 pb-32 bg-[#EFECE6] text-[#1A1816] min-h-screen">
         <div className="shell max-w-5xl">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-[11px] font-mono tracking-[0.16em] uppercase text-[#75716B] mb-8">
-            <Link href="/resources" className="hover:text-[#1A1816] transition-colors">
-              03 / Resources
+          {/* Back to Articles & Breadcrumb */}
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+            <Link
+              href="/resources"
+              aria-label="Return to Published Articles Archive"
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-[2px] bg-[#FAF9F5] border border-[#1A1816] text-[#1A1816] font-mono text-[12px] font-bold tracking-wider uppercase transition-all duration-200 hover:bg-[#1A1816] hover:text-[#FAF9F5] group"
+            >
+              <span className="text-[#DE5D35] group-hover:text-[#FAF9F5] transition-transform duration-200 group-hover:-translate-x-1 font-bold">
+                ←
+              </span>
+              <span>Back to 03 / Published Articles</span>
             </Link>
-            <span>/</span>
-            <span className="text-[#DE5D35] font-semibold">Validation · Cross-Validation</span>
+
+            <div className="flex items-center gap-2 text-[11px] font-mono tracking-[0.16em] uppercase text-[#75716B]">
+              <Link
+                href="/resources"
+                className="hover:text-[#1A1816] transition-colors"
+              >
+                03 / Resources
+              </Link>
+              <span>/</span>
+              <span className="text-[#DE5D35] font-semibold">
+                Validation · Cross-Validation
+              </span>
+            </div>
           </div>
 
           {/* Header */}
@@ -75,14 +99,16 @@ export default function CrossValidationArticlePage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
               <span className="text-[11px] font-mono tracking-widest uppercase text-[#75716B]">
-                Interactive Diagnostic Essay · Topic 06
+                Interactive Diagnostic Essay · Topic 05
               </span>
             </div>
             <h1 className="text-[38px] sm:text-[56px] font-black tracking-[-0.035em] leading-[1.02] uppercase font-display text-[#1A1816] mb-5">
               K-Fold Partitioning & Generalization
             </h1>
             <p className="text-[16px] sm:text-[18px] text-[#75716B] max-w-2xl leading-[1.6]">
-              Mitigating sample bias and estimating performance variance through rotational holdout splits, out-of-fold validation, and standard error bounds.
+              Mitigating sample bias and estimating performance variance through
+              rotational holdout splits, out-of-fold validation, and standard
+              error bounds.
             </p>
           </header>
 
@@ -90,13 +116,19 @@ export default function CrossValidationArticlePage() {
           <section className="mb-16">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">01 / Resampling Strategy</span>
-                <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">Rotational Train-Validation Splits</h2>
+                <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
+                  01 / Resampling Strategy
+                </span>
+                <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">
+                  Rotational Train-Validation Splits
+                </h2>
               </div>
 
               {/* Fold Selectors */}
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono text-[#75716B] mr-2">FOLDS (K):</span>
+                <span className="text-[11px] font-mono text-[#75716B] mr-2">
+                  FOLDS (K):
+                </span>
                 {[3, 5, 10].map((k) => (
                   <button
                     key={k}
@@ -121,16 +153,25 @@ export default function CrossValidationArticlePage() {
               {/* Controls and Math */}
               <div className="lg:col-span-5 text-[14px] text-[#4A4742] leading-[1.7] space-y-4">
                 <p>
-                  A simple train/test split suffers from sample variance: lucky splits overestimate generalization, while unlucky splits underestimate it.
+                  A simple train/test split suffers from sample variance: lucky
+                  splits overestimate generalization, while unlucky splits
+                  underestimate it.
                 </p>
                 <p>
-                  <MathTex math="K" />-Fold Cross-Validation partitions the full dataset into <MathTex math="K" /> equal-sized subsets. In each round <MathTex math="k" />, one fold is held out for validation while the remaining <MathTex math="K-1" /> folds train the model.
+                  <MathTex math="K" />
+                  -Fold Cross-Validation partitions the full dataset into{" "}
+                  <MathTex math="K" /> equal-sized subsets. In each round{" "}
+                  <MathTex math="k" />, one fold is held out for validation
+                  while the remaining <MathTex math="K-1" /> folds train the
+                  model.
                 </p>
 
                 {/* Animation / Step Controls */}
                 <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono text-[#75716B]">ACTIVE ITERATION:</span>
+                    <span className="text-[11px] font-mono text-[#75716B]">
+                      ACTIVE ITERATION:
+                    </span>
                     <span className="text-[13px] font-mono font-bold text-[#DE5D35]">
                       ROUND {activeIteration + 1} OF {kFolds}
                     </span>
@@ -139,7 +180,9 @@ export default function CrossValidationArticlePage() {
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => setActiveIteration((prev) => (prev + 1) % kFolds)}
+                      onClick={() =>
+                        setActiveIteration((prev) => (prev + 1) % kFolds)
+                      }
                       className="flex-1 py-2 bg-[#FAF9F5] border border-[#1A1816]/20 text-[11px] font-mono hover:border-[#1A1816] transition-colors cursor-pointer"
                     >
                       Step to Next Fold →
@@ -162,11 +205,15 @@ export default function CrossValidationArticlePage() {
                 <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 font-mono text-[12px] space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-[#75716B]">MEAN CV ERROR:</span>
-                    <span className="font-bold text-[#DE5D35]">{(stats.mean * 100).toFixed(2)}%</span>
+                    <span className="font-bold text-[#DE5D35]">
+                      {(stats.mean * 100).toFixed(2)}%
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#75716B]">STANDARD ERROR (SE):</span>
-                    <span className="font-bold text-[#1A1816]">±{(stats.stdErr * 100).toFixed(3)}%</span>
+                    <span className="font-bold text-[#1A1816]">
+                      ±{(stats.stdErr * 100).toFixed(3)}%
+                    </span>
                   </div>
                 </div>
               </div>
@@ -184,7 +231,9 @@ export default function CrossValidationArticlePage() {
                       <span>Validation Holdout (1)</span>
                     </span>
                   </div>
-                  <span className="font-semibold text-[#DE5D35]">Fold {activeIteration + 1}</span>
+                  <span className="font-semibold text-[#DE5D35]">
+                    Fold {activeIteration + 1}
+                  </span>
                 </div>
 
                 {/* Iteration Rows */}
@@ -202,11 +251,18 @@ export default function CrossValidationArticlePage() {
                         }`}
                       >
                         <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
-                          <span className={isCurrent ? "font-bold text-[#DE5D35]" : "text-[#75716B]"}>
+                          <span
+                            className={
+                              isCurrent
+                                ? "font-bold text-[#DE5D35]"
+                                : "text-[#75716B]"
+                            }
+                          >
                             SPLIT #{iterIdx + 1}
                           </span>
                           <span className="font-mono text-[11px]">
-                            Holdout Loss: {(foldScores[iterIdx] * 100).toFixed(1)}%
+                            Holdout Loss:{" "}
+                            {(foldScores[iterIdx] * 100).toFixed(1)}%
                           </span>
                         </div>
 
@@ -239,28 +295,47 @@ export default function CrossValidationArticlePage() {
           {/* Section 02: Formulation */}
           <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">02 / Mathematical Bounds</span>
-              <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">The K-Fold Risk Estimator</h2>
+              <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
+                02 / Mathematical Bounds
+              </span>
+              <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">
+                The K-Fold Risk Estimator
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-[14px] text-[#4A4742] leading-[1.7]">
               <div className="space-y-4">
                 <p>
-                  The overall cross-validation generalization score aggregates the out-of-fold validation loss across all <MathTex math="K" /> splits:
+                  The overall cross-validation generalization score aggregates
+                  the out-of-fold validation loss across all{" "}
+                  <MathTex math="K" /> splits:
                 </p>
                 <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15">
-                  <span className="block text-[11px] font-mono uppercase text-[#75716B] mb-2">CV Error Aggregation</span>
-                  <MathTex math="\text{CV}_{(K)} = \frac{1}{K} \sum_{k=1}^K \mathcal{L}_k = \frac{1}{K} \sum_{k=1}^K \left( \frac{1}{N_k} \sum_{i \in \mathcal{C}_k} \ell(y_i, \hat{f}^{(-k)}(x_i)) \right)" block />
+                  <span className="block text-[11px] font-mono uppercase text-[#75716B] mb-2">
+                    CV Error Aggregation
+                  </span>
+                  <MathTex
+                    math="\text{CV}_{(K)} = \frac{1}{K} \sum_{k=1}^K \mathcal{L}_k = \frac{1}{K} \sum_{k=1}^K \left( \frac{1}{N_k} \sum_{i \in \mathcal{C}_k} \ell(y_i, \hat{f}^{(-k)}(x_i)) \right)"
+                    block
+                  />
                 </div>
               </div>
 
               <div className="space-y-4">
                 <p>
-                  <strong>The One-Standard-Error Rule:</strong> When performing model selection or hyperparameter tuning, practitioners often select the simplest model whose error lies within one standard error of the minimum:
+                  <strong>The One-Standard-Error Rule:</strong> When performing
+                  model selection or hyperparameter tuning, practitioners often
+                  select the simplest model whose error lies within one standard
+                  error of the minimum:
                 </p>
                 <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15">
-                  <span className="block text-[11px] font-mono uppercase text-[#75716B] mb-2">1-SE Selection Boundary</span>
-                  <MathTex math="\text{Error}_{\text{candidate}} \le \text{Error}_{\text{best}} + \text{SE}(\text{Error}_{\text{best}})" block />
+                  <span className="block text-[11px] font-mono uppercase text-[#75716B] mb-2">
+                    1-SE Selection Boundary
+                  </span>
+                  <MathTex
+                    math="\text{Error}_{\text{candidate}} \le \text{Error}_{\text{best}} + \text{SE}(\text{Error}_{\text{best}})"
+                    block
+                  />
                 </div>
               </div>
             </div>

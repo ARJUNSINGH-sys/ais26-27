@@ -22,16 +22,16 @@ export default function About() {
               </h2>
 
               <p className="text-[16px] leading-[1.65] text-[#6B6860] mb-6">
-                The Artificial Intelligence Society is Bennett University&apos;s premier
-                technical specialization cohort. Founded to foster intellectual rigor
-                and high-impact development, our society cultivates students who
-                build, publish, and ship.
+                The Artificial Intelligence Society is Bennett University&apos;s
+                premier technical specialization cohort. Founded to foster
+                intellectual rigor and high-impact development, our society
+                cultivates students who build, publish, and ship.
               </p>
 
               <p className="text-[16px] leading-[1.65] text-[#6B6860] mb-8">
-                Through open-source architectures, national hackathons, and immersive
-                research groups, members progress from machine learning novices to
-                autonomous system engineers.
+                Through open-source architectures, national hackathons, and
+                immersive research groups, members progress from machine
+                learning novices to autonomous system engineers.
               </p>
             </div>
 
@@ -107,7 +107,9 @@ export default function About() {
                   {/* Footer link accent */}
                   <div className="relative z-10 pt-4 border-t border-[#D9D6CF]/70 flex items-center justify-between text-[11px] font-semibold tracking-[0.12em] uppercase text-[#111110]">
                     <span>Standard Protocol</span>
-                    <span className="transition-transform group-hover:translate-x-1">→</span>
+                    <span className="transition-transform group-hover:translate-x-1">
+                      →
+                    </span>
                   </div>
                 </div>
               ))}

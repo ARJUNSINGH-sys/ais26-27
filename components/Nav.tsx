@@ -29,7 +29,9 @@ export default function Nav({ isMenuOpen = false, onToggleMenu }: NavProps) {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ${
-        scrolled && !isMenuOpen ? "bg-ground/85 backdrop-blur-xl" : "bg-transparent"
+        scrolled && !isMenuOpen
+          ? "bg-ground/85 backdrop-blur-xl"
+          : "bg-transparent"
       }`}
     >
       <div className="shell grid h-[76px] grid-cols-[1fr_auto_1fr] items-center md:h-[92px]">
@@ -79,7 +81,9 @@ export default function Nav({ isMenuOpen = false, onToggleMenu }: NavProps) {
             rel="noopener noreferrer"
             aria-label="AI Society on GitHub"
             className={`icon-btn ${
-              isMenuOpen ? "border-white/20 text-white hover:bg-white hover:text-black" : ""
+              isMenuOpen
+                ? "border-white/20 text-white hover:bg-white hover:text-black"
+                : ""
             }`}
           >
             <svg
@@ -102,7 +106,9 @@ export default function Nav({ isMenuOpen = false, onToggleMenu }: NavProps) {
             href="mailto:ais@bennett.edu.in"
             aria-label="Contact the society"
             className={`icon-btn ${
-              isMenuOpen ? "border-white/20 text-white hover:bg-white hover:text-black" : ""
+              isMenuOpen
+                ? "border-white/20 text-white hover:bg-white hover:text-black"
+                : ""
             }`}
           >
             <svg
