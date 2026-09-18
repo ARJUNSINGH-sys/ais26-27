@@ -9,12 +9,9 @@ interface FoldMenuProps {
 }
 
 const navLinks = [
-  { prefix: "01", label: "OVERVIEW", href: "/#hero" },
-  { prefix: "02", label: "ABOUT", href: "/#statement" },
-  { prefix: "03", label: "PILLARS", href: "/#pillars" },
-  { prefix: "04", label: "EVENTS", href: "/#events" },
-  { prefix: "05", label: "RESOURCE CENTER", href: "/resources" },
-  { prefix: "06", label: "ROADMAP", href: "/#methodology" },
+  { prefix: "01", label: "HOME", href: "/" },
+  { prefix: "02", label: "EVENTS", href: "/#events" },
+  { prefix: "03", label: "RESOURCES", href: "/resources" },
 ];
 
 export default function FoldMenu({ isOpen, onClose, onNavigate }: FoldMenuProps) {
