@@ -1,18 +1,21 @@
 "use client";
 
-import { useState, useRef, ReactNode } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import SmoothScroll, { resetScrollToTop } from "@/components/SmoothScroll";
-import Nav from "@/components/Nav";
+import gsap from "gsap";
+import { CustomEase } from "gsap/CustomEase";
+import { usePathname, useRouter } from "next/navigation";
+import { type ReactNode, useRef, useState } from "react";
 import FoldMenu from "@/components/FoldMenu";
 import Footer from "@/components/Footer";
+import Nav from "@/components/Nav";
+import SmoothScroll, { resetScrollToTop } from "@/components/SmoothScroll";
 
 interface FoldLayoutProps {
   children: ReactNode;
   showFooter?: boolean;
 }
+
+gsap.registerPlugin(CustomEase);
 
 export default function FoldLayout({
   children,
@@ -25,84 +28,132 @@ export default function FoldLayout({
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
   useGSAP(() => {
-    // Initial GPU accelerated states
-    gsap.set("#page-canvas", {
-      transformOrigin: "center top",
-      scale: 1,
-      opacity: 1,
-      willChange: "transform, opacity",
-    });
+    // Awwwards fluid curve: rapid launch, velvety spring deceleration
+    if (!CustomEase.get("fluidMenu")) {
+      CustomEase.create("fluidMenu", "0.16, 1, 0.3, 1");
+    }
+    if (!CustomEase.get("fluidItems")) {
+      CustomEase.create("fluidItems", "0.22, 1, 0.36, 1");
+    }
 
-    gsap.set("#fold-menu-backdrop", {
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    // Resting closed state:
+    // Panel collapsed to 0px circle directly at the corner button position
+    gsap.set("#menu-backdrop", { autoAlpha: 0 });
+    gsap.set("#menu-panel", {
       autoAlpha: 0,
-      pointerEvents: "none",
+      scale: 0.88,
+      x: 15,
+      y: -12,
+      overflow: "hidden",
+      clipPath: "circle(0px at calc(100% - 48px) 36px)",
+      transformOrigin: "top right",
+      willChange: "transform, opacity, clip-path",
     });
-
-    gsap.set("#menu-content", {
-      y: -20,
+    gsap.set(".menu-header", {
+      y: -10,
       opacity: 0,
-      willChange: "transform, opacity",
     });
-
     gsap.set(".menu-nav-item", {
-      y: 20,
+      x: 45,
+      y: 25,
       opacity: 0,
+      rotate: 1.5,
       willChange: "transform, opacity",
     });
+    gsap.set(".menu-footer", {
+      y: 18,
+      opacity: 0,
+    });
 
-    // Master bi-directional timeline for smooth opening & reverse closing
-    timelineRef.current = gsap
-      .timeline({
-        paused: true,
-        defaults: { ease: "power3.inOut" },
-        onReverseComplete: () => {
-          gsap.set("#fold-menu-backdrop", {
-            autoAlpha: 0,
-            pointerEvents: "none",
-          });
-          setIsMenuOpen(false);
-          isNavigatingRef.current = false;
-        },
-      })
-      // 1. Activate backdrop overlay
-      .set("#fold-menu-backdrop", { autoAlpha: 1, pointerEvents: "auto" }, 0)
+    // Bi-directional master timeline for fluid opening & closing
+    const tl = gsap.timeline({
+      paused: true,
+      onStart: () => {
+        document.documentElement.classList.add("menu-open");
+        gsap.set("#menu-panel", { overflow: "hidden" });
+      },
+      onComplete: () => {
+        // Enable scrollbar only when animation is fully settled
+        gsap.set("#menu-panel", { overflowY: "auto" });
+      },
+      onReverseComplete: () => {
+        document.documentElement.classList.remove("menu-open");
+        gsap.set("#menu-backdrop", { autoAlpha: 0 });
+        gsap.set("#menu-panel", { autoAlpha: 0, overflow: "hidden" });
+        setIsMenuOpen(false);
+        isNavigatingRef.current = false;
+      },
+    });
 
-      // 2. Gentle canvas breath (zero clip-path overhead for phone 60/120fps)
-      .to(
-        "#page-canvas",
-        {
-          scale: 0.985,
-          opacity: 0.85,
-          duration: 0.35,
-          ease: "power2.out",
-        },
+    if (prefersReduced) {
+      // Reduced motion fallback: gentle clean fades
+      tl.to("#menu-backdrop", { autoAlpha: 1, duration: 0.2, ease: "none" }, 0)
+        .to("#menu-panel", { autoAlpha: 1, duration: 0.2, ease: "none" }, 0)
+        .to(
+          ".menu-nav-item",
+          { opacity: 1, stagger: 0.03, duration: 0.15, ease: "none" },
+          0.05,
+        );
+    } else {
+      // Smooth expanding diagonal fluid sequence
+      tl.to(
+        "#menu-backdrop",
+        { autoAlpha: 1, duration: 0.42, ease: "power2.out" },
         0,
       )
+        .to(
+          "#menu-panel",
+          {
+            autoAlpha: 1,
+            scale: 1,
+            x: 0,
+            y: 0,
+            clipPath: "circle(1800px at calc(100% - 48px) 36px)",
+            duration: 0.54,
+            ease: "fluidMenu",
+          },
+          0,
+        )
+        .to(
+          ".menu-header",
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.32,
+            ease: "fluidItems",
+          },
+          0.1,
+        )
+        .to(
+          ".menu-nav-item",
+          {
+            x: 0,
+            y: 0,
+            opacity: 1,
+            rotate: 0,
+            duration: 0.45,
+            stagger: 0.045,
+            ease: "fluidItems",
+          },
+          0.14,
+        )
+        .to(
+          ".menu-footer",
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.36,
+            ease: "fluidItems",
+          },
+          0.28,
+        );
+    }
 
-      // 3. Slide in menu content
-      .to(
-        "#menu-content",
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.36,
-          ease: "power3.out",
-        },
-        "-=0.22",
-      )
-
-      // 4. Stagger primary navigation links
-      .to(
-        ".menu-nav-item",
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.28,
-          stagger: 0.04,
-          ease: "power2.out",
-        },
-        "-=0.2",
-      );
+    timelineRef.current = tl;
   }, []);
 
   const handleToggleMenu = () => {
@@ -111,16 +162,16 @@ export default function FoldLayout({
       handleCloseMenu();
     } else {
       setIsMenuOpen(true);
-      if (timelineRef.current) {
-        timelineRef.current.timeScale(1).play();
-      }
+      timelineRef.current?.timeScale(1).play();
     }
   };
 
   const handleCloseMenu = () => {
     if (isNavigatingRef.current) return;
     if (timelineRef.current) {
-      timelineRef.current.timeScale(1.15).reverse();
+      // Hide any internal scrollbar immediately before reverse animation
+      gsap.set("#menu-panel", { overflow: "hidden" });
+      timelineRef.current.timeScale(1.8).reverse();
     } else {
       setIsMenuOpen(false);
     }
@@ -131,10 +182,8 @@ export default function FoldLayout({
     isNavigatingRef.current = true;
 
     const performTransition = () => {
-      // 1. Reset scroll immediately before loading the new page
       resetScrollToTop();
 
-      // 2. Perform navigation
       if (href.startsWith("/#")) {
         const targetId = href.replace("/#", "");
         if (pathname === "/") {
@@ -151,14 +200,14 @@ export default function FoldLayout({
     };
 
     if (timelineRef.current) {
-      // Execute the exact same timeline in reverse smoothly
-      timelineRef.current.timeScale(1.2).reverse();
-
-      timelineRef.current.eventCallback("onReverseComplete", () => {
-        gsap.set("#fold-menu-backdrop", {
-          autoAlpha: 0,
-          pointerEvents: "none",
-        });
+      const tl = timelineRef.current;
+      // Immediately hide internal scrollbar during reverse collapse
+      gsap.set("#menu-panel", { overflow: "hidden" });
+      tl.timeScale(1.8).reverse();
+      tl.eventCallback("onReverseComplete", () => {
+        document.documentElement.classList.remove("menu-open");
+        gsap.set("#menu-backdrop", { autoAlpha: 0 });
+        gsap.set("#menu-panel", { autoAlpha: 0, overflow: "hidden" });
         setIsMenuOpen(false);
         isNavigatingRef.current = false;
         performTransition();
@@ -173,25 +222,21 @@ export default function FoldLayout({
   return (
     <SmoothScroll isPaused={isMenuOpen}>
       <div className="relative min-h-screen w-full overflow-x-hidden bg-[#0E0D0C]">
-        {/* Simple, Smooth, High-Performance Menu Overlay */}
+        {/* Nav header sits at root level with z-[60] and corner button at z-[70] */}
+        <Nav isMenuOpen={isMenuOpen} onToggleMenu={handleToggleMenu} />
+
+        {/* Fluid diagonal expanding menu */}
         <FoldMenu
           isOpen={isMenuOpen}
           onClose={handleCloseMenu}
           onNavigate={handleNavigate}
         />
 
-        {/* Main Page Canvas */}
+        {/* Underlying page canvas */}
         <div
           id="page-canvas"
           className="relative z-10 flex min-h-screen w-full flex-col bg-ground text-ink"
         >
-          {/* Header Navigation with Menu Trigger */}
-          <Nav
-            isMenuOpen={isMenuOpen}
-            onToggleMenu={handleToggleMenu}
-          />
-
-          {/* Page Content */}
           <div className="grow flex flex-col">{children}</div>
 
           {showFooter && <Footer />}

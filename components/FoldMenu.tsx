@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 
 interface FoldMenuProps {
   isOpen: boolean;
@@ -10,11 +9,27 @@ interface FoldMenuProps {
 }
 
 const NAV_LINKS = [
-  { prefix: "01", label: "HOME", href: "/" },
-  { prefix: "02", label: "ABOUT", href: "/#about" },
-  { prefix: "03", label: "EVENTS", href: "/#events" },
-  { prefix: "04", label: "RESOURCES", href: "/resources" },
-  { prefix: "05", label: "ROADMAP", href: "/#roadmap" },
+  { prefix: "01", label: "HOME", href: "/", tag: "OVERVIEW" },
+  { prefix: "02", label: "TEAMS", href: "/team", tag: "COHORT & MENTORS" },
+  {
+    prefix: "03",
+    label: "EVENTS",
+    href: "/events",
+    tag: "TALKS & HACKATHONS",
+  },
+  {
+    prefix: "04",
+    label: "RESOURCES",
+    href: "/resources",
+    tag: "AI LAB & ARCHIVE",
+  },
+  { prefix: "05", label: "ROADMAP", href: "/roadmap", tag: "COMING SOON" },
+];
+
+const SOCIALS = [
+  { label: "GitHub", href: "https://github.com" },
+  { label: "LinkedIn", href: "https://linkedin.com" },
+  { label: "Instagram", href: "https://instagram.com" },
 ];
 
 export default function FoldMenu({
@@ -22,27 +37,15 @@ export default function FoldMenu({
   onClose,
   onNavigate,
 }: FoldMenuProps) {
-  // Close menu on Escape key press
+  // Keyboard Escape listener
   useEffect(() => {
+    if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
+      if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
-
-  // Lock body scroll when menu is active on mobile & desktop
-  useEffect(() => {
-    if (isOpen) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
-    }
-  }, [isOpen]);
 
   const handleLinkClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -53,133 +56,147 @@ export default function FoldMenu({
   };
 
   return (
-    <div
-      id="fold-menu-backdrop"
-      aria-hidden={!isOpen}
-      className={`fixed inset-0 z-50 bg-[#0E0D0C] text-[#FAF9F5] flex flex-col justify-between overflow-y-auto overflow-x-hidden ${
-        isOpen ? "pointer-events-auto" : "pointer-events-none"
-      }`}
-      style={{
-        opacity: 0,
-        visibility: "hidden",
-        willChange: "transform, opacity",
-      }}
-    >
-      {/* Background Architectural Grid Pattern */}
+    <>
+      {/* Backdrop: clean dark overlay without blur */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-20"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, rgba(250,249,245,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(250,249,245,0.06) 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
+        id="menu-backdrop"
+        aria-hidden={!isOpen}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
         }}
+        className="fixed inset-0 z-40 bg-black/40 transition-opacity"
+        style={{ opacity: 0, visibility: "hidden" }}
       />
 
-      {/* Outer Content Shell */}
+      {/* Panel: Floating side menu with rounded corners and balanced height */}
       <div
-        id="menu-content"
-        className="relative z-10 w-full min-h-full flex flex-col justify-between p-6 sm:p-10 md:p-14 max-w-[1360px] mx-auto"
+        id="menu-panel"
+        aria-hidden={!isOpen}
+        className="fixed z-50 flex flex-col overflow-hidden border border-white/10 bg-[#0E0D0C] text-[#FAF9F5] shadow-[-25px_0_80px_rgba(0,0,0,0.85),_0_0_0_1px_rgba(255,255,255,0.06)] no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden
+          /* Positioned on the right with rounded corners and content-hugging height */
+          top-3 right-3 w-[calc(100vw-24px)] sm:top-4 sm:right-4 sm:w-[450px] md:top-5 md:right-6 md:w-[470px] max-h-[calc(100dvh-28px)] sm:max-h-[calc(100dvh-36px)] h-auto rounded-[28px] sm:rounded-[32px] md:rounded-[36px]"
+        style={{
+          clipPath: "circle(0px at calc(100% - 48px) 36px)",
+          transformOrigin: "top right",
+          opacity: 0,
+          visibility: "hidden",
+        }}
       >
-        {/* Top Bar */}
-        <div className="flex items-center justify-between pb-6 border-b border-white/10 text-[11px] sm:text-[12px] font-mono tracking-widest text-white/60 uppercase">
-          <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-white font-bold tracking-wider">
-              AI SOCIETY · BENNETT UNIVERSITY
+        {/* Ambient diagonal radiant glow from top-right expansion origin */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-16 -right-16 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#DE5D35]/25 via-[#DE5D35]/10 to-transparent blur-3xl opacity-60"
+        />
+
+        {/* Diagonal architectural grid accent */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "linear-gradient(135deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+
+        {/* Header: Status Indicator + Unified Close Button */}
+        <div className="menu-header relative z-10 flex shrink-0 items-center justify-between border-b border-white/10 px-6 py-4 sm:px-7 sm:py-4.5">
+          <div className="flex items-center gap-2.5 text-[11px] font-mono tracking-widest uppercase text-white/60">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
+            <span className="text-white font-bold">AI SOCIETY</span>
+            <span className="text-white/40">· ED. 26-27</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:inline text-white/40">EDITION 26-27</span>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close menu"
-              className="h-9 px-4 rounded-full bg-white/10 hover:bg-white text-white hover:text-black font-mono text-[11px] uppercase tracking-wider font-bold transition-all duration-200 inline-flex items-center gap-2 border border-white/15 cursor-pointer"
-            >
-              <span>CLOSE</span>
-              <span className="text-[13px] leading-none">✕</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close menu"
+            className="h-[34px] px-4 rounded-full bg-white text-[#0A0A0A] hover:bg-[#E3DFD7] font-mono text-[11px] uppercase tracking-wider font-bold transition-all duration-200 inline-flex items-center gap-2 cursor-pointer active:scale-95 shadow-xs"
+          >
+            <span>CLOSE</span>
+            <span className="text-[12px] leading-none font-bold">✕</span>
+          </button>
         </div>
 
-        {/* Primary Stacked Navigation Links */}
-        <nav className="my-auto py-10 sm:py-14 flex flex-col items-start gap-3 sm:gap-5 md:gap-6">
+        {/* Primary Navigation Links — balanced spacing without large voids */}
+        <nav
+          aria-label="Primary navigation"
+          className="relative z-10 flex flex-col gap-1 sm:gap-1.5 px-4 py-3 sm:px-6 sm:py-4 overflow-y-auto no-scrollbar"
+        >
+          <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/30 px-4 mb-1 block shrink-0">
+            INDEX / NAVIGATION
+          </span>
+
           {NAV_LINKS.map((item) => (
-            <div key={item.label} className="menu-nav-item w-full">
+            <div key={item.label} className="menu-nav-item w-full shrink-0">
               <a
                 href={item.href}
                 onClick={(e) => handleLinkClick(e, item.href)}
-                className="group flex items-baseline gap-4 sm:gap-6 py-2 transition-all duration-200 cursor-pointer select-none"
+                tabIndex={isOpen ? 0 : -1}
+                className="group flex items-center justify-between rounded-2xl px-4 py-2.5 sm:py-3 transition-all duration-200 cursor-pointer select-none hover:bg-white/[0.06]"
               >
-                {/* Monospace Topic Index Prefix */}
-                <span className="font-mono text-[12px] sm:text-[16px] md:text-[18px] text-[#DE5D35] group-hover:text-white font-semibold tracking-wider transition-colors">
-                  {item.prefix} /
-                </span>
+                <div className="flex items-center gap-4">
+                  <span className="w-7 font-mono text-[13px] text-[#DE5D35] group-hover:text-white font-semibold tracking-wider transition-colors duration-200">
+                    {item.prefix}
+                  </span>
 
-                {/* Primary Nav Label with Hover Arrow */}
-                <span className="text-[28px] sm:text-[44px] md:text-[58px] lg:text-[72px] font-black tracking-[-0.03em] leading-none text-[#FAF9F5] group-hover:text-[#DE5D35] transition-colors flex items-center gap-3">
-                  <span>{item.label}</span>
-                  <span className="opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#DE5D35] text-[0.8em]">
+                  <span className="font-display text-[24px] sm:text-[28px] md:text-[30px] font-extrabold tracking-[-0.03em] leading-none text-[#FAF9F5] group-hover:text-[#DE5D35] transition-colors duration-200">
+                    {item.label}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-white/35 group-hover:text-white/70 transition-colors duration-200 hidden sm:inline">
+                    {item.tag}
+                  </span>
+                  <span className="text-[14px] text-[#DE5D35] opacity-0 -translate-x-1.5 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0">
                     →
                   </span>
-                </span>
+                </div>
               </a>
             </div>
           ))}
         </nav>
 
-        {/* Bottom Coordinates & Footer Bar */}
-        <div className="pt-6 border-t border-white/10 grid grid-cols-1 sm:grid-cols-12 gap-6 text-[12px] font-mono text-white/60">
-          <div className="sm:col-span-6 flex flex-col justify-end">
-            <span className="text-white/40 uppercase tracking-widest text-[10px] block mb-1">
+        {/* Footer info & coordinates */}
+        <div className="menu-footer relative z-10 shrink-0 border-t border-white/10 bg-black/25 px-6 py-4.5 sm:px-7 sm:py-5 text-[11px] font-mono text-white/60">
+          <div className="mb-3">
+            <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/35 block mb-0.5">
               CAMPUS HEADQUARTERS
             </span>
-            <span className="text-white/85 text-[12px] sm:text-[13px] leading-relaxed">
-              Plot Nos 8–11, TechZone II, Greater Noida, Uttar Pradesh 201310
+            <span className="text-[12px] text-white/80 leading-relaxed block">
+              Plot Nos 8–11, TechZone II, Greater Noida, UP 201310
             </span>
           </div>
 
-          <div className="sm:col-span-3 flex flex-col justify-end">
-            <span className="text-white/40 uppercase tracking-widest text-[10px] block mb-1">
-              OFFICIAL INQUIRIES
-            </span>
+          <div className="flex items-center justify-between pt-2.5 border-t border-white/5 text-[11px]">
             <a
               href="mailto:ais@bennett.edu.in"
-              className="text-white/90 hover:text-[#DE5D35] hover:underline underline-offset-4 transition-colors text-[12px] sm:text-[13px]"
+              className="text-white/80 hover:text-[#DE5D35] transition-colors inline-flex items-center gap-1.5"
             >
-              ais@bennett.edu.in
+              <span>ais@bennett.edu.in</span>
+              <span className="text-[10px] text-white/40">↗</span>
             </a>
-          </div>
 
-          <div className="sm:col-span-3 flex items-end justify-start sm:justify-end gap-5">
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white/70 hover:text-white transition-colors"
-            >
-              GitHub ↗
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white/70 hover:text-white transition-colors"
-            >
-              LinkedIn ↗
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white/70 hover:text-white transition-colors"
-            >
-              Instagram ↗
-            </a>
+            <div className="flex items-center gap-4 text-white/50">
+              {SOCIALS.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  {s.label}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

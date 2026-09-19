@@ -1,5 +1,14 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { type CSSProperties, useRef } from "react";
 import { featurePillars } from "@/lib/data";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 /**
  * Each quadrant is cut with a single concave corner facing the centre, so the
@@ -31,12 +40,73 @@ const QUADRANTS = [
 ];
 
 export default function PillarsBento() {
+  const containerRef = useRef<HTMLElement | null>(null);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          reduceMotion: "(prefers-reduced-motion: reduce)",
+          standard: "(prefers-reduced-motion: no-preference)",
+        },
+        (context) => {
+          const { reduceMotion } = context.conditions as {
+            reduceMotion: boolean;
+            standard: boolean;
+          };
+
+          if (reduceMotion) {
+            gsap.set([".pillar-statement", ".pillar-tile"], {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+            });
+            return;
+          }
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: containerRef.current,
+              start: "top 78%",
+              toggleActions: "play none none none",
+            },
+            defaults: { ease: "power3.out" },
+          });
+
+          tl.fromTo(
+            ".pillar-statement",
+            { y: 40, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.9 },
+          ).fromTo(
+            ".pillar-tile",
+            { scale: 0.94, opacity: 0, y: 25 },
+            {
+              scale: 1,
+              opacity: 1,
+              y: 0,
+              duration: 0.75,
+              stagger: 0.08,
+            },
+            "-=0.6",
+          );
+        },
+      );
+    },
+    { scope: containerRef },
+  );
+
   return (
-    <section id="pillars" className="py-6 md:py-10">
+    <section
+      ref={containerRef}
+      id="pillars"
+      className="py-6 md:py-10 overflow-hidden"
+    >
       <div className="shell">
         <div className="grid gap-4 lg:grid-cols-12">
           {/* Statement panel */}
-          <div className="flex min-h-[400px] flex-col justify-between rounded-[32px] bg-panel p-9 sm:p-12 lg:col-span-5 lg:min-h-[520px]">
+          <div className="pillar-statement flex min-h-[400px] flex-col justify-between rounded-[32px] bg-panel p-9 sm:p-12 lg:col-span-5 lg:min-h-[520px]">
             <div>
               <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
                 Pillars
@@ -69,7 +139,7 @@ export default function PillarsBento() {
               return (
                 <div
                   key={quadrant.cut}
-                  className={`flex flex-col gap-4 bg-accent p-7 text-white sm:p-9 ${quadrant.cut} ${quadrant.corner} ${quadrant.anchor}`}
+                  className={`pillar-tile will-change-transform flex flex-col gap-4 bg-accent p-7 text-white sm:p-9 ${quadrant.cut} ${quadrant.corner} ${quadrant.anchor}`}
                   style={{ "--scallop": "64px" } as CSSProperties}
                 >
                   <span className="font-display text-[32px] font-bold leading-none text-white/25">

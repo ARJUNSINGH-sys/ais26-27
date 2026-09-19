@@ -1,4 +1,14 @@
+"use client";
+
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
+import { useRef } from "react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const STEPS = [
   {
@@ -20,13 +30,75 @@ const STEPS = [
 ];
 
 export default function MethodologySection() {
+  const containerRef = useRef<HTMLElement | null>(null);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          reduceMotion: "(prefers-reduced-motion: reduce)",
+          standard: "(prefers-reduced-motion: no-preference)",
+        },
+        (context) => {
+          const { reduceMotion } = context.conditions as {
+            reduceMotion: boolean;
+            standard: boolean;
+          };
+
+          if (reduceMotion) {
+            gsap.set([".methodology-header", ".methodology-row"], {
+              opacity: 1,
+              y: 0,
+            });
+            return;
+          }
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: containerRef.current,
+              start: "top 78%",
+              toggleActions: "play none none none",
+            },
+            defaults: { ease: "power3.out" },
+          });
+
+          tl.fromTo(
+            ".methodology-header",
+            { y: 35, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.9 },
+          ).fromTo(
+            ".methodology-row",
+            { y: 30, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8, stagger: 0.12 },
+            "-=0.5",
+          );
+        },
+      );
+    },
+    { scope: containerRef },
+  );
+
   return (
-    <section id="roadmap" className="py-20 md:py-28">
+    <section
+      ref={containerRef}
+      id="roadmap"
+      className="py-20 md:py-28 overflow-hidden"
+    >
       <div className="shell">
-        <div className="mb-14 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between md:mb-20">
-          <h2 className="font-display text-[clamp(30px,3.6vw,46px)] font-extrabold leading-[1.05] tracking-[-0.035em] text-ink">
-            How We Build
-          </h2>
+        <div className="methodology-header mb-14 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between md:mb-20">
+          <div>
+            <div className="inline-flex items-center gap-2 mb-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
+              <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-[#DE5D35]">
+                ROADMAP · COMING SOON
+              </span>
+            </div>
+            <h2 className="font-display text-[clamp(30px,3.6vw,46px)] font-extrabold leading-[1.05] tracking-[-0.035em] text-ink">
+              How We Build
+            </h2>
+          </div>
           <p className="max-w-[34ch] text-[14px] leading-[1.6] text-ink-soft sm:text-right">
             Every epoch is structured scientific inquiry — rigorous benchmarking
             and collective development, not merely syntax.
@@ -37,7 +109,7 @@ export default function MethodologySection() {
           {STEPS.map((step) => (
             <div
               key={step.numeral}
-              className="grid gap-6 border-b border-line py-9 md:grid-cols-12 md:items-center"
+              className="methodology-row will-change-transform grid gap-6 border-b border-line py-9 md:grid-cols-12 md:items-center"
             >
               <span className="text-[12px] font-medium tracking-[0.14em] text-ink-soft md:col-span-1">
                 {step.numeral}

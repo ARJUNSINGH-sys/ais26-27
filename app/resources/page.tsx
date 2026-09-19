@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import FoldLayout from "@/components/FoldLayout";
 
 interface ArticleMeta {
@@ -13,7 +13,11 @@ interface ArticleMeta {
     | "EVALUATION"
     | "VALIDATION"
     | "TREE ENSEMBLES"
-    | "DEEP LEARNING";
+    | "DEEP LEARNING"
+    | "ENSEMBLE LEARNING"
+    | "FOUNDATIONS"
+    | "FAIRNESS"
+    | "SEQUENTIAL";
   title: string;
   subtitle: string;
   readTime: string;
@@ -92,9 +96,9 @@ const PUBLISHED_ARTICLES: ArticleMeta[] = [
     subtitle:
       "Recursive feature space partitioning, Gini impurity minimization, and bootstrap aggregation (bagging) with random feature sub-sampling to suppress variance.",
     readTime: "10 min read",
-    date: "In Curriculum Review",
+    date: "June 2024",
     author: "AIS Research Cohort",
-    status: "UPCOMING",
+    status: "PUBLISHED",
   },
   {
     index: "07",
@@ -117,9 +121,9 @@ const PUBLISHED_ARTICLES: ArticleMeta[] = [
     subtitle:
       "Spatial receptive fields, 2D discrete convolution kernels, hierarchical feature maps, and spatial invariance through pooling layers.",
     readTime: "12 min read",
-    date: "In Laboratory Calibration",
+    date: "July 2024",
     author: "AIS Research Cohort",
-    status: "UPCOMING",
+    status: "PUBLISHED",
   },
   {
     index: "09",
@@ -129,9 +133,81 @@ const PUBLISHED_ARTICLES: ArticleMeta[] = [
     subtitle:
       "Sequential temporal dynamics, Backpropagation Through Time (BPTT), vanishing gradients, LSTM memory gates, and Transformer self-attention.",
     readTime: "14 min read",
-    date: "In Curriculum Review",
+    date: "August 2024",
     author: "AIS Research Cohort",
-    status: "UPCOMING",
+    status: "PUBLISHED",
+  },
+  {
+    index: "10",
+    slug: "random-forest",
+    category: "ENSEMBLE LEARNING",
+    title: "The Random Forest Algorithm",
+    subtitle:
+      "Bagging, random feature sub-sampling, and majority voting. How averaging many decorrelated trees collapses variance without adding bias.",
+    readTime: "11 min read",
+    date: "September 2024",
+    author: "AIS Research Cohort",
+    status: "PUBLISHED",
+  },
+  {
+    index: "11",
+    slug: "bias-variance",
+    category: "FOUNDATIONS",
+    title: "The Bias-Variance Tradeoff",
+    subtitle:
+      "Decomposing expected error into bias squared, variance, and irreducible noise. Underfitting, overfitting, and the KNN knob that dials between them.",
+    readTime: "10 min read",
+    date: "September 2024",
+    author: "AIS Research Cohort",
+    status: "PUBLISHED",
+  },
+  {
+    index: "12",
+    slug: "train-test-validation",
+    category: "FOUNDATIONS",
+    title: "Train, Test & Validation: The Honest Split",
+    subtitle:
+      "Why one dataset must become three, what each partition is actually for, and how a single careless peek turns your final number into fiction.",
+    readTime: "9 min read",
+    date: "September 2024",
+    author: "AIS Research Cohort",
+    status: "PUBLISHED",
+  },
+  {
+    index: "13",
+    slug: "double-descent",
+    category: "FOUNDATIONS",
+    title: "Double Descent",
+    subtitle:
+      "Error that rises at the interpolation threshold and then falls again. Why over-parameterised models generalise, and what minimum-norm bias has to do with it.",
+    readTime: "12 min read",
+    date: "September 2024",
+    author: "AIS Research Cohort",
+    status: "PUBLISHED",
+  },
+  {
+    index: "14",
+    slug: "equality-of-odds",
+    category: "FAIRNESS",
+    title: "Equality of Odds",
+    subtitle:
+      "Defining and measuring parity in true and false positive rates across groups, the equal-opportunity relaxation, and the three stages at which you can intervene.",
+    readTime: "11 min read",
+    date: "September 2024",
+    author: "AIS Research Cohort",
+    status: "PUBLISHED",
+  },
+  {
+    index: "15",
+    slug: "reinforcement-learning",
+    category: "SEQUENTIAL",
+    title: "Reinforcement Learning",
+    subtitle:
+      "Learning from delayed consequences instead of labels. Markov decision processes, the explore-exploit dilemma, grid worlds, and the Bellman recursion.",
+    readTime: "13 min read",
+    date: "September 2024",
+    author: "AIS Research Cohort",
+    status: "PUBLISHED",
   },
 ];
 
@@ -142,7 +218,11 @@ const CATEGORIES = [
   "EVALUATION",
   "VALIDATION",
   "TREE ENSEMBLES",
+  "ENSEMBLE LEARNING",
   "DEEP LEARNING",
+  "FOUNDATIONS",
+  "FAIRNESS",
+  "SEQUENTIAL",
 ] as const;
 
 export default function ResourcesPage() {
@@ -188,9 +268,10 @@ export default function ResourcesPage() {
             </h1>
 
             <p className="text-[16px] text-[#75716B] leading-[1.65]">
-              Visual essays, mathematical derivations, and interactive simulations.
-              Follow the pedagogical curriculum from linear regression and classification
-              to tree ensembles, deep neural networks, and sequence models.
+              Visual essays, mathematical derivations, and interactive
+              simulations. Follow the pedagogical curriculum from linear
+              regression and classification to tree ensembles, deep neural
+              networks, and sequence models.
             </p>
           </header>
 
@@ -204,7 +285,7 @@ export default function ResourcesPage() {
                 </span>
               </div>
               <span className="text-[10px] font-mono text-[#75716B]">
-                9 MODULES · FIRST PRINCIPLES
+                15 MODULES · FIRST PRINCIPLES
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[11px] font-mono">
@@ -235,6 +316,30 @@ export default function ResourcesPage() {
               <span className="font-bold text-[#DE5D35] bg-[#DE5D35]/10 px-1.5 py-0.5 rounded-[1px]">
                 07 Neural Networks & Deep Learning (CNNs / RNNs)
               </span>
+              <span className="text-[#DE5D35] font-bold">→</span>
+              <span className="font-bold text-[#1A1816] bg-[#1A1816]/5 px-1.5 py-0.5 rounded-[1px]">
+                08 Random Forests
+              </span>
+              <span className="text-[#DE5D35] font-bold">→</span>
+              <span className="font-bold text-[#1A1816] bg-[#1A1816]/5 px-1.5 py-0.5 rounded-[1px]">
+                09 Bias-Variance
+              </span>
+              <span className="text-[#DE5D35] font-bold">→</span>
+              <span className="font-bold text-[#1A1816] bg-[#1A1816]/5 px-1.5 py-0.5 rounded-[1px]">
+                10 Train / Test / Validation
+              </span>
+              <span className="text-[#DE5D35] font-bold">→</span>
+              <span className="font-bold text-[#1A1816] bg-[#1A1816]/5 px-1.5 py-0.5 rounded-[1px]">
+                11 Double Descent
+              </span>
+              <span className="text-[#DE5D35] font-bold">→</span>
+              <span className="font-bold text-[#1A1816] bg-[#1A1816]/5 px-1.5 py-0.5 rounded-[1px]">
+                12 Equality of Odds
+              </span>
+              <span className="text-[#DE5D35] font-bold">→</span>
+              <span className="font-bold text-[#1A1816] bg-[#1A1816]/5 px-1.5 py-0.5 rounded-[1px]">
+                13 Reinforcement Learning
+              </span>
             </div>
           </div>
 
@@ -244,9 +349,9 @@ export default function ResourcesPage() {
               <div className="flex items-center gap-3 text-[12px] font-mono">
                 <span className="w-2 h-2 rounded-full bg-[#DE5D35] shrink-0" />
                 <span>
-                  <strong>CURRICULUM MODULE IN PEER REVIEW:</strong> {upcomingNotice} is
-                  currently undergoing laboratory simulation calibration and will unlock in the next
-                  curriculum cohort.
+                  <strong>CURRICULUM MODULE IN PEER REVIEW:</strong>{" "}
+                  {upcomingNotice} is currently undergoing laboratory simulation
+                  calibration and will unlock in the next curriculum cohort.
                 </span>
               </div>
               <button
@@ -471,10 +576,36 @@ export default function ResourcesPage() {
                             stroke="#1A1816"
                             strokeWidth="1"
                           />
-                          <line x1="0" y1="14" x2="28" y2="14" stroke="#1A1816" strokeWidth="0.8" />
-                          <line x1="14" y1="0" x2="14" y2="28" stroke="#1A1816" strokeWidth="0.8" />
-                          <rect x="1" y="1" width="12" height="12" fill="rgba(43,108,176,0.3)" />
-                          <rect x="15" y="15" width="12" height="12" fill="rgba(43,108,176,0.3)" />
+                          <line
+                            x1="0"
+                            y1="14"
+                            x2="28"
+                            y2="14"
+                            stroke="#1A1816"
+                            strokeWidth="0.8"
+                          />
+                          <line
+                            x1="14"
+                            y1="0"
+                            x2="14"
+                            y2="28"
+                            stroke="#1A1816"
+                            strokeWidth="0.8"
+                          />
+                          <rect
+                            x="1"
+                            y="1"
+                            width="12"
+                            height="12"
+                            fill="rgba(43,108,176,0.3)"
+                          />
+                          <rect
+                            x="15"
+                            y="15"
+                            width="12"
+                            height="12"
+                            fill="rgba(43,108,176,0.3)"
+                          />
                         </g>
                       </svg>
                     )}
@@ -572,29 +703,134 @@ export default function ResourcesPage() {
                         className="w-full max-w-[210px] h-auto select-none relative z-10"
                       >
                         {/* Tree branches */}
-                        <line x1="120" y1="20" x2="65" y2="55" stroke="#1A1816" strokeWidth="1.5" />
-                        <line x1="120" y1="20" x2="175" y2="55" stroke="#1A1816" strokeWidth="1.5" />
-                        <line x1="65" y1="55" x2="40" y2="90" stroke="#1A1816" strokeWidth="1.2" />
-                        <line x1="65" y1="55" x2="90" y2="90" stroke="#1A1816" strokeWidth="1.2" />
-                        <line x1="175" y1="55" x2="150" y2="90" stroke="#1A1816" strokeWidth="1.2" />
-                        <line x1="175" y1="55" x2="200" y2="90" stroke="#1A1816" strokeWidth="1.2" />
+                        <line
+                          x1="120"
+                          y1="20"
+                          x2="65"
+                          y2="55"
+                          stroke="#1A1816"
+                          strokeWidth="1.5"
+                        />
+                        <line
+                          x1="120"
+                          y1="20"
+                          x2="175"
+                          y2="55"
+                          stroke="#1A1816"
+                          strokeWidth="1.5"
+                        />
+                        <line
+                          x1="65"
+                          y1="55"
+                          x2="40"
+                          y2="90"
+                          stroke="#1A1816"
+                          strokeWidth="1.2"
+                        />
+                        <line
+                          x1="65"
+                          y1="55"
+                          x2="90"
+                          y2="90"
+                          stroke="#1A1816"
+                          strokeWidth="1.2"
+                        />
+                        <line
+                          x1="175"
+                          y1="55"
+                          x2="150"
+                          y2="90"
+                          stroke="#1A1816"
+                          strokeWidth="1.2"
+                        />
+                        <line
+                          x1="175"
+                          y1="55"
+                          x2="200"
+                          y2="90"
+                          stroke="#1A1816"
+                          strokeWidth="1.2"
+                        />
 
                         {/* Root Node */}
-                        <rect x="100" y="10" width="40" height="20" rx="2" fill="#1A1816" />
-                        <text x="120" y="24" fill="#FAF9F5" fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="bold">X ≤ 3.5</text>
+                        <rect
+                          x="100"
+                          y="10"
+                          width="40"
+                          height="20"
+                          rx="2"
+                          fill="#1A1816"
+                        />
+                        <text
+                          x="120"
+                          y="24"
+                          fill="#FAF9F5"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          X ≤ 3.5
+                        </text>
 
                         {/* Level 1 Nodes */}
-                        <rect x="45" y="45" width="40" height="18" rx="2" fill="#FAF9F5" stroke="#1A1816" strokeWidth="1.2" />
-                        <text x="65" y="57" fill="#1A1816" fontSize="7.5" fontFamily="monospace" textAnchor="middle">Gini: 0.12</text>
-                        <rect x="155" y="45" width="40" height="18" rx="2" fill="#FAF9F5" stroke="#1A1816" strokeWidth="1.2" />
-                        <text x="175" y="57" fill="#1A1816" fontSize="7.5" fontFamily="monospace" textAnchor="middle">Gini: 0.28</text>
+                        <rect
+                          x="45"
+                          y="45"
+                          width="40"
+                          height="18"
+                          rx="2"
+                          fill="#FAF9F5"
+                          stroke="#1A1816"
+                          strokeWidth="1.2"
+                        />
+                        <text
+                          x="65"
+                          y="57"
+                          fill="#1A1816"
+                          fontSize="7.5"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                        >
+                          Gini: 0.12
+                        </text>
+                        <rect
+                          x="155"
+                          y="45"
+                          width="40"
+                          height="18"
+                          rx="2"
+                          fill="#FAF9F5"
+                          stroke="#1A1816"
+                          strokeWidth="1.2"
+                        />
+                        <text
+                          x="175"
+                          y="57"
+                          fill="#1A1816"
+                          fontSize="7.5"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                        >
+                          Gini: 0.28
+                        </text>
 
                         {/* Leaf Nodes */}
                         <circle cx="40" cy="95" r="7" fill="#DE5D35" />
                         <circle cx="90" cy="95" r="7" fill="#2B6CB0" />
                         <circle cx="150" cy="95" r="7" fill="#DE5D35" />
                         <circle cx="200" cy="95" r="7" fill="#2B6CB0" />
-                        <text x="120" y="112" fill="#75716B" fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="bold">ENSEMBLE FOREST BAGGING</text>
+                        <text
+                          x="120"
+                          y="112"
+                          fill="#75716B"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          ENSEMBLE FOREST BAGGING
+                        </text>
                       </svg>
                     )}
 
@@ -757,19 +993,51 @@ export default function ResourcesPage() {
                                 width="14"
                                 height="14"
                                 rx="1"
-                                fill={r < 2 && c < 2 ? "rgba(222,93,53,0.25)" : "#FAF9F5"}
+                                fill={
+                                  r < 2 && c < 2
+                                    ? "rgba(222,93,53,0.25)"
+                                    : "#FAF9F5"
+                                }
                                 stroke="#1A1816"
                                 strokeWidth="0.8"
                               />
                             )),
                           )}
-                          <rect x="0" y="0" width="30" height="30" fill="none" stroke="#DE5D35" strokeWidth="1.5" strokeDasharray="3 2" />
-                          <text x="32" y="76" fill="#75716B" fontSize="8" fontFamily="monospace" textAnchor="middle">2D Input</text>
+                          <rect
+                            x="0"
+                            y="0"
+                            width="30"
+                            height="30"
+                            fill="none"
+                            stroke="#DE5D35"
+                            strokeWidth="1.5"
+                            strokeDasharray="3 2"
+                          />
+                          <text
+                            x="32"
+                            y="76"
+                            fill="#75716B"
+                            fontSize="8"
+                            fontFamily="monospace"
+                            textAnchor="middle"
+                          >
+                            2D Input
+                          </text>
                         </g>
 
                         {/* Kernel Mapping Lines */}
-                        <path d="M 62 35 L 140 45" stroke="#DE5D35" strokeWidth="1" strokeDasharray="2 2" />
-                        <path d="M 62 50 L 140 60" stroke="#DE5D35" strokeWidth="1" strokeDasharray="2 2" />
+                        <path
+                          d="M 62 35 L 140 45"
+                          stroke="#DE5D35"
+                          strokeWidth="1"
+                          strokeDasharray="2 2"
+                        />
+                        <path
+                          d="M 62 50 L 140 60"
+                          stroke="#DE5D35"
+                          strokeWidth="1"
+                          strokeDasharray="2 2"
+                        />
 
                         {/* 3x3 Filter Kernel & Feature Map */}
                         <g transform="translate(140, 30)">
@@ -782,13 +1050,24 @@ export default function ResourcesPage() {
                                 width="14"
                                 height="14"
                                 rx="1"
-                                fill={r === 0 && c === 0 ? "#2B6CB0" : "#FAF9F5"}
+                                fill={
+                                  r === 0 && c === 0 ? "#2B6CB0" : "#FAF9F5"
+                                }
                                 stroke="#1A1816"
                                 strokeWidth="0.8"
                               />
                             )),
                           )}
-                          <text x="24" y="66" fill="#75716B" fontSize="8" fontFamily="monospace" textAnchor="middle">Feature Map</text>
+                          <text
+                            x="24"
+                            y="66"
+                            fill="#75716B"
+                            fontSize="8"
+                            fontFamily="monospace"
+                            textAnchor="middle"
+                          >
+                            Feature Map
+                          </text>
                         </g>
                       </svg>
                     )}
@@ -807,25 +1086,608 @@ export default function ResourcesPage() {
                         ].map((step, idx) => (
                           <g key={step.t}>
                             {/* Input x_t */}
-                            <circle cx={step.x} cy="95" r="10" fill="#FAF9F5" stroke="#1A1816" strokeWidth="1.2" />
-                            <text x={step.x} y="98" fill="#1A1816" fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="bold">x_{step.t}</text>
-                            <line x1={step.x} y1="85" x2={step.x} y2="60" stroke="#1A1816" strokeWidth="1.2" />
+                            <circle
+                              cx={step.x}
+                              cy="95"
+                              r="10"
+                              fill="#FAF9F5"
+                              stroke="#1A1816"
+                              strokeWidth="1.2"
+                            />
+                            <text
+                              x={step.x}
+                              y="98"
+                              fill="#1A1816"
+                              fontSize="8"
+                              fontFamily="monospace"
+                              textAnchor="middle"
+                              fontWeight="bold"
+                            >
+                              x_{step.t}
+                            </text>
+                            <line
+                              x1={step.x}
+                              y1="85"
+                              x2={step.x}
+                              y2="60"
+                              stroke="#1A1816"
+                              strokeWidth="1.2"
+                            />
 
                             {/* Hidden State Cell h_t */}
-                            <rect x={step.x - 16} y="35" width="32" height="24" rx="2" fill={idx === 1 ? "#1A1816" : "#FAF9F5"} stroke="#1A1816" strokeWidth="1.2" />
-                            <text x={step.x} y="50" fill={idx === 1 ? "#FAF9F5" : "#1A1816"} fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="bold">h_{step.t}</text>
+                            <rect
+                              x={step.x - 16}
+                              y="35"
+                              width="32"
+                              height="24"
+                              rx="2"
+                              fill={idx === 1 ? "#1A1816" : "#FAF9F5"}
+                              stroke="#1A1816"
+                              strokeWidth="1.2"
+                            />
+                            <text
+                              x={step.x}
+                              y="50"
+                              fill={idx === 1 ? "#FAF9F5" : "#1A1816"}
+                              fontSize="8"
+                              fontFamily="monospace"
+                              textAnchor="middle"
+                              fontWeight="bold"
+                            >
+                              h_{step.t}
+                            </text>
 
                             {/* Output y_t */}
-                            <line x1={step.x} y1="35" x2={step.x} y2="15" stroke="#1A1816" strokeWidth="1.2" />
+                            <line
+                              x1={step.x}
+                              y1="35"
+                              x2={step.x}
+                              y2="15"
+                              stroke="#1A1816"
+                              strokeWidth="1.2"
+                            />
                             <circle cx={step.x} cy="12" r="6" fill="#DE5D35" />
                           </g>
                         ))}
 
                         {/* Recurrent Temporal Transmission Arcs */}
-                        <path d="M 61 47 L 104 47" stroke="#2B6CB0" strokeWidth="1.5" strokeDasharray="3 2" />
+                        <path
+                          d="M 61 47 L 104 47"
+                          stroke="#2B6CB0"
+                          strokeWidth="1.5"
+                          strokeDasharray="3 2"
+                        />
                         <polygon points="104,47 98,44 98,50" fill="#2B6CB0" />
-                        <path d="M 136 47 L 179 47" stroke="#2B6CB0" strokeWidth="1.5" strokeDasharray="3 2" />
+                        <path
+                          d="M 136 47 L 179 47"
+                          stroke="#2B6CB0"
+                          strokeWidth="1.5"
+                          strokeDasharray="3 2"
+                        />
                         <polygon points="179,47 173,44 173,50" fill="#2B6CB0" />
+                      </svg>
+                    )}
+
+                    {/* 10: RANDOM FOREST */}
+                    {article.slug === "random-forest" && (
+                      <svg
+                        viewBox="0 0 240 120"
+                        className="w-full max-w-[210px] h-auto select-none relative z-10"
+                      >
+                        {[35, 120, 205].map((cx, i) => (
+                          <g key={cx}>
+                            {/* trunk + branches */}
+                            <line
+                              x1={cx}
+                              y1="78"
+                              x2={cx}
+                              y2="94"
+                              stroke="#1A1816"
+                              strokeWidth="1.4"
+                            />
+                            <line
+                              x1={cx}
+                              y1="60"
+                              x2={cx - 13}
+                              y2="78"
+                              stroke="#1A1816"
+                              strokeWidth="1.1"
+                            />
+                            <line
+                              x1={cx}
+                              y1="60"
+                              x2={cx + 13}
+                              y2="78"
+                              stroke="#1A1816"
+                              strokeWidth="1.1"
+                            />
+                            {/* canopy */}
+                            <circle
+                              cx={cx}
+                              cy="46"
+                              r="15"
+                              fill={i === 1 ? "#1A1816" : "#FAF9F5"}
+                              stroke="#1A1816"
+                              strokeWidth="1.3"
+                            />
+                            <text
+                              x={cx}
+                              y="50"
+                              fill={i === 1 ? "#FAF9F5" : "#1A1816"}
+                              fontSize="9"
+                              fontFamily="monospace"
+                              textAnchor="middle"
+                              fontWeight="bold"
+                            >
+                              T{i + 1}
+                            </text>
+                          </g>
+                        ))}
+                        {/* vote tally */}
+                        <line
+                          x1="25"
+                          y1="106"
+                          x2="215"
+                          y2="106"
+                          stroke="#1A1816"
+                          strokeWidth="1"
+                          opacity="0.25"
+                        />
+                        {[0, 1, 2].map((k) => (
+                          <circle
+                            key={k}
+                            cx={92 + k * 18}
+                            cy="106"
+                            r="4"
+                            fill={k < 2 ? "#DE5D35" : "#FAF9F5"}
+                            stroke="#DE5D35"
+                            strokeWidth="1"
+                          />
+                        ))}
+                        <text
+                          x="163"
+                          y="110"
+                          fill="#1A1816"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                        >
+                          MAJORITY
+                        </text>
+                      </svg>
+                    )}
+
+                    {/* 11: BIAS-VARIANCE */}
+                    {article.slug === "bias-variance" && (
+                      <svg
+                        viewBox="0 0 240 120"
+                        className="w-full max-w-[200px] h-auto select-none relative z-10"
+                      >
+                        {/* target rings */}
+                        {[46, 32, 18].map((r) => (
+                          <circle
+                            key={r}
+                            cx="110"
+                            cy="60"
+                            r={r}
+                            fill="none"
+                            stroke="#1A1816"
+                            strokeWidth="1"
+                            opacity="0.35"
+                          />
+                        ))}
+                        <circle cx="110" cy="60" r="5" fill="#1A1816" />
+                        {/* throws: cluster offset up-right from the bullseye */}
+                        {[
+                          { x: 138, y: 40 },
+                          { x: 148, y: 47 },
+                          { x: 133, y: 52 },
+                          { x: 144, y: 34 },
+                          { x: 152, y: 39 },
+                        ].map((p, i) => (
+                          <circle
+                            key={i}
+                            cx={p.x}
+                            cy={p.y}
+                            r="3.5"
+                            fill="#DE5D35"
+                          />
+                        ))}
+                        {/* bias arrow from bullseye to cluster centre */}
+                        <line
+                          x1="110"
+                          y1="60"
+                          x2="142"
+                          y2="42"
+                          stroke="#DE5D35"
+                          strokeWidth="1.4"
+                          strokeDasharray="3 2"
+                        />
+                        <text
+                          x="172"
+                          y="36"
+                          fill="#DE5D35"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                        >
+                          BIAS
+                        </text>
+                        <text
+                          x="172"
+                          y="50"
+                          fill="#75716B"
+                          fontSize="8"
+                          fontFamily="monospace"
+                        >
+                          + VARIANCE
+                        </text>
+                      </svg>
+                    )}
+
+                    {/* 12: TRAIN / TEST / VALIDATION */}
+                    {article.slug === "train-test-validation" && (
+                      <svg
+                        viewBox="0 0 240 120"
+                        className="w-full max-w-[210px] h-auto select-none relative z-10"
+                      >
+                        {/* one dataset bar, split three ways */}
+                        <rect
+                          x="20"
+                          y="40"
+                          width="120"
+                          height="26"
+                          fill="#1A1816"
+                        />
+                        <rect
+                          x="142"
+                          y="40"
+                          width="40"
+                          height="26"
+                          fill="#DE5D35"
+                        />
+                        <rect
+                          x="184"
+                          y="40"
+                          width="36"
+                          height="26"
+                          fill="#FAF9F5"
+                          stroke="#1A1816"
+                          strokeWidth="1.3"
+                        />
+                        <text
+                          x="80"
+                          y="57"
+                          fill="#FAF9F5"
+                          fontSize="9"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          TRAIN 60%
+                        </text>
+                        <text
+                          x="162"
+                          y="57"
+                          fill="#FAF9F5"
+                          fontSize="7.5"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          VAL 20%
+                        </text>
+                        <text
+                          x="202"
+                          y="57"
+                          fill="#1A1816"
+                          fontSize="7.5"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          TEST
+                        </text>
+                        {/* the test block is read once */}
+                        <text
+                          x="202"
+                          y="82"
+                          fill="#75716B"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                        >
+                          ONCE
+                        </text>
+                        <text
+                          x="162"
+                          y="82"
+                          fill="#DE5D35"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          ↻ REUSED
+                        </text>
+                        <text
+                          x="80"
+                          y="82"
+                          fill="#1A1816"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                        >
+                          FITS PARAMS
+                        </text>
+                        <text
+                          x="120"
+                          y="104"
+                          fill="#75716B"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          ONE DATASET · THREE JOBS
+                        </text>
+                      </svg>
+                    )}
+
+                    {/* 13: DOUBLE DESCENT */}
+                    {article.slug === "double-descent" && (
+                      <svg
+                        viewBox="0 0 240 120"
+                        className="w-full max-w-[210px] h-auto select-none relative z-10"
+                      >
+                        <line
+                          x1="22"
+                          y1="100"
+                          x2="222"
+                          y2="100"
+                          stroke="#1A1816"
+                          strokeWidth="1.2"
+                        />
+                        <line
+                          x1="22"
+                          y1="12"
+                          x2="22"
+                          y2="100"
+                          stroke="#1A1816"
+                          strokeWidth="1.2"
+                        />
+                        {/* threshold */}
+                        <line
+                          x1="112"
+                          y1="12"
+                          x2="112"
+                          y2="100"
+                          stroke="#1A1816"
+                          strokeWidth="1"
+                          strokeDasharray="4 3"
+                          opacity="0.4"
+                        />
+                        {/* classical U then the spike, then descent */}
+                        <path
+                          d="M28 30 C 50 62 72 76 96 74 C 106 72 112 24 122 26 C 140 30 168 56 216 76"
+                          fill="none"
+                          stroke="#DE5D35"
+                          strokeWidth="2.6"
+                        />
+                        <circle cx="112" cy="24" r="4.5" fill="#DE5D35" />
+                        <text
+                          x="112"
+                          y="16"
+                          fill="#DE5D35"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          THRESHOLD
+                        </text>
+                        <text
+                          x="122"
+                          y="114"
+                          fill="#1A1816"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                        >
+                          capacity →
+                        </text>
+                        <text
+                          x="64"
+                          y="60"
+                          fill="#75716B"
+                          fontSize="8"
+                          fontFamily="monospace"
+                        >
+                          second descent ↘
+                        </text>
+                      </svg>
+                    )}
+
+                    {/* 14: EQUALITY OF ODDS */}
+                    {article.slug === "equality-of-odds" && (
+                      <svg
+                        viewBox="0 0 240 120"
+                        className="w-full max-w-[200px] h-auto select-none relative z-10"
+                      >
+                        <line
+                          x1="24"
+                          y1="100"
+                          x2="220"
+                          y2="100"
+                          stroke="#1A1816"
+                          strokeWidth="1.2"
+                        />
+                        {/* TPR pair — matched */}
+                        {[
+                          { x: 44, h: 54, c: "#1A1816" },
+                          { x: 66, h: 54, c: "#DE5D35" },
+                        ].map((b) => (
+                          <rect
+                            key={b.x}
+                            x={b.x}
+                            y={100 - b.h}
+                            width="16"
+                            height={b.h}
+                            fill={b.c}
+                          />
+                        ))}
+                        <text
+                          x="63"
+                          y="112"
+                          fill="#1A1816"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          TPR ✓
+                        </text>
+                        {/* FPR pair — unequal, gap marked */}
+                        {[
+                          { x: 140, h: 16, c: "#1A1816" },
+                          { x: 162, h: 40, c: "#DE5D35" },
+                        ].map((b) => (
+                          <rect
+                            key={b.x}
+                            x={b.x}
+                            y={100 - b.h}
+                            width="16"
+                            height={b.h}
+                            fill={b.c}
+                          />
+                        ))}
+                        <line
+                          x1="186"
+                          y1={100 - 16}
+                          x2="186"
+                          y2={100 - 40}
+                          stroke="#DE5D35"
+                          strokeWidth="1.6"
+                          strokeDasharray="3 2"
+                        />
+                        <text
+                          x="164"
+                          y="112"
+                          fill="#1A1816"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          FPR ✗
+                        </text>
+                        <text
+                          x="122"
+                          y="20"
+                          fill="#75716B"
+                          fontSize="8"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          PARITY PER GROUP
+                        </text>
+                      </svg>
+                    )}
+
+                    {/* 15: REINFORCEMENT LEARNING */}
+                    {article.slug === "reinforcement-learning" && (
+                      <svg
+                        viewBox="0 0 240 120"
+                        className="w-full max-w-[210px] h-auto select-none relative z-10"
+                      >
+                        {/* 4x4 grid */}
+                        {[0, 1, 2, 3].map((r) =>
+                          [0, 1, 2, 3].map((c) => {
+                            const isGoal = r === 3 && c === 3;
+                            const isPit = r === 1 && c === 1;
+                            return (
+                              <rect
+                                key={`g-${r}-${c}`}
+                                x={40 + c * 20}
+                                y={14 + r * 20}
+                                width="20"
+                                height="20"
+                                fill={
+                                  isGoal
+                                    ? "rgba(222,93,53,0.28)"
+                                    : isPit
+                                      ? "rgba(239,68,68,0.18)"
+                                      : "#FAF9F5"
+                                }
+                                stroke="#1A1816"
+                                strokeWidth="0.8"
+                              />
+                            );
+                          }),
+                        )}
+                        {/* greedy path */}
+                        <path
+                          d="M50 24 L50 44 L70 44 L70 64 L90 64 L90 84 L110 84"
+                          fill="none"
+                          stroke="#DE5D35"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                        />
+                        <circle cx="50" cy="24" r="4" fill="#1A1816" />
+                        <circle cx="110" cy="84" r="4.5" fill="#DE5D35" />
+                        <text
+                          x="90"
+                          y="78"
+                          fill="#EF4444"
+                          fontSize="7"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          PIT
+                        </text>
+                        <text
+                          x="110"
+                          y="78"
+                          fill="#DE5D35"
+                          fontSize="7"
+                          fontFamily="monospace"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          GOAL
+                        </text>
+                        <text
+                          x="175"
+                          y="46"
+                          fill="#1A1816"
+                          fontSize="8.5"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                        >
+                          STATE →
+                        </text>
+                        <text
+                          x="175"
+                          y="60"
+                          fill="#1A1816"
+                          fontSize="8.5"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                        >
+                          ACTION →
+                        </text>
+                        <text
+                          x="175"
+                          y="74"
+                          fill="#DE5D35"
+                          fontSize="8.5"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                        >
+                          REWARD
+                        </text>
                       </svg>
                     )}
 
@@ -837,7 +1699,9 @@ export default function ResourcesPage() {
                     {/* Status Badge */}
                     <span className="absolute top-3 right-3 text-[10px] font-mono font-bold tracking-wider">
                       {isPublished ? (
-                        <span className="text-[#75716B]">{article.readTime}</span>
+                        <span className="text-[#75716B]">
+                          {article.readTime}
+                        </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded-[2px] bg-[#DE5D35]/10 text-[#DE5D35] border border-[#DE5D35]/30">
                           CALIBRATION

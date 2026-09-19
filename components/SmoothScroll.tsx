@@ -1,9 +1,15 @@
 "use client";
 
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
-import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import "lenis/dist/lenis.css";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 interface SmoothScrollProps {
   children: React.ReactNode;
@@ -27,24 +33,28 @@ export default function SmoothScroll({
 
   // Ensure scroll restoration is manual and scroll resets to 0 on every route change
   useEffect(() => {
-    if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
+    if (
+      typeof window !== "undefined" &&
+      "scrollRestoration" in window.history
+    ) {
       window.history.scrollRestoration = "manual";
     }
 
     resetScrollToTop();
-    if (lenisRef.current) {
+    // Use pathname to trigger scroll reset on route changes
+    if (pathname && lenisRef.current) {
       lenisRef.current.scrollTo(0, { immediate: true, force: true });
     }
+    // Refresh ScrollTrigger calculations after route transition
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   useEffect(() => {
-    // Detect touch device for optimal phone performance
-    const isTouch =
-      typeof window !== "undefined" &&
-      ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-
     const lenis = new Lenis({
-      duration: 1.0,
+      duration: 1.15,
       easing: (t) => Math.min(1, 1.001 - 2 ** (-10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
@@ -57,17 +67,19 @@ export default function SmoothScroll({
 
     lenisRef.current = lenis;
 
-    let rafId = 0;
+    // Connect Lenis to ScrollTrigger
+    lenis.on("scroll", ScrollTrigger.update);
 
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
+    // Sync Lenis RAF with GSAP ticker for 100% jitter-free locked frame updates
+    const tickerCallback = (time: number) => {
+      lenis.raf(time * 1000);
+    };
 
-    rafId = requestAnimationFrame(raf);
+    gsap.ticker.add(tickerCallback);
+    gsap.ticker.lagSmoothing(0);
 
     return () => {
-      cancelAnimationFrame(rafId);
+      gsap.ticker.remove(tickerCallback);
       lenis.destroy();
       lenisRef.current = null;
     };

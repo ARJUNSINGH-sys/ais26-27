@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import Link from "next/link";
-import FoldLayout from "@/components/FoldLayout";
 import dynamic from "next/dynamic";
-import katex from "katex";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import FoldLayout from "@/components/FoldLayout";
+import { Looped, LoopedStyles } from "@/components/looped";
+import MathTex from "@/components/MathTex";
 
 const BackpropSimulator = dynamic(
   () => import("@/components/BackpropSimulator"),
@@ -21,28 +22,47 @@ const BackpropSimulator = dynamic(
   },
 );
 
-// KaTeX LaTeX formula helper component
-function MathTex({ math, block = false }: { math: string; block?: boolean }) {
-  const html = useMemo(() => {
-    try {
-      return katex.renderToString(math, {
-        displayMode: block,
-        throwOnError: false,
-      });
-    } catch {
-      return math;
-    }
-  }, [math, block]);
-
-  return (
-    <span
-      dangerouslySetInnerHTML={{ __html: html }}
-      className={block ? "block my-2" : "inline-block"}
-    />
-  );
-}
-
 export default function NeuralNetworksArticlePage() {
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Section 8: Forward/backward sweep diagram (looped · 9s · CSS keyframes only)
+  // ─────────────────────────────────────────────────────────────────────────────
+  const nnInputs = [
+    { x: 60, y: 80 },
+    { x: 60, y: 180 },
+  ];
+  const nnHidden = [
+    { x: 250, y: 50 },
+    { x: 250, y: 130 },
+    { x: 250, y: 210 },
+  ];
+  const nnOutput = { x: 400, y: 130 };
+  const nnLoss = { x: 487, y: 130 };
+
+  const nnCss = `
+    @keyframes nn2Fwd {
+      0%        { stroke-dashoffset: 70; opacity: 0; }
+      3%        { opacity: 1; }
+      20%       { stroke-dashoffset: 0; opacity: 1; }
+      32%       { opacity: 0; }
+      100%      { stroke-dashoffset: 0; opacity: 0; }
+    }
+    @keyframes nn2Back {
+      0%, 50%   { stroke-dashoffset: 0; opacity: 0; }
+      54%       { opacity: 1; }
+      72%       { stroke-dashoffset: 70; opacity: 1; }
+      80%       { stroke-dashoffset: 70; opacity: 0; }
+      100%      { stroke-dashoffset: 70; opacity: 0; }
+    }
+    @keyframes nn2NodePulse {
+      0%, 44%   { stroke: #1A1816; }
+      50%, 58%  { stroke: #DE5D35; }
+      64%, 100% { stroke: #1A1816; }
+    }
+    .nn2-fwd  { stroke-dasharray: 10 60; animation: nn2Fwd 9s linear infinite; }
+    .nn2-back { stroke-dasharray: 10 60; animation: nn2Back 9s linear infinite; }
+    .nn2-node { animation: nn2NodePulse 9s linear infinite; }
+  `;
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Section 2: Weights Sliders (Modulation)
   // ─────────────────────────────────────────────────────────────────────────────
@@ -399,8 +419,13 @@ class FeedForwardNetwork(nn.Module):
                 </div>
 
                 <div className="text-[11px] font-mono text-[#75716B] pt-2 border-t border-[#1A1816]/15 flex items-center justify-between">
-                  <span>*Input signals propagate forward through the mathematical kernel</span>
-                  <span className="text-[#2B6CB0] font-bold">FORWARD GRAPH</span>
+                  <span>
+                    *Input signals propagate forward through the mathematical
+                    kernel
+                  </span>
+                  <span className="text-[#2B6CB0] font-bold">
+                    FORWARD GRAPH
+                  </span>
                 </div>
               </div>
             </div>
@@ -447,9 +472,10 @@ class FeedForwardNetwork(nn.Module):
                 <MathTex math="z = w_1 x_1 + w_2 x_2" />
               </div>
               <p className="text-[15px] text-[#475569] leading-[1.75]">
-                Weights act like precision volume knobs: positive weights (Steel Teal) amplify
-                aligned features, while negative weights (Terracotta) dampen contradictory
-                inputs before they reach the nucleus.
+                Weights act like precision volume knobs: positive weights (Steel
+                Teal) amplify aligned features, while negative weights
+                (Terracotta) dampen contradictory inputs before they reach the
+                nucleus.
               </p>
             </div>
 
@@ -482,7 +508,10 @@ class FeedForwardNetwork(nn.Module):
                       d="M 120 60 C 160 60, 170 110, 210 110"
                       fill="none"
                       stroke={weightW1 >= 0 ? "#2B6CB0" : "#D62839"}
-                      strokeWidth={Math.max(1.5, Math.min(3.8, 1.2 + Math.abs(weightW1) * 1.0))}
+                      strokeWidth={Math.max(
+                        1.5,
+                        Math.min(3.8, 1.2 + Math.abs(weightW1) * 1.0),
+                      )}
                       strokeDasharray="6 4"
                       className="animate-dash-forward"
                     />
@@ -491,7 +520,10 @@ class FeedForwardNetwork(nn.Module):
                       d="M 120 160 C 160 160, 170 110, 210 110"
                       fill="none"
                       stroke={weightW2 >= 0 ? "#2B6CB0" : "#D62839"}
-                      strokeWidth={Math.max(1.5, Math.min(3.8, 1.2 + Math.abs(weightW2) * 1.0))}
+                      strokeWidth={Math.max(
+                        1.5,
+                        Math.min(3.8, 1.2 + Math.abs(weightW2) * 1.0),
+                      )}
                       strokeDasharray="6 4"
                       className="animate-dash-forward"
                     />
@@ -647,7 +679,9 @@ class FeedForwardNetwork(nn.Module):
                   <div>
                     <div className="flex justify-between mb-1">
                       <span>Weight w₁:</span>
-                      <span className={`font-bold ${weightW1 >= 0 ? "text-[#2B6CB0]" : "text-[#D62839]"}`}>
+                      <span
+                        className={`font-bold ${weightW1 >= 0 ? "text-[#2B6CB0]" : "text-[#D62839]"}`}
+                      >
                         {weightW1.toFixed(1)}
                       </span>
                     </div>
@@ -664,7 +698,9 @@ class FeedForwardNetwork(nn.Module):
                   <div>
                     <div className="flex justify-between mb-1">
                       <span>Weight w₂:</span>
-                      <span className={`font-bold ${weightW2 >= 0 ? "text-[#2B6CB0]" : "text-[#D62839]"}`}>
+                      <span
+                        className={`font-bold ${weightW2 >= 0 ? "text-[#2B6CB0]" : "text-[#D62839]"}`}
+                      >
                         {weightW2.toFixed(1)}
                       </span>
                     </div>
@@ -3017,6 +3053,387 @@ class FeedForwardNetwork(nn.Module):
                   <span className="text-[#FAF9F5]">)</span>
                 </code>
               </pre>
+            </div>
+          </div>
+
+          {/* ─────────────────────────────────────────────────────────────── */}
+          {/* SECTION 8: FORWARD PASS / BACKWARD PASS WALKTHROUGH             */}
+          {/* ─────────────────────────────────────────────────────────────── */}
+          <div className="pt-8 border-t border-[#1A1816]/15 space-y-6">
+            <LoopedStyles
+              css={nnCss}
+              reduceMotionTargets={[".nn2-fwd", ".nn2-back", ".nn2-node"]}
+            />
+
+            <div>
+              <span className="text-[11px] font-mono font-bold tracking-[0.16em] uppercase text-[#DE5D35] block">
+                08 / THE TWO PASSES
+              </span>
+              <h3 className="text-[24px] sm:text-[28px] font-black uppercase tracking-tight text-[#1A1816] font-display mt-1">
+                Forward, Then Backward: The Pass-by-Pass Walkthrough
+              </h3>
+            </div>
+
+            <div className="text-[15px] text-[#475569] leading-[1.75] space-y-4">
+              <p>
+                Training is two sweeps over the same graph, run in opposite
+                directions. On the{" "}
+                <strong className="text-[#1A1816] font-bold">
+                  forward pass
+                </strong>{" "}
+                each layer performs one affine step followed by one nonlinear
+                step: <MathTex math="z^{(l)} = W^{(l)} a^{(l-1)} + b^{(l)}" />,
+                then <MathTex math="a^{(l)} = f(z^{(l)})" />. The input{" "}
+                <MathTex math="a^{(0)} = x" /> starts the chain and the last
+                activation produces the prediction <MathTex math="\hat{y}" />.
+              </p>
+              <p>
+                A scalar loss — say binary cross-entropy — folds that whole
+                prediction down to one number, <MathTex math="L(\hat{y}, y)" />.
+                That single number is what training minimises; every parameter
+                is judged only by how much it moves it.
+              </p>
+              <p>
+                The{" "}
+                <strong className="text-[#1A1816] font-bold">
+                  backward pass
+                </strong>{" "}
+                is the chain rule applied right-to-left. Starting from{" "}
+                <MathTex math="\partial L / \partial \hat{y}" />, each layer
+                takes the gradient arriving from the layer above (the{" "}
+                <em>incoming</em> gradient) and multiplies it by its own{" "}
+                <em>local</em> derivative: the activation slope{" "}
+                <MathTex math="f'(z)" /> for the neuron, and the layer&apos;s
+                input <MathTex math="a^{(l-1)}" /> for the weights. Nothing is
+                recomputed — the forward activations are cached and reused,
+                which is why the forward pass must run first.
+              </p>
+              <p>
+                Every sample in a batch is pushed through with the <em>same</em>{" "}
+                weights. Forward, each sample contributes its own output;
+                backward, each contributes its own gradient, and those
+                per-sample gradients are summed into one update. That is why a
+                batch behaves like one shared model learning from many examples
+                at once rather than many models — the weights are literally the
+                same object on every forward and backward trip.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[560px] text-[11px] sm:text-[12px] font-mono border border-[#1A1816]/15 bg-[#FAF9F5]">
+                <thead>
+                  <tr className="bg-[#1A1816] text-[#FAF9F5] text-left">
+                    <th className="px-3 py-2 font-bold uppercase tracking-wider">
+                      Stage
+                    </th>
+                    <th className="px-3 py-2 font-bold uppercase tracking-wider">
+                      Forward pass
+                    </th>
+                    <th className="px-3 py-2 font-bold uppercase tracking-wider">
+                      Backward pass (local × incoming)
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="text-[#4A4742]">
+                  <tr className="border-t border-[#1A1816]/15">
+                    <td className="px-3 py-2 font-bold text-[#1A1816]">
+                      Input L0
+                    </td>
+                    <td className="px-3 py-2">a⁰ = x (2×1)</td>
+                    <td className="px-3 py-2">∂L/∂x = (W¹)ᵀ δ¹</td>
+                  </tr>
+                  <tr className="border-t border-[#1A1816]/15">
+                    <td className="px-3 py-2 font-bold text-[#1A1816]">
+                      Hidden L1
+                    </td>
+                    <td className="px-3 py-2">
+                      z¹ = W¹a⁰ + b¹ → a¹ = ReLU(z¹) (3×1)
+                    </td>
+                    <td className="px-3 py-2">
+                      δ¹ = (W²)ᵀδ² ⊙ f′(z¹); ∂L/∂W¹ = δ¹(a⁰)ᵀ
+                    </td>
+                  </tr>
+                  <tr className="border-t border-[#1A1816]/15">
+                    <td className="px-3 py-2 font-bold text-[#1A1816]">
+                      Output L2
+                    </td>
+                    <td className="px-3 py-2">
+                      z² = W²a¹ + b² → ŷ = σ(z²) (1×1)
+                    </td>
+                    <td className="px-3 py-2">
+                      δ² = (∂L/∂ŷ) ⊙ σ′(z²); ∂L/∂W² = δ²(a¹)ᵀ
+                    </td>
+                  </tr>
+                  <tr className="border-t border-[#1A1816]/15">
+                    <td className="px-3 py-2 font-bold text-[#1A1816]">Loss</td>
+                    <td className="px-3 py-2">L(ŷ, y) (scalar)</td>
+                    <td className="px-3 py-2">seed: ∂L/∂ŷ from the loss</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div
+              className="relative rounded-[2px] border border-[#1A1816] p-6 bg-[#FAF9F5]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(26,24,22,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(26,24,22,0.05) 1px, transparent 1px)",
+                backgroundSize: "24px 24px",
+              }}
+            >
+              <div className="flex items-center justify-between text-[11px] font-mono text-[#75716B] mb-4 pb-2 border-b border-[#1A1816]/15">
+                <span className="font-bold text-[#1A1816]">
+                  FIGURE 08 · FORWARD &amp; BACKWARD SWEEP
+                </span>
+                <span className="text-[#DE5D35] font-bold font-mono">
+                  9s LOOP
+                </span>
+              </div>
+
+              <div className="w-full flex items-center justify-center py-4">
+                <Looped
+                  label="Animation of a forward activation wave travelling left to right through a small layered network, followed by a backward gradient wave travelling right to left"
+                  className="w-full max-w-[520px]"
+                >
+                  <svg
+                    viewBox="0 0 520 260"
+                    className="w-full h-auto select-none"
+                  >
+                    {/* Base wiring */}
+                    {nnInputs.map((a, i) =>
+                      nnHidden.map((b, j) => (
+                        <line
+                          key={`base-ih-${i}-${j}`}
+                          x1={a.x}
+                          y1={a.y}
+                          x2={b.x}
+                          y2={b.y}
+                          stroke="rgba(26,24,22,0.14)"
+                          strokeWidth="1.5"
+                        />
+                      )),
+                    )}
+                    {nnHidden.map((a, j) => (
+                      <line
+                        key={`base-ho-${j}`}
+                        x1={a.x}
+                        y1={a.y}
+                        x2={nnOutput.x}
+                        y2={nnOutput.y}
+                        stroke="rgba(26,24,22,0.14)"
+                        strokeWidth="1.5"
+                      />
+                    ))}
+                    <line
+                      x1={nnOutput.x}
+                      y1={nnOutput.y}
+                      x2={nnLoss.x}
+                      y2={nnLoss.y}
+                      stroke="rgba(26,24,22,0.14)"
+                      strokeWidth="1.5"
+                    />
+
+                    {/* Forward wave (ink), staggered layer by layer */}
+                    {nnInputs.map((a, i) =>
+                      nnHidden.map((b, j) => (
+                        <line
+                          key={`fwd-ih-${i}-${j}`}
+                          className="nn2-fwd"
+                          style={{ animationDelay: "0s" }}
+                          x1={a.x}
+                          y1={a.y}
+                          x2={b.x}
+                          y2={b.y}
+                          stroke="#1A1816"
+                          strokeWidth="2.5"
+                        />
+                      )),
+                    )}
+                    {nnHidden.map((a, j) => (
+                      <line
+                        key={`fwd-ho-${j}`}
+                        className="nn2-fwd"
+                        style={{ animationDelay: "1.3s" }}
+                        x1={a.x}
+                        y1={a.y}
+                        x2={nnOutput.x}
+                        y2={nnOutput.y}
+                        stroke="#1A1816"
+                        strokeWidth="2.5"
+                      />
+                    ))}
+                    <line
+                      className="nn2-fwd"
+                      style={{ animationDelay: "2.6s" }}
+                      x1={nnOutput.x}
+                      y1={nnOutput.y}
+                      x2={nnLoss.x}
+                      y2={nnLoss.y}
+                      stroke="#1A1816"
+                      strokeWidth="2.5"
+                    />
+
+                    {/* Backward wave (accent), right to left */}
+                    <line
+                      className="nn2-back"
+                      style={{ animationDelay: "0s" }}
+                      x1={nnLoss.x}
+                      y1={nnLoss.y}
+                      x2={nnOutput.x}
+                      y2={nnOutput.y}
+                      stroke="#DE5D35"
+                      strokeWidth="2.5"
+                    />
+                    {nnHidden.map((a, j) => (
+                      <line
+                        key={`back-ho-${j}`}
+                        className="nn2-back"
+                        style={{ animationDelay: "0.9s" }}
+                        x1={nnOutput.x}
+                        y1={nnOutput.y}
+                        x2={a.x}
+                        y2={a.y}
+                        stroke="#DE5D35"
+                        strokeWidth="2.5"
+                      />
+                    ))}
+                    {nnInputs.map((a, i) =>
+                      nnHidden.map((b, j) => (
+                        <line
+                          key={`back-ih-${i}-${j}`}
+                          className="nn2-back"
+                          style={{ animationDelay: "1.8s" }}
+                          x1={b.x}
+                          y1={b.y}
+                          x2={a.x}
+                          y2={a.y}
+                          stroke="#DE5D35"
+                          strokeWidth="2.5"
+                        />
+                      )),
+                    )}
+
+                    {/* Nodes */}
+                    {nnInputs.map((n, i) => (
+                      <g key={`in-${i}`}>
+                        <circle
+                          className="nn2-node"
+                          cx={n.x}
+                          cy={n.y}
+                          r="20"
+                          fill="#FAF9F5"
+                          stroke="#1A1816"
+                          strokeWidth="2"
+                        />
+                        <text
+                          x={n.x}
+                          y={n.y + 4}
+                          textAnchor="middle"
+                          fontSize="10"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                          fill="#1A1816"
+                        >
+                          x{i === 0 ? "₁" : "₂"}
+                        </text>
+                      </g>
+                    ))}
+                    {nnHidden.map((n, i) => (
+                      <g key={`hid-${i}`}>
+                        <circle
+                          className="nn2-node"
+                          cx={n.x}
+                          cy={n.y}
+                          r="20"
+                          fill="#FAF9F5"
+                          stroke="#1A1816"
+                          strokeWidth="2"
+                        />
+                        <text
+                          x={n.x}
+                          y={n.y + 4}
+                          textAnchor="middle"
+                          fontSize="10"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                          fill="#1A1816"
+                        >
+                          a¹{i === 0 ? "" : `·${i + 1}`}
+                        </text>
+                      </g>
+                    ))}
+                    <g>
+                      <circle
+                        className="nn2-node"
+                        cx={nnOutput.x}
+                        cy={nnOutput.y}
+                        r="22"
+                        fill="#FAF9F5"
+                        stroke="#1A1816"
+                        strokeWidth="2"
+                      />
+                      <text
+                        x={nnOutput.x}
+                        y={nnOutput.y + 4}
+                        textAnchor="middle"
+                        fontSize="11"
+                        fontFamily="monospace"
+                        fontWeight="bold"
+                        fill="#1A1816"
+                      >
+                        ŷ
+                      </text>
+                    </g>
+                    <g>
+                      <circle
+                        className="nn2-node"
+                        cx={nnLoss.x}
+                        cy={nnLoss.y}
+                        r="24"
+                        fill="#1A1816"
+                        stroke="#1A1816"
+                        strokeWidth="2"
+                      />
+                      <text
+                        x={nnLoss.x}
+                        y={nnLoss.y + 4}
+                        textAnchor="middle"
+                        fontSize="11"
+                        fontFamily="monospace"
+                        fontWeight="bold"
+                        fill="#DE5D35"
+                      >
+                        L
+                      </text>
+                    </g>
+
+                    {/* Legend */}
+                    <text
+                      x="60"
+                      y="245"
+                      fontSize="10"
+                      fontFamily="monospace"
+                      fill="#1A1816"
+                    >
+                      ▸ FORWARD · z = Wx + b, a = f(z)
+                    </text>
+                    <text
+                      x="300"
+                      y="245"
+                      fontSize="10"
+                      fontFamily="monospace"
+                      fill="#DE5D35"
+                    >
+                      ◂ BACKWARD · ∂L/∂w
+                    </text>
+                  </svg>
+                </Looped>
+              </div>
+
+              <div className="text-[11px] font-mono text-[#75716B] pt-2 border-t border-[#1A1816]/15">
+                *Ink pulse sweeps left→right as activations are computed; accent
+                pulse sweeps right→left as the chain-rule gradient returns.
+              </div>
             </div>
           </div>
 

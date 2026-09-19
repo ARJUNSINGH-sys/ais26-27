@@ -46,6 +46,13 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scrollbar-gutter: stable;
+  }
+
+  /* Lock background scroll without layout shift when menu is active */
+  html.menu-open,
+  html.menu-open body {
+    overflow: hidden !important;
   }
 
   body {
@@ -53,6 +60,31 @@
     background-color: var(--color-ground);
     color: var(--color-ink);
     overflow-x: hidden;
+  }
+
+  /* Sleek modern scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(26, 24, 22, 0.2);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(26, 24, 22, 0.4);
+  }
+
+  /* Utility to completely hide scrollbar while keeping scrollability */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
   }
 
   ::selection {
