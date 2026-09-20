@@ -79,8 +79,8 @@ export default function NotFound() {
             "clamp(80px,10vw,140px) clamp(20px,5vw,72px) clamp(40px,5vw,80px)",
         }}
       >
-        {/* ── Row 1 — [quad img] · 404 · [moon img] ────────────────── */}
-        <div className="flex items-center justify-between gap-3 sm:gap-5">
+        {/* ── Row 1 — [quad img] · 404 · [moon img], grouped and centered ─ */}
+        <div className="flex items-center justify-center gap-3 sm:gap-5">
           <ShapeImg
             shape="quad"
             src="/images/hero1.jpg"
@@ -92,7 +92,7 @@ export default function NotFound() {
           />
 
           <span
-            className="font-display font-black tracking-[-0.04em] leading-[0.88] text-[#1A1816] select-none flex-1 text-center"
+            className="font-display font-black tracking-[-0.04em] leading-[0.88] text-[#1A1816] select-none"
             style={{ fontSize: "clamp(72px,17vw,220px)" }}
           >
             404
@@ -109,14 +109,18 @@ export default function NotFound() {
           />
         </div>
 
-        {/* ── Row 2 — ERROR · [donut img] ──────────────────────────── */}
+        {/* ── Row 2 — ERROR (indented so its trailing "OR" sits under
+               the "40" of 404) · [donut img] ─────────────────────────── */}
         <div
           className="flex items-center gap-3 sm:gap-5"
           style={{ marginTop: "clamp(-8px,-1.5vw,-28px)" }}
         >
           <span
-            className="font-display font-black tracking-[-0.04em] leading-[0.88] text-[#1A1816] select-none flex-1"
-            style={{ fontSize: "clamp(72px,17vw,220px)" }}
+            className="font-display font-black tracking-[-0.04em] leading-[0.88] text-[#1A1816] select-none whitespace-nowrap"
+            style={{
+              fontSize: "clamp(72px,17vw,220px)",
+              marginLeft: "max(0px, calc(50% - 2.7em))",
+            }}
           >
             ERROR
           </span>
@@ -130,29 +134,38 @@ export default function NotFound() {
               height: "clamp(80px,11vw,175px)",
             }}
           />
+
+          <div className="flex-1" />
         </div>
 
-        {/* ── Row 3 — [spiral img] · PAGE · [accent shape] ─────────── */}
+        {/* ── Row 3 — PAGE · [accent shape] · [spiral img in front of
+               "PA"] · [moon img bottom corner] ────────────────────────── */}
         <div
-          className="flex items-center gap-3 sm:gap-5"
+          className="relative flex items-center gap-3 sm:gap-5"
           style={{ marginTop: "clamp(-8px,-1.5vw,-28px)" }}
         >
+          <span
+            className="font-display font-black tracking-[-0.04em] leading-[0.88] text-[#1A1816] select-none whitespace-nowrap"
+            style={{
+              fontSize: "clamp(72px,17vw,220px)",
+              marginLeft: "max(0px, calc(50% - 1em))",
+            }}
+          >
+            PAGE
+          </span>
+
+          {/* Spiral image — sits just left of the "P", adjacent to it */}
           <ShapeImg
             shape="spiral"
             src="/images/hero2.jpg"
             uid="d"
+            className="absolute top-1/2 -translate-y-1/2 z-10"
             style={{
               width: "clamp(65px,9vw,145px)",
               height: "clamp(65px,9vw,145px)",
+              left: "max(0px, calc(50% - clamp(72px, 17vw, 220px) - 1.25rem - clamp(65px, 9vw, 145px)))",
             }}
           />
-
-          <span
-            className="font-display font-black tracking-[-0.04em] leading-[0.88] text-[#1A1816] select-none flex-1"
-            style={{ fontSize: "clamp(72px,17vw,220px)" }}
-          >
-            PAGE
-          </span>
 
           {/* Pure-shape accent — no photo, just the orange fill */}
           <svg

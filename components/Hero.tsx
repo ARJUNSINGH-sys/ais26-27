@@ -117,6 +117,8 @@ export default function Hero() {
       path: SHAPE_1,
       image: "/images/hero1.jpg",
       x: 0,
+      mobileX: 0,
+      mobileY: 0,
       label: "01 · AI Society Cohort",
     },
     {
@@ -124,6 +126,8 @@ export default function Hero() {
       path: SHAPE_2,
       image: "/images/clubbattle.jpg", // Replaced with Club Battle image
       x: 400,
+      mobileX: 400,
+      mobileY: 0,
       label: "02 · Club Battle Showcase",
     },
     {
@@ -131,6 +135,8 @@ export default function Hero() {
       path: SHAPE_3,
       image: "/images/hero3.jpg",
       x: 800,
+      mobileX: 0,
+      mobileY: 400,
       label: "03 · Academic Assembly",
     },
   ];
@@ -177,9 +183,10 @@ export default function Hero() {
         */}
         <div className="hero-canvas group relative w-full overflow-hidden select-none">
           <div className="hero-canvas-inner will-change-transform">
+            {/* Desktop: seamless 3-panel strip (1200x400) */}
             <svg
               viewBox="0 0 1200 400"
-              className="w-full h-auto block"
+              className="hidden md:block w-full h-auto"
               style={{ filter: "drop-shadow(0 20px 45px rgba(0,0,0,0.06))" }}
               aria-label="AIS Flagship Events: AI 101, Club Battle Showcase, Academic Assembly"
             >
@@ -232,6 +239,67 @@ export default function Hero() {
                   />
                 </g>
               ))}
+            </svg>
+
+            {/* Mobile: square 2x2 layout — three photo panels + accent shape */}
+            <svg
+              viewBox="0 0 800 800"
+              className="block md:hidden w-full h-auto"
+              style={{ filter: "drop-shadow(0 20px 45px rgba(0,0,0,0.06))" }}
+              aria-label="AIS Flagship Events: AI 101, Club Battle Showcase, Academic Assembly"
+            >
+              <defs>
+                {/* Subtle cinematic gradient overlay for depth */}
+                <linearGradient id="hero-scrim-m" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="60%" stopColor="#000000" stopOpacity="0" />
+                  <stop offset="100%" stopColor="#000000" stopOpacity="0.3" />
+                </linearGradient>
+
+                {panels.map((p) => (
+                  <clipPath
+                    key={`clip-m-${p.id}`}
+                    id={`clip-m-${p.id}`}
+                    clipPathUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d={p.path}
+                      transform={`translate(${p.mobileX}, ${p.mobileY}) scale(${scale})`}
+                    />
+                  </clipPath>
+                ))}
+              </defs>
+
+              {panels.map((p) => (
+                <g key={`m-${p.id}`}>
+                  <image
+                    clipPath={`url(#clip-m-${p.id})`}
+                    href={p.image}
+                    xlinkHref={p.image}
+                    x={p.mobileX}
+                    y={p.mobileY}
+                    width={panelW}
+                    height={panelH}
+                    preserveAspectRatio="xMidYMid slice"
+                  />
+                  <rect
+                    clipPath={`url(#clip-m-${p.id})`}
+                    x={p.mobileX}
+                    y={p.mobileY}
+                    width={panelW}
+                    height={panelH}
+                    fill="url(#hero-scrim-m)"
+                    pointerEvents="none"
+                  />
+                </g>
+              ))}
+
+              {/* Filler cell — pure accent shape, no photo */}
+              <path
+                d={panels[1].path}
+                transform="translate(400, 400) scale(1.5625)"
+                fill="#DE5D35"
+                opacity={0.2}
+              />
             </svg>
           </div>
 

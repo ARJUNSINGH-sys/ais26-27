@@ -60,7 +60,7 @@ export default function EventsGallery() {
           };
 
           if (reduceMotion) {
-            gsap.set([".gallery-col", ".gallery-photo"], {
+            gsap.set([".gallery-item", ".gallery-photo"], {
               opacity: 1,
               y: 0,
               scale: 1,
@@ -68,9 +68,9 @@ export default function EventsGallery() {
             return;
           }
 
-          // Staggered column entrance
+          // Staggered tile entrance
           gsap.fromTo(
-            ".gallery-col",
+            ".gallery-item",
             { y: 50, opacity: 0 },
             {
               y: 0,
@@ -102,20 +102,6 @@ export default function EventsGallery() {
               },
             },
           );
-
-          // Parallax depth on center column for wide screens
-          if (window.innerWidth >= 768) {
-            gsap.to(".gallery-col-middle", {
-              yPercent: -6,
-              ease: "none",
-              scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top bottom",
-                end: "bottom top",
-                scrub: 1.2,
-              },
-            });
-          }
         },
       );
     },
@@ -129,76 +115,79 @@ export default function EventsGallery() {
       className="py-16 md:py-24 overflow-hidden"
     >
       <div className="shell">
-        <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-3">
-          {/* Column one — title plate stacked over a tall portrait */}
-          <div className="gallery-col flex flex-col gap-5">
-            <div className="flex items-center justify-between rounded-[32px] bg-dark p-7 text-white sm:p-8">
-              <h2 className="font-display text-[24px] font-extrabold leading-[1.1] tracking-[-0.03em]">
-                Selected
-                <br />
-                Works
-              </h2>
+        {/* Bento grid — 2 cols on mobile, 3 cols on desktop with varied spans */}
+        <div className="grid grid-cols-2 auto-rows-[150px] sm:auto-rows-[170px] gap-4 md:grid-cols-3 md:auto-rows-[172px] md:gap-5">
+          {/* Title plate */}
+          <div className="gallery-item relative col-span-2 flex items-center justify-between rounded-[32px] bg-dark p-6 text-white md:col-span-1 md:col-start-1 md:row-start-1 md:p-7">
+            <h2 className="font-display text-[24px] font-extrabold leading-[1.1] tracking-[-0.03em]">
+              Selected
+              <br />
+              Works
+            </h2>
 
-              <span
-                aria-hidden
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/25"
-              >
-                <span className="grid h-5 w-5 place-items-center rounded-full border border-white/45">
-                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                </span>
+            <span
+              aria-hidden
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/25"
+            >
+              <span className="grid h-5 w-5 place-items-center rounded-full border border-white/45">
+                <span className="h-1.5 w-1.5 rounded-full bg-white" />
               </span>
-            </div>
-
-            <div className="frame h-[420px] rounded-[32px] overflow-hidden">
-              <Image
-                src={COLUMN_ONE.src}
-                alt={COLUMN_ONE.alt}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="gallery-photo object-cover will-change-transform"
-              />
-            </div>
+            </span>
           </div>
 
-          {/* Column two — matched pair */}
-          <div className="gallery-col gallery-col-middle flex flex-col gap-5 will-change-transform">
-            {COLUMN_TWO.map((photo) => (
-              <div
-                key={photo.src}
-                className="frame h-[240px] rounded-[32px] overflow-hidden"
-              >
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="gallery-photo object-cover will-change-transform"
-                />
-              </div>
-            ))}
+          {/* Tall portrait — club carnival */}
+          <div className="gallery-item frame relative row-span-2 overflow-hidden rounded-[32px] md:col-start-1 md:row-start-2">
+            <Image
+              src={COLUMN_ONE.src}
+              alt={COLUMN_ONE.alt}
+              fill
+              sizes="(max-width: 768px) 50vw, 33vw"
+              className="gallery-photo object-cover will-change-transform"
+            />
           </div>
 
-          {/* Column three — tall portrait over a wide crop */}
-          <div className="gallery-col flex flex-col gap-5">
-            <div className="frame h-[300px] rounded-[32px] overflow-hidden">
-              <Image
-                src={COLUMN_THREE[0].src}
-                alt={COLUMN_THREE[0].alt}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="gallery-photo object-cover will-change-transform"
-              />
-            </div>
+          {/* AI 101 — tall on desktop */}
+          <div className="gallery-item frame relative overflow-hidden rounded-[32px] md:row-span-2 md:col-start-2 md:row-start-1">
+            <Image
+              src={COLUMN_TWO[0].src}
+              alt={COLUMN_TWO[0].alt}
+              fill
+              sizes="(max-width: 768px) 50vw, 33vw"
+              className="gallery-photo object-cover will-change-transform"
+            />
+          </div>
 
-            <div className="frame h-[200px] rounded-[32px] overflow-hidden">
-              <Image
-                src={COLUMN_THREE[1].src}
-                alt={COLUMN_THREE[1].alt}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="gallery-photo object-cover will-change-transform"
-              />
-            </div>
+          {/* AI Hunt */}
+          <div className="gallery-item frame relative overflow-hidden rounded-[32px] md:col-start-2 md:row-start-3">
+            <Image
+              src={COLUMN_TWO[1].src}
+              alt={COLUMN_TWO[1].alt}
+              fill
+              sizes="(max-width: 768px) 50vw, 33vw"
+              className="gallery-photo object-cover will-change-transform"
+            />
+          </div>
+
+          {/* Tech Arena */}
+          <div className="gallery-item frame relative overflow-hidden rounded-[32px] md:col-start-3 md:row-start-1">
+            <Image
+              src={COLUMN_THREE[0].src}
+              alt={COLUMN_THREE[0].alt}
+              fill
+              sizes="(max-width: 768px) 50vw, 33vw"
+              className="gallery-photo object-cover will-change-transform"
+            />
+          </div>
+
+          {/* Project Showcase — tall on desktop */}
+          <div className="gallery-item frame relative overflow-hidden rounded-[32px] md:row-span-2 md:col-start-3 md:row-start-2">
+            <Image
+              src={COLUMN_THREE[1].src}
+              alt={COLUMN_THREE[1].alt}
+              fill
+              sizes="(max-width: 768px) 50vw, 33vw"
+              className="gallery-photo object-cover will-change-transform"
+            />
           </div>
         </div>
       </div>

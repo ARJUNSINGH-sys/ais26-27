@@ -3,7 +3,7 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { type CSSProperties, useRef } from "react";
+import { useRef } from "react";
 import { featurePillars } from "@/lib/data";
 
 if (typeof window !== "undefined") {
@@ -11,32 +11,28 @@ if (typeof window !== "undefined") {
 }
 
 /**
- * Each quadrant is cut with a single concave corner facing the centre, so the
- * four quarter-circles close into one circular void at the meeting point.
- * `corner` rounds only the outward-facing corners — the block reads as one
- * shape with a hole in it rather than four separate tiles.
+ * Shape 46 from shapes.gallery (256x256): scalloped square with four corner
+ * circles. Rendered as a square SVG (never stretched) — pillar titles curve
+ * along the four scallop curves via textPath, numerals sit in the circles.
  */
-const QUADRANTS = [
-  {
-    cut: "scallop-br",
-    corner: "rounded-tl-[32px]",
-    anchor: "justify-start items-start text-left",
-  },
-  {
-    cut: "scallop-bl",
-    corner: "rounded-tr-[32px]",
-    anchor: "justify-start items-end text-right",
-  },
-  {
-    cut: "scallop-tr",
-    corner: "rounded-bl-[32px]",
-    anchor: "justify-end items-start text-left",
-  },
-  {
-    cut: "scallop-tl",
-    corner: "rounded-br-[32px]",
-    anchor: "justify-end items-end text-right",
-  },
+const SHAPE_46 =
+  "M 192 0 C 227.346 0 256 28.654 256 64 C 256 99.346 227.346 128 192 128 C 227.346 128 256 156.654 256 192 C 256 227.346 227.346 256 192 256 C 156.654 256 128 227.346 128 192 C 128 227.346 99.346 256 64 256 C 28.654 256 0 227.346 0 192 C 0 156.654 28.654 128 64 128 C 28.654 128 0 99.346 0 64 C 0 28.654 28.654 0 64 0 C 99.346 0 128 28.654 128 64 C 128 28.654 156.654 0 192 0 Z M 64 160 C 46.327 160 32 174.327 32 192 C 32 209.673 46.327 224 64 224 C 81.673 224 96 209.673 96 192 C 96 174.327 81.673 160 64 160 Z M 192 160 C 174.327 160 160 174.327 160 192 C 160 209.673 174.327 224 192 224 C 209.673 224 224 209.673 224 192 C 224 174.327 209.673 160 192 160 Z M 64 32 C 46.327 32 32 46.327 32 64 C 32 81.673 46.327 96 64 96 C 81.673 96 96 81.673 96 64 C 96 46.327 81.673 32 64 32 Z M 192 32 C 174.327 32 160 46.327 160 64 C 160 81.673 174.327 96 192 96 C 209.673 96 224 81.673 224 64 C 224 46.327 209.673 32 192 32 Z";
+
+/* Guide arcs: one per scallop curve, each oriented so its text reads
+   upright at the middle of the curve. */
+const TITLE_ARCS = [
+  "M 64 0 A 64 64 0 0 0 192 0",
+  "M 256 64 A 64 64 0 0 0 256 192",
+  "M 64 256 A 64 64 0 0 1 192 256",
+  "M 0 192 A 64 64 0 0 0 0 64",
+];
+
+/* Corner circles for the numerals: TL, TR, BR, BL (clockwise). */
+const NUMERAL_SPOTS = [
+  { x: 64, y: 64 },
+  { x: 192, y: 64 },
+  { x: 192, y: 192 },
+  { x: 64, y: 192 },
 ];
 
 export default function PillarsBento() {
@@ -132,25 +128,61 @@ export default function PillarsBento() {
             </div>
           </div>
 
-          {/* Terracotta quadrant with a circular void at its centre */}
-          <div className="grid grid-cols-2 grid-rows-2 lg:col-span-7 lg:min-h-[520px]">
-            {QUADRANTS.map((quadrant, index) => {
-              const pillar = featurePillars[index];
-              return (
-                <div
-                  key={quadrant.cut}
-                  className={`pillar-tile will-change-transform flex flex-col gap-4 bg-accent p-7 text-white sm:p-9 ${quadrant.cut} ${quadrant.corner} ${quadrant.anchor}`}
-                  style={{ "--scallop": "64px" } as CSSProperties}
+          {/* Ink card cut as Shape 46 — titles curved along the four
+              scallop curves, numerals inside the corner circles */}
+          <div className="flex items-center justify-center lg:col-span-7">
+            <svg
+              viewBox="0 0 256 256"
+              className="pillar-tile block aspect-square h-auto w-full max-w-[560px] will-change-transform"
+              role="img"
+              aria-label="The four AIS pillars: Research Excellence, Engineering Hub, Skill Incubation, Industry Trajectory"
+            >
+              <defs>
+                {TITLE_ARCS.map((d, i) => (
+                  <path key={i} id={`pillar-arc-${i}`} d={d} />
+                ))}
+              </defs>
+
+              <path d={SHAPE_46} fill="#1A1816" />
+
+              {/* Titles curved along the scallop curves */}
+              {featurePillars.map((pillar, i) => (
+                <text
+                  key={pillar.numeral}
+                  className="font-display font-bold"
+                  fontSize="11"
+                  letterSpacing="1.5"
+                  fill="#1A1816"
                 >
-                  <span className="font-display text-[32px] font-bold leading-none text-white/25">
-                    {pillar.numeral}
-                  </span>
-                  <h3 className="max-w-[10ch] font-display text-[19px] font-bold leading-[1.15] tracking-[-0.02em]">
+                  <textPath
+                    href={`#pillar-arc-${i}`}
+                    startOffset="50%"
+                    textAnchor="middle"
+                  >
                     {pillar.title}
-                  </h3>
-                </div>
-              );
-            })}
+                  </textPath>
+                </text>
+              ))}
+
+              {/* Numerals in the corner circles */}
+              {featurePillars.map((pillar, i) => {
+                const spot = NUMERAL_SPOTS[i];
+                return (
+                  <text
+                    key={pillar.numeral}
+                    x={spot.x}
+                    y={spot.y}
+                    className="font-display font-bold"
+                    fontSize="15"
+                    fill="#DE5D35"
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                  >
+                    {pillar.numeral}
+                  </text>
+                );
+              })}
+            </svg>
           </div>
         </div>
       </div>
