@@ -109,7 +109,7 @@ export default function MethodologySection() {
           {STEPS.map((step) => (
             <div
               key={step.numeral}
-              className="methodology-row will-change-transform grid gap-6 border-b border-line py-9 md:grid-cols-12 md:items-center"
+              className="methodology-row will-change-transform grid gap-6 border-b border-line py-9 md:grid-cols-12 md:items-center last:border-b-0"
             >
               <span className="text-[12px] font-medium tracking-[0.14em] text-ink-soft md:col-span-1">
                 {step.numeral}
