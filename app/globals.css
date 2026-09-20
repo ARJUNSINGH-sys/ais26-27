@@ -447,6 +447,56 @@
   }
 }
 
+/* ─── Footer photo-strip marquee ─────────────────────────────────── */
+@keyframes footer-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.footer-marquee {
+  animation: footer-marquee 30s linear infinite;
+  will-change: transform;
+}
+
+.footer-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-marquee {
+    animation: none;
+  }
+}
+
+/* ─── Footer bottom-bar text ticker ──────────────────────────── */
+@keyframes footer-text-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.footer-text-ticker {
+  animation: footer-text-ticker 22s linear infinite;
+  will-change: transform;
+}
+
+.footer-text-ticker:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-text-ticker {
+    animation: none;
+  }
+}
+
 /* ─── Neural Network Synaptic & Node Animations ─────────────────── */
 @keyframes synapseForward {
   from {

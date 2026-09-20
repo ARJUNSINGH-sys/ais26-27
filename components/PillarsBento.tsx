@@ -18,15 +18,6 @@ if (typeof window !== "undefined") {
 const SHAPE_46 =
   "M 192 0 C 227.346 0 256 28.654 256 64 C 256 99.346 227.346 128 192 128 C 227.346 128 256 156.654 256 192 C 256 227.346 227.346 256 192 256 C 156.654 256 128 227.346 128 192 C 128 227.346 99.346 256 64 256 C 28.654 256 0 227.346 0 192 C 0 156.654 28.654 128 64 128 C 28.654 128 0 99.346 0 64 C 0 28.654 28.654 0 64 0 C 99.346 0 128 28.654 128 64 C 128 28.654 156.654 0 192 0 Z M 64 160 C 46.327 160 32 174.327 32 192 C 32 209.673 46.327 224 64 224 C 81.673 224 96 209.673 96 192 C 96 174.327 81.673 160 64 160 Z M 192 160 C 174.327 160 160 174.327 160 192 C 160 209.673 174.327 224 192 224 C 209.673 224 224 209.673 224 192 C 224 174.327 209.673 160 192 160 Z M 64 32 C 46.327 32 32 46.327 32 64 C 32 81.673 46.327 96 64 96 C 81.673 96 96 81.673 96 64 C 96 46.327 81.673 32 64 32 Z M 192 32 C 174.327 32 160 46.327 160 64 C 160 81.673 174.327 96 192 96 C 209.673 96 224 81.673 224 64 C 224 46.327 209.673 32 192 32 Z";
 
-/* Guide arcs: one per scallop curve, each oriented so its text reads
-   upright at the middle of the curve. */
-const TITLE_ARCS = [
-  "M 64 0 A 64 64 0 0 0 192 0",
-  "M 256 64 A 64 64 0 0 0 256 192",
-  "M 64 256 A 64 64 0 0 1 192 256",
-  "M 0 192 A 64 64 0 0 0 0 64",
-];
-
 /* Corner circles for the numerals: TL, TR, BR, BL (clockwise). */
 const NUMERAL_SPOTS = [
   { x: 64, y: 64 },
@@ -34,6 +25,13 @@ const NUMERAL_SPOTS = [
   { x: 192, y: 192 },
   { x: 64, y: 192 },
 ];
+
+/* Full-circle guide paths (r=44) around each ring — the duplicated title
+   fills the whole loop so the endless rotation has no gap. */
+const RING_ARCS = NUMERAL_SPOTS.map(
+  ({ x, y }) =>
+    `M ${x} ${y - 44} A 44 44 0 1 1 ${x} ${y + 44} A 44 44 0 1 1 ${x} ${y - 44}`,
+);
 
 export default function PillarsBento() {
   const containerRef = useRef<HTMLElement | null>(null);
@@ -87,6 +85,20 @@ export default function PillarsBento() {
             },
             "-=0.6",
           );
+
+          // Titles orbit their rings forever — slow, alternating direction
+          gsap.utils
+            .toArray<SVGTextElement>(".pillar-ring-text")
+            .forEach((el, i) => {
+              const spot = NUMERAL_SPOTS[i % NUMERAL_SPOTS.length];
+              gsap.to(el, {
+                rotation: i % 2 === 0 ? 360 : -360,
+                svgOrigin: `${spot.x} ${spot.y}`,
+                duration: 28,
+                repeat: -1,
+                ease: "none",
+              });
+            });
         },
       );
     },
@@ -101,9 +113,69 @@ export default function PillarsBento() {
     >
       <div className="shell">
         <div className="grid gap-4 lg:grid-cols-12">
-          {/* Statement panel */}
-          <div className="pillar-statement flex min-h-[400px] flex-col justify-between rounded-[32px] bg-panel p-9 sm:p-12 lg:col-span-5 lg:min-h-[520px]">
-            <div>
+          {/* Statement panel — floats over low-opacity shape watermarks */}
+          <div className="pillar-statement relative flex min-h-[400px] flex-col justify-between overflow-hidden rounded-[32px] bg-panel p-9 sm:p-12 lg:col-span-5 lg:min-h-[520px]">
+            {/* Shape watermarks (shapes.gallery paths, very low opacity) */}
+            <svg
+              viewBox="0 0 256 256"
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-16 h-64 w-64"
+              style={{ color: "#1A1816", opacity: 0.05 }}
+            >
+              <path
+                d="M 156 0 C 211.228 0 256 44.772 256 100 L 256 256 L 100 256 C 44.772 256 0 211.228 0 156 L 0 0 Z M 80 80 C 80 133.019 122.981 176 176 176 C 176 122.981 133.019 80 80 80 Z"
+                fill="currentColor"
+              />
+            </svg>
+            <svg
+              viewBox="0 0 256 256"
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-20 -left-16 h-72 w-72"
+              style={{ color: "#DE5D35", opacity: 0.07 }}
+            >
+              <path
+                d="M 128 192 C 92.654 192 64 220.654 64 256 L 0 256 C 0 185.308 57.308 128 128 128 Z M 256 128 C 256 198.692 198.692 256 128 256 L 128 192 C 163.346 192 192 163.346 192 128 Z M 128 64 C 92.654 64 64 92.654 64 128 L 0 128 C 0 57.308 57.308 0 128 0 Z M 256 0 C 256 70.692 198.692 128 128 128 L 128 64 C 163.346 64 192 35.346 192 0 Z"
+                fill="currentColor"
+              />
+            </svg>
+            {/* Extra depth shape — centre right */}
+            <svg
+              viewBox="0 0 256 256"
+              aria-hidden="true"
+              className="pointer-events-none absolute right-10 top-1/2 h-24 w-24"
+              style={{ color: "#1A1816", opacity: 0.04 }}
+            >
+              <path
+                d="M 206 0 C 233.614 0 256 22.386 256 50 L 256 206 C 256 233.614 233.614 256 206 256 L 50 256 C 22.386 256 0 233.614 0 206 L 0 50 C 0 22.386 22.386 0 50 0 Z M 128 64 C 128 99.346 99.346 128 64 128 C 99.346 128 128 156.654 128 192 C 128 156.654 156.654 128 192 128 C 156.654 128 128 99.346 128 64 Z"
+                fill="currentColor"
+              />
+            </svg>
+            {/* Shape 12 — bolt watermark top-left corner */}
+            <svg
+              viewBox="0 0 256 256"
+              aria-hidden="true"
+              className="pointer-events-none absolute left-6 top-1/3 h-16 w-16"
+              style={{ color: "#DE5D35", opacity: 0.06 }}
+            >
+              <path
+                d="M 64 128 L 64.5 128 L 32 95 L 0 64 L 0 0 L 64 0 L 128 64 L 128 64.5 L 161 32 L 192 0 L 256 0 L 256 64 L 192 128 L 128 128 L 128 192 L 96 223 L 63.5 256 L 0 256 L 0 192 Z M 256 192 L 224 223 L 191.5 256 L 128 256 L 128 192 L 192 128 L 256 128 Z"
+                fill="currentColor"
+              />
+            </svg>
+            {/* Shape 14 — slashes watermark bottom-right */}
+            <svg
+              viewBox="0 0 256 256"
+              aria-hidden="true"
+              className="pointer-events-none absolute bottom-8 right-8 h-20 w-20"
+              style={{ color: "#1A1816", opacity: 0.05 }}
+            >
+              <path
+                d="M 144 256 L 27.598 256 L 144 139.598 Z M 256 207.5 L 200 256 L 200 56 L 0 56 L 48 0 L 256 0 Z M 0 204.402 L 0 112 L 92.402 112 Z"
+                fill="currentColor"
+              />
+            </svg>
+
+            <div className="relative">
               <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft">
                 Pillars
               </span>
@@ -114,7 +186,7 @@ export default function PillarsBento() {
               </h2>
             </div>
 
-            <div className="flex items-end justify-between gap-8">
+            <div className="relative flex items-end justify-between gap-8">
               <p className="max-w-[26ch] text-[13px] leading-[1.55] text-ink-soft">
                 Four commitments that turn curious students into engineers who
                 ship.
@@ -128,8 +200,8 @@ export default function PillarsBento() {
             </div>
           </div>
 
-          {/* Ink card cut as Shape 46 — titles curved along the four
-              scallop curves, numerals inside the corner circles */}
+          {/* Ink card cut as Shape 46 — titles curved around the four
+              black rings, numerals inside the corner circles */}
           <div className="flex items-center justify-center lg:col-span-7">
             <svg
               viewBox="0 0 256 256"
@@ -138,31 +210,33 @@ export default function PillarsBento() {
               aria-label="The four AIS pillars: Research Excellence, Engineering Hub, Skill Incubation, Industry Trajectory"
             >
               <defs>
-                {TITLE_ARCS.map((d, i) => (
-                  <path key={i} id={`pillar-arc-${i}`} d={d} />
+                {RING_ARCS.map((d, i) => (
+                  <path key={d} id={`pillar-arc-${i}`} d={d} />
                 ))}
               </defs>
 
               <path d={SHAPE_46} fill="#1A1816" />
 
-              {/* Titles curved along the scallop curves */}
+              {/* Titles duplicated around each ring for a seamless loop */}
               {featurePillars.map((pillar, i) => (
                 <text
                   key={pillar.numeral}
-                  className="font-display font-bold"
-                  fontSize="11"
-                  letterSpacing="1.5"
-                  fill="#1A1816"
+                  className="pillar-ring-text font-display font-bold"
+                  fontSize="9.5"
+                  letterSpacing="2"
+                  fill="#EFECE6"
                 >
                   <textPath
                     href={`#pillar-arc-${i}`}
-                    startOffset="50%"
-                    textAnchor="middle"
+                    startOffset="0"
                   >
-                    {pillar.title}
+                    {`${pillar.title} . ${pillar.title} . ${pillar.title} . ${pillar.title} . ${pillar.title} . ${pillar.title} . `}
                   </textPath>
                 </text>
               ))}
+
+              {/* Orange dot where the four rings meet */}
+              <circle cx="128" cy="128" r="9" fill="#DE5D35" />
 
               {/* Numerals in the corner circles */}
               {featurePillars.map((pillar, i) => {
