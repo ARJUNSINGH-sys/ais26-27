@@ -29,6 +29,19 @@ interface ArticleMeta {
 
 const PUBLISHED_ARTICLES: ArticleMeta[] = [
   {
+    index: "00",
+    slug: "transformer-architecture",
+    category: "DEEP LEARNING",
+    title: "The Transformer Architecture: Attention Is All You Need",
+    subtitle:
+      "Eliminating recurrence in favor of global multi-head self-attention. Complete first-principles mathematical breakdown, canonical paper architecture blueprint, and 3D dual-tower engine.",
+    readTime: "12 min read",
+    date: "September 2026",
+    author: "AIS Research Cohort",
+    status: "PUBLISHED",
+    featured: true,
+  },
+  {
     index: "01",
     slug: "linear-regression",
     category: "REGRESSION",

@@ -1,0 +1,3871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attention Is All You Need — Interactive Transformer Tutorial | AI Society Bennett University</title>
+  <meta name="description" content="A comprehensive, interactive first-principles tutorial on the Transformer architecture (Vaswani et al., 2017) with embedded Eigensight-level WebGL animations and mathematical derivations." />
+
+  <!-- Fonts: Inter, Space Grotesk, IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       AI SOCIETY (BENNETT UNIVERSITY) EDITORIAL THEME + EIGENSIGHT SCI-FI HUD
+       Clean, Non-Cluttered, Spacious Layout
+       ========================================================================== */
+    :root {
+      /* Bennett AI Society Palette */
+      --bg-editorial: #EFECE6;
+      --bg-paper: #FAF9F5;
+      --bg-card: #F4F1EA;
+      --text-dark: #1A1816;
+      --text-muted: #75716B;
+      --border-dark: rgba(26, 24, 22, 0.14);
+      --border-solid: #1A1816;
+      --coral-accent: #DE5D35;
+      --coral-light: rgba(222, 93, 53, 0.1);
+      --cobalt-accent: #2B6CB0;
+
+      /* Eigensight HUD Dark Palette */
+      --hud-bg: #07090C;
+      --hud-panel: #0E1217;
+      --hud-card: #131920;
+      --hud-cyan: #00ffcc;
+      --hud-emerald: #52e3a4;
+      --hud-border: rgba(255, 255, 255, 0.1);
+      --hud-text: #FAF9F5;
+      --hud-muted: #94A3B8;
+
+      /* Typography */
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-display: 'Space Grotesk', var(--font-sans);
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg-editorial);
+      color: var(--text-dark);
+      font-family: var(--font-sans);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header Nav */
+    header.site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(14, 13, 12, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: #FAF9F5;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #FAF9F5;
+    }
+    .brand-badge {
+      background: var(--coral-accent);
+      color: #fff;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 16px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+    .brand-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .brand-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      color: #FAF9F5;
+    }
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FAF9F5;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .header-pill:hover {
+      background: var(--coral-accent);
+      border-color: var(--coral-accent);
+    }
+
+    /* Main Container */
+    .tutorial-shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 48px 24px 120px;
+    }
+
+    /* Hero */
+    .hero-section {
+      margin-bottom: 48px;
+    }
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .hero-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--coral-accent);
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(38px, 6vw, 68px);
+      font-weight: 900;
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      color: var(--text-dark);
+    }
+    .hero-description {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 76ch;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* Canonical Sequence Strip */
+    .sequence-strip {
+      background: var(--bg-paper);
+      border: 1px solid var(--border-solid);
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin-bottom: 56px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+    .sequence-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-dark);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+    .sequence-pills {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .seq-pill {
+      background: rgba(26, 24, 22, 0.06);
+      color: var(--text-dark);
+      padding: 4px 8px;
+      border-radius: 2px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .seq-pill:hover, .seq-pill.active {
+      background: var(--coral-accent);
+      color: #fff;
+    }
+    .seq-arrow {
+      color: var(--coral-accent);
+      font-weight: bold;
+    }
+
+    /* Chapter Cards */
+    .chapter-card {
+      background: var(--bg-paper);
+      border: 1px solid var(--border-solid);
+      border-radius: 4px;
+      padding: 40px 44px;
+      margin-bottom: 56px;
+      box-shadow: 0 6px 28px rgba(0, 0, 0, 0.04);
+      position: relative;
+    }
+    .chapter-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .chapter-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--coral-accent);
+    }
+    .chapter-time {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .chapter-title {
+      font-family: var(--font-display);
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+    .chapter-subtitle {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--coral-accent);
+      margin-bottom: 22px;
+    }
+    .chapter-body {
+      font-size: 15.5px;
+      color: #33312e;
+      line-height: 1.75;
+      margin-bottom: 24px;
+    }
+    .chapter-body p {
+      margin-bottom: 16px;
+    }
+    .chapter-body strong {
+      color: var(--text-dark);
+    }
+
+    /* Math Formula Box */
+    .formula-callout {
+      background: #F2EFE8;
+      border: 1px solid var(--border-solid);
+      border-left: 4px solid var(--coral-accent);
+      border-radius: 2px;
+      padding: 18px 24px;
+      margin: 24px 0 28px;
+      font-family: var(--font-mono);
+    }
+    .formula-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--coral-accent);
+      margin-bottom: 6px;
+    }
+    .formula-main {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      overflow-x: auto;
+    }
+    .formula-dims {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       EIGENSIGHT SCI-FI HUD ANIMATION BOXES
+       ========================================================================== */
+    .eigensight-hud-box {
+      background: var(--hud-bg);
+      border: 1px solid var(--hud-border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 32px 0;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
+      color: var(--hud-text);
+    }
+    .hud-header {
+      background: var(--hud-panel);
+      border-bottom: 1px solid var(--hud-border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hud-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--hud-cyan);
+    }
+    .hud-title-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--hud-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--hud-cyan);
+    }
+    .hud-chip {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 3px;
+      background: rgba(0, 255, 204, 0.1);
+      color: var(--hud-cyan);
+      border: 1px solid rgba(0, 255, 204, 0.3);
+      text-transform: uppercase;
+    }
+    .hud-content {
+      padding: 24px;
+    }
+    .hud-canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 440px;
+      background: #05070A;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .hud-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    .hud-canvas:active { cursor: grabbing; }
+
+    .hud-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .hud-btn {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--hud-text);
+      border: 1px solid var(--hud-border);
+      border-radius: 3px;
+      padding: 6px 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .hud-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .hud-btn.active {
+      background: var(--coral-accent);
+      border-color: var(--coral-accent);
+      color: #fff;
+    }
+    .hud-btn.cyan-active {
+      background: rgba(0, 255, 204, 0.15);
+      border-color: var(--hud-cyan);
+      color: var(--hud-cyan);
+    }
+
+    .hud-slider {
+      flex: 1;
+      min-width: 120px;
+      height: 4px;
+      accent-color: var(--hud-cyan);
+    }
+
+    /* Architecture Studio Deck */
+    .arch-deck-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .arch-deck-btn {
+      background: #18191E;
+      color: #9E9C96;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      padding: 9px 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .arch-deck-btn:hover {
+      background: #23252B;
+      color: #FAF9F5;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .arch-deck-btn.active {
+      background: var(--coral-accent);
+      color: #FFFFFF;
+      border-color: var(--coral-accent);
+      box-shadow: 0 0 14px rgba(222, 93, 53, 0.35);
+    }
+
+    .arch-views-container {
+      width: 100%;
+      position: relative;
+    }
+    .arch-views-container.mode-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 1024px) {
+      .arch-views-container.mode-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Canonical Paper SVG Container */
+    .canonical-card {
+      background: #141518;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+    }
+    .canonical-header {
+      background: #1B1D22;
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .canonical-svg-wrapper {
+      padding: 24px 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #141518;
+    }
+    .canonical-svg-wrapper svg {
+      width: 100%;
+      max-width: 620px;
+      height: auto;
+      display: block;
+    }
+    .arch-svg-node {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .arch-svg-node:hover rect {
+      stroke: #DE5D35 !important;
+      stroke-width: 2.4px !important;
+      filter: drop-shadow(0 0 10px rgba(222, 93, 53, 0.75)) !important;
+    }
+    .arch-svg-node.is-selected rect {
+      stroke: #00FFCC !important;
+      stroke-width: 2.4px !important;
+      filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.8)) !important;
+    }
+    .arch-inspector-hud {
+      background: #0D0E11;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 20px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* PyTorch Code Block */
+    .code-block {
+      background: #0A0D12;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      padding: 18px 22px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: #E2E8F0;
+      overflow-x: auto;
+      margin-top: 20px;
+      line-height: 1.5;
+    }
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 10px;
+      color: var(--hud-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Tokenizer Studio Specific Styles */
+    .token-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      margin: 4px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .token-chip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 255, 204, 0.2);
+    }
+
+    /* Footer */
+    footer.site-footer {
+      background: #0E0D0C;
+      color: #FAF9F5;
+      padding: 48px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 60px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    .footer-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation (Bennett AI Society) -->
+  <header class="site-header">
+    <a href="#" class="header-brand">
+      <div class="brand-badge">AIS</div>
+      <div>
+        <div class="brand-meta">03 / OPEN ARCHIVE · BENNETT UNIVERSITY</div>
+        <div class="brand-title">ATTENTION IS ALL YOU NEED — THE TRANSFORMER BLUEPRINT</div>
+      </div>
+    </a>
+    <div class="header-links">
+      <a href="#ch-01" class="header-pill">01 3D Architecture</a>
+      <a href="#ch-tokenizer" class="header-pill">02 Tokenizer BPE</a>
+      <a href="#ch-04" class="header-pill">05 Scaled Attention</a>
+      <a href="#ch-05" class="header-pill">06 Multi-Head</a>
+      <a href="#ch-08" class="header-pill">09 Decoder</a>
+      <a href="#benchmark" class="header-pill" style="border-color:var(--coral-accent); color:var(--coral-accent);">Benchmark HUD</a>
+    </div>
+  </header>
+
+  <div class="tutorial-shell">
+    <!-- Hero Header -->
+    <section class="hero-section">
+      <div class="hero-meta">
+        <span class="hero-dot"></span>
+        <span>03 / CURRICULUM ARCHIVE · FIRST-PRINCIPLES DECONSTRUCTION</span>
+      </div>
+      <h1 class="hero-title">Attention Is All You Need.</h1>
+      <p class="hero-description">
+        An interactive, first-principles pedagogical essay on the Transformer architecture (Vaswani et al., 2017). 
+        Eliminating sequential recurrence in favor of multi-head self-attention mechanisms with $O(1)$ maximum path lengths.
+      </p>
+    </section>
+
+    <!-- Canonical Curriculum Sequence Bar -->
+    <div class="sequence-strip">
+      <div class="sequence-header">
+        <span class="brand-meta" style="color:var(--text-dark); font-weight:bold;">CANONICAL CURRICULUM SEQUENCE · 12 MODULES</span>
+        <span class="brand-meta">FIRST PRINCIPLES · VASWANI ET AL. 2017</span>
+      </div>
+      <div class="sequence-pills">
+        <a href="#ch-01" class="seq-pill">01 Overall Architecture</a>
+        <span class="seq-arrow">→</span>
+        <a href="#ch-tokenizer" class="seq-pill" style="background:var(--coral-accent); color:#fff;">02 Tokenizer (BPE)</a>
+        <span class="seq-arrow">→</span>
+        <a href="#ch-02" class="seq-pill">03 Input Embeddings</a>
+        <span class="seq-arrow">→</span>
+        <a href="#ch-03" class="seq-pill">04 Positional Encodings</a>
+        <span class="seq-arrow">→</span>
+        <a href="#ch-04" class="seq-pill">05 Scaled Dot-Product</a>
+        <span class="seq-arrow">→</span>
+        <a href="#ch-05" class="seq-pill">06 Multi-Head Attention</a>
+        <span class="seq-arrow">→</span>
+        <a href="#ch-06" class="seq-pill">07 Feed-Forward (FFN)</a>
+        <span class="seq-arrow">→</span>
+        <a href="#ch-07" class="seq-pill">08 Residual & LayerNorm</a>
+        <span class="seq-arrow">→</span>
+        <a href="#ch-08" class="seq-pill">09 Masked Decoder</a>
+        <span class="seq-arrow">→</span>
+        <a href="#ch-09" class="seq-pill">10 Cross-Attention</a>
+        <span class="seq-arrow">→</span>
+        <a href="#ch-10" class="seq-pill">11 Noam LR Warmup</a>
+        <span class="seq-arrow">→</span>
+        <a href="#benchmark" class="seq-pill">12 Benchmark & Specs</a>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         CHAPTER 01: OVERALL ARCHITECTURE & 3D WEBGL VISUALIZER
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-01">
+      <div class="chapter-meta">
+        <span class="chapter-badge">01 / ARCHITECTURE OVERVIEW</span>
+        <span class="chapter-time">8 min read</span>
+      </div>
+      <h2 class="chapter-title">The Transformer Architecture: Discarding Recurrence</h2>
+      <div class="chapter-subtitle">Sequential computation eliminated in favor of global parallel attention</div>
+      
+      <div class="chapter-body">
+        <p>
+          Before 2017, the undisputed state-of-the-art in sequence transduction models was dominated by recurrent neural networks (RNNs, LSTMs, GRUs). Recurrent models process input sequences along the sequential temporal axis:
+        </p>
+        <p style="text-align:center; font-family:var(--font-mono); font-weight:bold; background:#F2EFE8; padding:10px; border-radius:4px;">
+          h<sub>t</sub> = f(h<sub>t-1</sub>, x<sub>t</sub>)
+        </p>
+        <p>
+          This sequential processing precludes parallelization within training examples, creating severe bottlenecks on GPU hardware. Furthermore, signals between distant tokens must traverse <strong>O(n)</strong> recurrent steps, exacerbating vanishing gradients across long contexts.
+        </p>
+        <p>
+          <strong>Vaswani et al. introduced the Transformer</strong>: a model architecture relying solely on an attention mechanism to model dependencies between inputs and outputs. The maximum path length between any two tokens drops to <strong>O(1)</strong>, enabling massive parallelization during training.
+        </p>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">CANONICAL COMPLEXITY COMPARISON</div>
+        <div class="formula-main">Self-Attention: O(1) Sequential Operations vs RNN: O(n)</div>
+        <div class="formula-dims">Path length between any two tokens: Self-Attention = O(1) | Recurrent = O(n) | Convolutional = O(log_k n)</div>
+      </div>
+
+      <!-- Architecture Studio Mode Selector -->
+      <div class="arch-deck-tabs">
+        <button class="arch-deck-btn active" id="tabCanonicalPaper">1. CANONICAL PAPER BLUEPRINT (VASWANI ET AL.)</button>
+        <button class="arch-deck-btn" id="tab3dEngine">2. 3D EIGENSIGHT DUAL-TOWER ENGINE</button>
+        <button class="arch-deck-btn" id="tabSplitView">3. SIDE-BY-SIDE ARCHITECTURE LAB</button>
+      </div>
+
+      <div class="arch-views-container" id="archViewsContainer">
+        <!-- 1. CANONICAL PAPER ARCHITECTURE BLUEPRINT (EXACT COPY OF VASWANI ET AL. 2017) -->
+        <div class="canonical-card" id="canonicalPaperPane">
+          <div class="canonical-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="hud-title-dot" style="background:var(--coral-accent); box-shadow:0 0 8px var(--coral-accent);"></span>
+              <span style="color:#FAF9F5; font-weight:700; letter-spacing:0.08em;">THE ORIGINAL TRANSFORMER ARCHITECTURE · VASWANI ET AL. (2017)</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="hud-chip" style="background:rgba(222,93,53,0.15); color:var(--coral-accent); border-color:var(--coral-accent);">CANONICAL BLUEPRINT</span>
+              <span class="hud-chip" style="color:#A0A0A0; border-color:rgba(255,255,255,0.2);">HOVER / CLICK BLOCKS</span>
+            </div>
+          </div>
+
+          <div class="canonical-svg-wrapper">
+            <svg id="canonicalPaperSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 860" style="background:#141518; font-family:'IBM Plex Sans', -apple-system, sans-serif;">
+              <defs>
+                <marker id="arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#1B1B1B" />
+                </marker>
+                <marker id="arr-w" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#FAF9F5" />
+                </marker>
+                <filter id="shd" x="-10%" y="-10%" width="125%" height="125%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#000" flood-opacity="0.35"/>
+                </filter>
+              </defs>
+
+              <!-- Header Title -->
+              <text x="350" y="32" fill="#FAF9F5" font-size="15" font-weight="bold" text-anchor="middle" letter-spacing="1.5">THE TRANSFORMER ARCHITECTURE (VASWANI ET AL., 2017)</text>
+
+              <!-- ================= TOP: OUTPUT PROBABILITIES ================= -->
+              <g class="arch-svg-node" data-component="output_probs">
+                <text x="480" y="68" fill="#FAF9F5" font-size="14.5" font-weight="bold" text-anchor="middle">Output Probabilities</text>
+              </g>
+              <line x1="480" y1="94" x2="480" y2="76" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+
+              <!-- SOFTMAX -->
+              <g class="arch-svg-node" data-component="linear_softmax">
+                <rect x="402" y="94" width="156" height="35" rx="7" fill="#D9CEEB" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="480" y="116" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Softmax</text>
+              </g>
+              <line x1="480" y1="152" x2="480" y2="131" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+
+              <!-- LINEAR -->
+              <g class="arch-svg-node" data-component="linear_softmax">
+                <rect x="402" y="152" width="156" height="35" rx="7" fill="#D0E9F9" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="480" y="174" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Linear</text>
+              </g>
+              <line x1="480" y1="205" x2="480" y2="189" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+
+              <!-- ================= DECODER LAYER CONTAINER ================= -->
+              <rect x="375" y="205" width="210" height="440" rx="12" fill="#EAF4E8" stroke="#52A852" stroke-width="1.8"/>
+              <text x="598" y="420" fill="#FAF9F5" font-size="16" font-weight="bold" text-anchor="start">Decoder<tspan x="598" dy="20">layer</tspan></text>
+
+              <!-- Decoder: Top Add & Norm -->
+              <g class="arch-svg-node" data-component="decoder_norm">
+                <rect x="402" y="220" width="156" height="34" rx="7" fill="#FFF5B8" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="480" y="242" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Add &amp; Norm</text>
+              </g>
+
+              <!-- Feed Forward -->
+              <line x1="480" y1="280" x2="480" y2="256" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <g class="arch-svg-node" data-component="decoder_ffn">
+                <rect x="402" y="280" width="156" height="34" rx="7" fill="#FBDDB7" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="480" y="302" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Feed Forward</text>
+              </g>
+
+              <!-- Residual skip around Feed Forward -->
+              <path d="M 480 334 L 570 334 L 570 237 L 560 237" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- Decoder: Middle Add & Norm -->
+              <line x1="480" y1="344" x2="480" y2="316" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <g class="arch-svg-node" data-component="decoder_norm">
+                <rect x="402" y="344" width="156" height="34" rx="7" fill="#FFF5B8" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="480" y="366" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Add &amp; Norm</text>
+              </g>
+
+              <!-- Multi-Head Attention (Cross-Attention) -->
+              <line x1="480" y1="406" x2="480" y2="380" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <g class="arch-svg-node" data-component="decoder_cross_mha">
+                <rect x="402" y="406" width="156" height="52" rx="7" fill="#E6D3E8" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="480" y="428" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Multi-Head<tspan x="480" dy="17">Attention</tspan></text>
+              </g>
+
+              <!-- Residual skip around Cross-Attention -->
+              <path d="M 480 482 L 570 482 L 570 361 L 560 361" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- Decoder: Bottom Add & Norm -->
+              <line x1="480" y1="494" x2="480" y2="460" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <g class="arch-svg-node" data-component="decoder_norm">
+                <rect x="402" y="494" width="156" height="34" rx="7" fill="#FFF5B8" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="480" y="516" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Add &amp; Norm</text>
+              </g>
+
+              <!-- Masked Multi-Head Attention -->
+              <line x1="480" y1="556" x2="480" y2="530" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <g class="arch-svg-node" data-component="decoder_masked_mha">
+                <rect x="402" y="556" width="156" height="66" rx="7" fill="#E6D3E8" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="480" y="578" fill="#1B1B1B" font-size="13" font-weight="bold" text-anchor="middle">Masked<tspan x="480" dy="16">Multi-Head</tspan><tspan x="480" dy="16">Attention</tspan></text>
+              </g>
+
+              <!-- Masked Attention 3-arrow fork -->
+              <line x1="480" y1="642" x2="480" y2="624" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <path d="M 480 635 L 438 635 L 438 624" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <path d="M 480 635 L 522 635 L 522 624" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- Residual skip around Masked MHA -->
+              <path d="M 480 642 L 570 642 L 570 511 L 560 511" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- Decoder Positional Encoding & Add circle -->
+              <line x1="480" y1="678" x2="480" y2="650" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+              <circle cx="480" cy="678" r="12" fill="#FAF9F5" stroke="#1B1B1B" stroke-width="1.8"/>
+              <text x="480" y="683" fill="#1B1B1B" font-size="17" font-weight="bold" text-anchor="middle">+</text>
+
+              <!-- Decoder Positional Encoding wave -->
+              <g class="arch-svg-node" data-component="pos_encoding">
+                <circle cx="532" cy="678" r="13" fill="#FAF9F5" stroke="#1B1B1B" stroke-width="1.8"/>
+                <path d="M 524 678 Q 528 672 532 678 T 540 678" fill="none" stroke="#1B1B1B" stroke-width="1.8"/>
+                <line x1="519" y1="678" x2="494" y2="678" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+                <text x="554" y="674" fill="#FAF9F5" font-size="12" font-weight="bold" text-anchor="start">Positional<tspan x="554" dy="14">Encoding</tspan></text>
+              </g>
+
+              <!-- Output Embedding -->
+              <line x1="480" y1="712" x2="480" y2="692" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+              <g class="arch-svg-node" data-component="output_embedding">
+                <rect x="402" y="712" width="156" height="44" rx="7" fill="#F4D5E8" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="480" y="732" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Output<tspan x="480" dy="16">Embedding</tspan></text>
+              </g>
+
+              <!-- Outputs text -->
+              <line x1="480" y1="795" x2="480" y2="758" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+              <text x="480" y="812" fill="#FAF9F5" font-size="14" font-weight="bold" text-anchor="middle">Outputs</text>
+              <text x="480" y="828" fill="#A0A0A0" font-size="11" text-anchor="middle">(Output Tokens from Previous Step)</text>
+
+
+              <!-- ================= ENCODER LAYER CONTAINER ================= -->
+              <rect x="95" y="335" width="210" height="310" rx="12" fill="#EAF4E8" stroke="#52A852" stroke-width="1.8"/>
+              <text x="78" y="500" fill="#FAF9F5" font-size="16" font-weight="bold" text-anchor="end">Encoder<tspan x="78" dy="20">layer</tspan></text>
+
+              <!-- Encoder: Top Add & Norm -->
+              <g class="arch-svg-node" data-component="encoder_norm">
+                <rect x="122" y="346" width="156" height="34" rx="7" fill="#FFF5B8" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="200" y="368" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Add &amp; Norm</text>
+              </g>
+
+              <!-- Feed Forward -->
+              <line x1="200" y1="406" x2="200" y2="382" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <g class="arch-svg-node" data-component="encoder_ffn">
+                <rect x="122" y="406" width="156" height="34" rx="7" fill="#FBDDB7" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="200" y="428" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Feed Forward</text>
+              </g>
+
+              <!-- Residual skip around Feed Forward -->
+              <path d="M 200 460 L 110 460 L 110 363 L 120 363" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- Encoder: Bottom Add & Norm -->
+              <line x1="200" y1="472" x2="200" y2="442" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <g class="arch-svg-node" data-component="encoder_norm">
+                <rect x="122" y="472" width="156" height="34" rx="7" fill="#FFF5B8" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="200" y="494" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Add &amp; Norm</text>
+              </g>
+
+              <!-- Multi-Head Attention (Self-Attention) -->
+              <line x1="200" y1="534" x2="200" y2="508" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <g class="arch-svg-node" data-component="encoder_mha">
+                <rect x="122" y="534" width="156" height="52" rx="7" fill="#E6D3E8" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="200" y="556" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Multi-Head<tspan x="200" dy="17">Attention</tspan></text>
+              </g>
+
+              <!-- Encoder Self-Attention 3-arrow fork -->
+              <line x1="200" y1="620" x2="200" y2="588" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <path d="M 200 612 L 158 612 L 158 588" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <path d="M 200 612 L 242 612 L 242 588" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- Residual skip around Multi-Head Attention -->
+              <path d="M 200 620 L 110 620 L 110 489 L 120 489" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+
+              <!-- Encoder Positional Encoding & Add circle -->
+              <line x1="200" y1="678" x2="200" y2="650" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+              <circle cx="200" cy="678" r="12" fill="#FAF9F5" stroke="#1B1B1B" stroke-width="1.8"/>
+              <text x="200" y="683" fill="#1B1B1B" font-size="17" font-weight="bold" text-anchor="middle">+</text>
+
+              <!-- Encoder Positional Encoding wave -->
+              <g class="arch-svg-node" data-component="pos_encoding">
+                <circle cx="148" cy="678" r="13" fill="#FAF9F5" stroke="#1B1B1B" stroke-width="1.8"/>
+                <path d="M 140 678 Q 144 672 148 678 T 156 678" fill="none" stroke="#1B1B1B" stroke-width="1.8"/>
+                <line x1="161" y1="678" x2="186" y2="678" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+                <text x="126" y="674" fill="#FAF9F5" font-size="12" font-weight="bold" text-anchor="end">Positional<tspan x="126" dy="14">Encoding</tspan></text>
+              </g>
+
+              <!-- Input Embedding -->
+              <line x1="200" y1="712" x2="200" y2="692" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+              <g class="arch-svg-node" data-component="input_embedding">
+                <rect x="122" y="712" width="156" height="44" rx="7" fill="#F4D5E8" stroke="#1B1B1B" stroke-width="1.5" filter="url(#shd)"/>
+                <text x="200" y="732" fill="#1B1B1B" font-size="13.5" font-weight="bold" text-anchor="middle">Input<tspan x="200" dy="16">Embedding</tspan></text>
+              </g>
+
+              <!-- Inputs text -->
+              <line x1="200" y1="795" x2="200" y2="758" stroke="#FAF9F5" stroke-width="1.8" marker-end="url(#arr-w)"/>
+              <text x="200" y="812" fill="#FAF9F5" font-size="14" font-weight="bold" text-anchor="middle">Inputs</text>
+
+              <!-- ================= CROSS-ATTENTION CONNECTION (ENCODER -> DECODER) ================= -->
+              <!-- Line leaves Encoder top Add & Norm -->
+              <path d="M 200 346 L 200 305 L 340 305 L 340 424 L 398 424" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <!-- Second arrow (Value) branching from K line -->
+              <path d="M 340 442 L 398 442" fill="none" stroke="#1B1B1B" stroke-width="1.8" marker-end="url(#arr)"/>
+              <circle cx="340" cy="424" r="2.5" fill="#1B1B1B"/>
+              <circle cx="340" cy="442" r="2.5" fill="#1B1B1B"/>
+            </svg>
+          </div>
+
+          <!-- Dynamic Component Inspector HUD -->
+          <div class="arch-inspector-hud" id="archInspectorHud">
+            <div style="flex:1; min-width:240px;">
+              <div style="color:var(--coral-accent); font-weight:bold; font-size:10px; letter-spacing:0.1em;" id="archInspType">ARCHITECTURE COMPONENT INSPECTOR</div>
+              <div style="color:#FAF9F5; font-size:13.5px; font-weight:bold; margin-top:2px;" id="archInspTitle">Multi-Head Attention (Self-Attention)</div>
+              <div style="color:var(--hud-cyan); font-size:11px; margin-top:3px; font-family:var(--font-mono);" id="archInspMath">Attention(Q, K, V) = softmax(Q K^T / √d_k) V</div>
+              <div style="color:#A0A0A0; font-size:10px; margin-top:2px;" id="archInspDims">Params: W_Q, W_K, W_V ∈ ℝ^{512 × 64}, W_O ∈ ℝ^{512 × 512} · h = 8 parallel heads</div>
+            </div>
+            <a href="#ch-04" class="hud-btn active" id="archInspLink" style="text-decoration:none; padding:8px 16px; white-space:nowrap;">EXPLORE CHAPTER 04 ▶</a>
+          </div>
+        </div>
+
+        <!-- 2. EIGENSIGHT 3D TRANSFORMER ENGINE PANE (EXACT COPY OF 3D VISUALIZER) -->
+        <div class="eigensight-hud-box" id="engine3dPane" style="display:none; margin-top:0;">
+          <div class="hud-header">
+            <div class="hud-title">
+              <span class="hud-title-dot"></span>
+              <span>EIGENSIGHT 3D TRANSFORMER ENGINE · DUAL TOWER (N=6)</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="hud-chip" id="fpsReadout">60 FPS · LIVE GPU</span>
+              <span class="hud-chip" style="color:var(--coral-accent); border-color:var(--coral-accent);">VASWANI 2017</span>
+            </div>
+          </div>
+          <div class="hud-content">
+            <div class="hud-canvas-wrap" style="height:540px;">
+              <canvas id="main3dCanvas" class="hud-canvas"></canvas>
+            </div>
+            <div class="hud-bar">
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <button class="hud-btn active" id="btnToggleAnim">PAUSE STREAM</button>
+                <button class="hud-btn cyan-active" id="btnPresetFront">FRONT (EIGENSIGHT)</button>
+                <button class="hud-btn" id="btnPresetOverview">ISOMETRIC</button>
+                <button class="hud-btn" id="btnPresetEncoder">ENCODER STACK</button>
+                <button class="hud-btn" id="btnPresetDecoder">DECODER STACK</button>
+                <button class="hud-btn" id="btnPresetCross">CROSS HIGHWAY</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; color:var(--hud-cyan);">
+                <span>STREAM SPEED:</span>
+                <input type="range" id="speedSlider" min="0.2" max="2.5" step="0.1" value="1.0" class="hud-slider" />
+                <span id="speedVal">1.0x</span>
+              </div>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-muted); margin-top:10px;">
+              Drag with mouse to orbit camera in 3D space. Scroll to zoom. Left tower: 6 Encoder layers with cyan data stream. Right tower: 6 Decoder layers with coral stream. Arching bridge: Cross-attention information highway.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span>Official PyTorch Canonical Definition</span>
+          <span>torch.nn.Transformer</span>
+        </div>
+<code>class Transformer(nn.Module):
+    def __init__(self, d_model=512, nhead=8, num_encoder_layers=6, num_decoder_layers=6, dim_feedforward=2048):
+        super().__init__()
+        self.encoder = TransformerEncoder(TransformerEncoderLayer(d_model, nhead, dim_feedforward), num_encoder_layers)
+        self.decoder = TransformerDecoder(TransformerDecoderLayer(d_model, nhead, dim_feedforward), num_decoder_layers)
+    
+    def forward(self, src, tgt, src_mask=None, tgt_mask=None):
+        memory = self.encoder(src, mask=src_mask)
+        output = self.decoder(tgt, memory, tgt_mask=tgt_mask)
+        return output</code>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 02: TOKENIZER & BPE SUBWORDS (NEW COMPREHENSIVE CHAPTER)
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-tokenizer">
+      <div class="chapter-meta">
+        <span class="chapter-badge">02 / TOKENIZATION & SUBWORDS</span>
+        <span class="chapter-time">7 min read</span>
+      </div>
+      <h2 class="chapter-title">Tokenization & Byte-Pair Encoding (BPE)</h2>
+      <div class="chapter-subtitle">Bridging raw characters and vector representations with |V| = 37,000 subwords</div>
+
+      <div class="chapter-body">
+        <p>
+          Before any vector math or attention can occur, discrete natural language text must be converted into a discrete sequence of integer token IDs. In Section 5.1 of <em>Attention Is All You Need</em>, the authors state:
+        </p>
+        <p style="background:#F2EFE8; border-left:3px solid var(--coral-accent); padding:12px 18px; font-style:italic;">
+          "On the English-to-German task, we trained using byte-pair encoding (BPE), which has a shared source-target vocabulary of about 37,000 tokens. For English-French, we used a vocabulary of 32,000 word-piece units."
+        </p>
+        <p>
+          <strong>Why subwords instead of full words or raw characters?</strong>
+        </p>
+        <ul style="margin-left:24px; margin-bottom:16px;">
+          <li><strong>Word-Level Tokenization</strong>: Fails on out-of-vocabulary (OOV) words, misspelling, and novel compound words (e.g. German compound nouns). Vocabularies explode to millions of words, inflating embedding tables.</li>
+          <li><strong>Character-Level Tokenization</strong>: Eliminates OOV, but sequence lengths explode $5\times$ to $10\times$. Since self-attention memory and computation scale quadratically $O(N^2)$, 1,000 characters would require a $1,000 \times 1,000$ attention matrix ($100\times$ more memory than 100 subwords).</li>
+          <li><strong>Byte-Pair Encoding (BPE)</strong>: The perfect middle ground. Common words remain single tokens (`"the"`, `"attention"`), while rare or inflected words are split into meaningful morphemic pieces (`"trans"`, `"##form"`, `"##er"`).</li>
+        </ul>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">BPE ALGORITHM CONTRACT</div>
+        <div class="formula-main">Raw Text ⟶ Character Slicing ⟶ Iterative Frequent Pair Merging ⟶ Token IDs ∈ [0, 37000) ⟶ Lookup in E ∈ ℝ^{37000 × 512}</div>
+        <div class="formula-dims">Sequence length shrinks by ~75% vs character-level while maintaining 0% Out-Of-Vocabulary rate</div>
+      </div>
+
+      <!-- Interactive BPE Tokenizer Studio Box -->
+      <div class="eigensight-hud-box">
+        <div class="hud-header">
+          <div class="hud-title">
+            <span class="hud-title-dot"></span>
+            <span>INTERACTIVE BPE TOKENIZER STUDIO · SUBWORD MERGE ENGINE</span>
+          </div>
+          <span class="hud-chip" id="tokCountChip">5 TOKENS DETECTED</span>
+        </div>
+        <div class="hud-content">
+          <!-- Text Input & Presets -->
+          <div style="margin-bottom:16px;">
+            <label style="font-family:var(--font-mono); font-size:11px; color:var(--hud-cyan); display:block; margin-bottom:6px;">TYPE ANY TEXT OR CHOOSE A PRESET TO TOKENIZE:</label>
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
+              <input type="text" id="tokCustomInput" value="Attention is all you need for neural sequence transduction"
+                     style="flex:1; background:#05070A; border:1px solid rgba(255,255,255,0.18); border-radius:4px; padding:10px 14px; font-family:var(--font-mono); font-size:12px; color:#fff;" />
+              <button class="hud-btn active" id="btnRunTokenize">TOKENIZE</button>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              <button class="hud-btn tok-preset-btn" data-text="Attention is all you need for sequence transduction">Vaswani Paper Title</button>
+              <button class="hud-btn tok-preset-btn" data-text="The animal didn't cross the street because it was too tired">Winograd Coreference</button>
+              <button class="hud-btn tok-preset-btn" data-text="Unbelievable multilingual subword tokenization">Morphological Subwords</button>
+            </div>
+          </div>
+
+          <!-- Tokenizer Stages Visualizer -->
+          <div style="background:#05070A; border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:18px; margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:6px;">
+              <span style="font-family:var(--font-mono); font-size:11px; color:var(--coral-accent); font-weight:bold;">1. EXTRACTED SUBWORD TOKENS & VOCABULARY IDS</span>
+              <span style="font-family:var(--font-mono); font-size:10px; color:var(--hud-muted);">Click any token to inspect byte embedding lookup</span>
+            </div>
+            <div id="tokenChipsDisplay" style="display:flex; flex-wrap:wrap; gap:8px;">
+              <!-- Dynamic token chips injected via JS -->
+            </div>
+          </div>
+
+          <!-- Tokenizer Inspector Deck -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+            <div style="background:#0A0D12; border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:14px; font-family:var(--font-mono); font-size:11px;">
+              <div style="color:var(--hud-cyan); font-weight:bold; margin-bottom:6px;">TOKEN INSPECTOR</div>
+              <div id="tokenInspectDetails" style="color:var(--hud-muted); line-height:1.6;">
+                Click any token above to see its subword boundary, ASCII byte representation, and embedding lookup row.
+              </div>
+            </div>
+            <div style="background:#0A0D12; border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:14px; font-family:var(--font-mono); font-size:11px;">
+              <div style="color:var(--hud-emerald); font-weight:bold; margin-bottom:6px;">BPE MERGE RULES SIMULATION</div>
+              <div style="color:var(--hud-muted); line-height:1.6;">
+                Frequent character bigrams merge into single tokens: <br/>
+                <span style="color:#FAF9F5;">'a' + 't' → 'at' → 'att' → 'atten' → 'attention'</span><br/>
+                <span style="color:var(--coral-accent);">'trans' + 'duc' + 'tion' → ['trans', '##duc', '##tion']</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3D Vector Space Projection Deck (ENHANCED!) -->
+          <div style="background:#05070A; border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:8px; flex-wrap:wrap; gap:8px;">
+              <span style="font-family:var(--font-mono); font-size:11px; color:var(--hud-cyan); font-weight:bold; display:flex; align-items:center; gap:6px;">
+                <span class="hud-title-dot"></span>
+                <span>2. TOKENS IN 3D VECTOR SPACE & CONTEXT ADDITION (ℝ^{d_model} ⟶ ℝ³)</span>
+              </span>
+              <span class="hud-chip" id="vecCosineSimChip">CLICK ANY 2 TOKENS FOR COSINE SIMILARITY</span>
+            </div>
+
+            <!-- Vector Mode Switcher Bar -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:4px; border:1px solid rgba(255,255,255,0.06); font-family:var(--font-mono); font-size:11px;">
+              <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                <button class="hud-btn active" id="btnModeStaticVec">1. STATIC EMBEDDINGS</button>
+                <button class="hud-btn" id="btnModeContextAdd" style="border-color:rgba(0,255,204,0.4);">2. + VALUE ADDITION (CONTEXT)</button>
+                <button class="hud-btn" id="btnModeAutoregress" style="border-color:rgba(222,93,53,0.4);">3. AUTOREGRESSIVE (1 TOKEN AT A TIME)</button>
+              </div>
+
+              <!-- Context Slider Controls -->
+              <div id="vecContextControlRow" style="display:none; align-items:center; gap:8px;">
+                <span style="color:var(--hud-emerald); font-weight:bold;">LAYER DEPTH:</span>
+                <input type="range" id="vecContextDepthSlider" min="0" max="6" value="3" step="1" style="width:100px; accent-color:var(--hud-emerald);">
+                <span id="vecContextDepthVal" style="color:#FAF9F5; min-width:65px; font-weight:bold;">LAYER 3 / 6</span>
+                <button class="hud-btn" id="btnStepContextDepth" style="padding:4px 8px; font-size:10px;">+ LAYER ▶</button>
+              </div>
+
+              <!-- Autoregressive Controls -->
+              <div id="vecAutoregressControlRow" style="display:none; align-items:center; gap:8px;">
+                <button class="hud-btn" id="btnVecAutoStepPrev" style="padding:4px 10px;">◀ PREV</button>
+                <span id="vecAutoStepBadge" class="hud-chip" style="font-size:10px; color:var(--coral-accent); border-color:var(--coral-accent);">TOKEN 1 / 8</span>
+                <button class="hud-btn active" id="btnVecAutoStepNext" style="padding:4px 10px;">NEXT ▶</button>
+                <button class="hud-btn" id="btnVecAutoPlay" style="padding:4px 10px;">AUTO PLAY</button>
+              </div>
+            </div>
+            
+            <div style="position:relative; width:100%; height:370px; background:#020406; border-radius:4px; overflow:hidden; border:1px solid rgba(255,255,255,0.06);">
+              <canvas id="vectorSpaceCanvas" width="980" height="370" style="width:100%; height:100%; display:block; cursor:grab;"></canvas>
+            </div>
+            
+            <div class="hud-bar">
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <button class="hud-btn active" id="btnResetVecCam">RESET 3D VIEW</button>
+                <button class="hud-btn active" id="btnToggleOriginVectors">ORIGIN VECTORS</button>
+                <button class="hud-btn active" id="btnToggleSimArcs">SIMILARITY ARCS</button>
+                <button class="hud-btn active" id="btnAnimateSpin">AUTO-ORBIT</button>
+              </div>
+              <div style="font-family:var(--font-mono); font-size:11px; color:var(--hud-muted);" id="vectorMetricStatus">
+                Drag to rotate vector space. Scroll to zoom. Click tokens to calculate cosine angle.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span>HuggingFace Tokenizers / SentencePiece Reference</span>
+          <span>BPE Vocabulary Lookup</span>
+        </div>
+<code>from tokenizers import Tokenizer
+from tokenizers.models import BPE
+
+# Shared source-target BPE vocabulary of ~37,000 subwords
+tokenizer = Tokenizer(BPE(unk_token="<unk>"))
+encoded = tokenizer.encode("Attention is all you need")
+
+print("Tokens:", encoded.tokens)   # ['Attention', 'is', 'all', 'you', 'need']
+print("IDs:   ", encoded.ids)      # [4921, 184, 912, 102, 650]</code>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 03: INPUT EMBEDDINGS & SCALING
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-02">
+      <div class="chapter-meta">
+        <span class="chapter-badge">03 / EMBEDDINGS & SCALING</span>
+        <span class="chapter-time">5 min read</span>
+      </div>
+      <h2 class="chapter-title">Input Embeddings & The Vital Scaling by √d<sub>model</sub></h2>
+      <div class="chapter-subtitle">Preserving semantic dominance over additive positional encodings</div>
+
+      <div class="chapter-body">
+        <p>
+          Discrete words/tokens are projected into continuous vector space ℝ<sup>d<sub>model</sub></sup> via a learned embedding matrix. The paper uses a vocabulary of $|V| \approx 37,000$ BPE tokens and dimension $d_{model} = 512$.
+        </p>
+        <p>
+          Crucially, in Section 3.4, the authors state: <em>"In the embedding layers, we multiply those weights by $\sqrt{d_{model}}$."</em> Why? Because when embedding weights are initialized with standard Gaussian variance (on the order of $1 / \sqrt{d_{model}}$), their vector magnitudes are approximately 1.0. Adding positional encodings (which have values strictly in $[-1, 1]$ and an average norm of $\approx \sqrt{d_{model} / 2}$) would otherwise drown out the semantic token signal with positional noise. Multiplying by $\sqrt{512} \approx 22.63$ ensures semantic features dominate early layer activations.
+        </p>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">EMBEDDING SCALING EQUATION</div>
+        <div class="formula-main">E<sub>scaled</sub> = Embedding(x) · √d<sub>model</sub> = Embedding(x) · √512 ≈ Embedding(x) · 22.627</div>
+        <div class="formula-dims">Input tokens: [Batch, Seq_Len] → Embedding Matrix: [37000, 512] → Scaled Output: [Batch, Seq_Len, 512]</div>
+      </div>
+
+      <!-- Interactive Embedding Vector & Magnitude Box (Live Animated Wave) -->
+      <div class="eigensight-hud-box">
+        <div class="hud-header">
+          <div class="hud-title">
+            <span class="hud-title-dot"></span>
+            <span>INTERACTIVE EMBEDDING MAGNITUDE EXPLORER (ANIMATED)</span>
+          </div>
+          <span class="hud-chip">VARIANCE STABILIZATION</span>
+        </div>
+        <div class="hud-content">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div style="background:#05070A; border:1px solid rgba(255,255,255,0.08); padding:16px; border-radius:4px;">
+              <div style="font-family:var(--font-mono); font-size:11px; color:var(--hud-muted); margin-bottom:8px;">RAW UN-SCALED EMBEDDING (|E| ≈ 1.0)</div>
+              <canvas id="rawEmbCanvas" width="340" height="130" style="width:100%; height:130px;"></canvas>
+              <div style="font-family:var(--font-mono); font-size:10px; color:#ef4444; margin-top:6px;">⚠️ Positional noise overpowers semantic signal</div>
+            </div>
+            <div style="background:#05070A; border:1px solid rgba(255,255,255,0.08); padding:16px; border-radius:4px;">
+              <div style="font-family:var(--font-mono); font-size:11px; color:var(--hud-cyan); margin-bottom:8px;">SCALED EMBEDDING: E · √512 (|E| ≈ 22.6)</div>
+              <canvas id="scaledEmbCanvas" width="340" height="130" style="width:100%; height:130px;"></canvas>
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-emerald); margin-top:6px;">✓ Clean semantic signal with gentle positional guidance</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 04: POSITIONAL ENCODINGS
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-03">
+      <div class="chapter-meta">
+        <span class="chapter-badge">04 / POSITIONAL ENCODINGS</span>
+        <span class="chapter-time">8 min read</span>
+      </div>
+      <h2 class="chapter-title">Sinusoidal Positional Encoding & Harmonic Frequencies</h2>
+      <div class="chapter-subtitle">Injecting sequence order into permutation-invariant self-attention</div>
+
+      <div class="chapter-body">
+        <p>
+          Because self-attention performs operations across all token pairs simultaneously, it is completely permutation-invariant: if you shuffle the words in an input sentence, self-attention computes the exact same attention outputs, merely shuffled in order!
+        </p>
+        <p>
+          To give the model awareness of token order, positional encodings are added to the input embeddings. Rather than learned embeddings that fail to extrapolate to longer sequences, Vaswani et al. formulated fixed sinusoidal functions across geometric frequencies:
+        </p>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">SINUSOIDAL POSITIONAL FORMULATION</div>
+        <div class="formula-main">PE<sub>(pos, 2i)</sub> = sin(pos / 10000<sup>2i / d<sub>model</sub></sup>), &nbsp; PE<sub>(pos, 2i+1)</sub> = cos(pos / 10000<sup>2i / d<sub>model</sub></sup>)</div>
+        <div class="formula-dims">Wavelengths form a geometric progression from 2π to 10000·2π (pos ∈ [0, max_len], i ∈ [0, 255])</div>
+      </div>
+
+      <!-- Interactive Positional Frequency Landscape Box (Live Continuous Animated Wave) -->
+      <div class="eigensight-hud-box">
+        <div class="hud-header">
+          <div class="hud-title">
+            <span class="hud-title-dot"></span>
+            <span>2D/3D HARMONIC POSITIONAL SPECTRUM (LIVE CONTINUOUS WAVE)</span>
+          </div>
+          <span class="hud-chip">LINEAR SHIFT INVARIANCE</span>
+        </div>
+        <div class="hud-content">
+          <canvas id="posHeatmapCanvas" width="800" height="200" style="width:100%; height:200px; background:#05070A; border-radius:4px; border:1px solid rgba(255,255,255,0.08);"></canvas>
+          <div class="hud-bar">
+            <div style="font-family:var(--font-mono); font-size:11px; color:var(--hud-muted);">
+              High Frequencies (Left, local syntax) → Low Frequencies (Right, long-range global context)
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="color:var(--hud-cyan); font-family:var(--font-mono); font-size:11px;">SAMPLE TOKENS:</span>
+              <input type="range" id="posSeqSlider" min="8" max="48" value="20" class="hud-slider" />
+              <span id="posSeqVal" style="font-family:var(--font-mono); color:var(--hud-cyan);">20</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chapter-body">
+        <p>
+          <strong>Why is this mathematically profound?</strong> For any fixed offset $k$, $PE_{pos+k}$ can be represented as a direct linear transformation of $PE_{pos}$. By standard trigonometric angle addition:
+        </p>
+        <p style="text-align:center; font-family:var(--font-mono); font-weight:bold; background:#F2EFE8; padding:10px; border-radius:4px;">
+          sin(ω(pos + k)) = sin(ω pos)·cos(ω k) + cos(ω pos)·sin(ω k)
+        </p>
+        <p>
+          This enables the self-attention mechanism to learn to attend to relative positions via simple linear projection matrices!
+        </p>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 05: SCALED DOT-PRODUCT ATTENTION
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-04">
+      <div class="chapter-meta">
+        <span class="chapter-badge">05 / SCALED ATTENTION</span>
+        <span class="chapter-time">9 min read</span>
+      </div>
+      <h2 class="chapter-title">Scaled Dot-Product Attention: The Core Engine</h2>
+      <div class="chapter-subtitle">Preventing vanishing gradients caused by softmax saturation</div>
+
+      <div class="chapter-body">
+        <p>
+          An attention function maps a query and a set of key-value pairs to an output. The queries ($Q$), keys ($K$), and values ($V$) are packed into matrices:
+        </p>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">SCALED DOT-PRODUCT ATTENTION FORMULA</div>
+        <div class="formula-main">Attention(Q, K, V) = softmax( (Q · K<sup>T</sup>) / √d<sub>k</sub> ) · V</div>
+        <div class="formula-dims">Q, K ∈ ℝ<sup>N × d_k</sup>, V ∈ ℝ<sup>N × d_v</sup> → Attention Weights A ∈ ℝ<sup>N × N</sup> → Output ∈ ℝ<sup>N × d_v</sup></div>
+      </div>
+
+      <!-- Live Attention Heatmap & Scaling Slider Box -->
+      <div class="eigensight-hud-box">
+        <div class="hud-header">
+          <div class="hud-title">
+            <span class="hud-title-dot"></span>
+            <span>LIVE ATTENTION CALCULATOR & MATRIX SCANNER (ANIMATED)</span>
+          </div>
+          <span class="hud-chip" id="entropyBadge">ENTROPY: 2.14 bits</span>
+        </div>
+        <div class="hud-content">
+          <div style="margin-bottom:14px;">
+            <label style="font-family:var(--font-mono); font-size:11px; color:var(--hud-cyan); display:block; margin-bottom:6px;">PROBE SENTENCE (EDIT TEXT TO RECOMPUTE MATRIX LIVE):</label>
+            <input type="text" id="attnSentenceInput" value="The animal didn't cross the street because it was too tired" 
+                   style="width:100%; background:#05070A; border:1px solid rgba(255,255,255,0.18); border-radius:4px; padding:10px 14px; font-family:var(--font-mono); font-size:12px; color:#fff;" />
+          </div>
+
+          <div style="background:#05070A; border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:14px; overflow-x:auto;" id="heatmapContainer">
+            <!-- Dynamic SVG Matrix injected via JS -->
+          </div>
+
+          <div class="hud-bar">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="color:var(--coral-accent); font-family:var(--font-mono); font-weight:bold;">TEMPERATURE SCALE (√d_k):</span>
+              <input type="range" id="tempScaleSlider" min="1.0" max="24.0" step="0.5" value="8.0" class="hud-slider" />
+              <span id="tempScaleVal" style="font-family:var(--font-mono); font-weight:bold; color:var(--coral-accent);">8.0</span>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-muted);">
+              Notice at √d_k=1 (unscaled), attention hardens into a single one-hot peak. At 8.0, it is beautifully calibrated.
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 06: MULTI-HEAD ATTENTION
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-05">
+      <div class="chapter-meta">
+        <span class="chapter-badge">06 / MULTI-HEAD ATTENTION</span>
+        <span class="chapter-time">10 min read</span>
+      </div>
+      <h2 class="chapter-title">Multi-Head Attention: Subspace Specialization</h2>
+      <div class="chapter-subtitle">Jointly attending to information from different representation subspaces</div>
+
+      <div class="chapter-body">
+        <p>
+          Instead of performing a single attention function with 512-dimensional vectors, the authors linearly project queries, keys, and values $h=8$ times with learned projections to dimension $d_k = d_v = d_{model}/h = 64$.
+        </p>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">MULTI-HEAD FORMULATION</div>
+        <div class="formula-main">MultiHead(Q,K,V) = Concat(head<sub>1</sub>, ..., head<sub>8</sub>) · W<sup>O</sup>, &nbsp; head<sub>i</sub> = Attention(Q·W<sub>i</sub><sup>Q</sup>, K·W<sub>i</sub><sup>K</sup>, V·W<sub>i</sub><sup>V</sup>)</div>
+        <div class="formula-dims">W_i^Q, W_i^K, W_i^V ∈ ℝ^{512 × 64}, W^O ∈ ℝ^{512 × 512} · Total compute identical to single full attention</div>
+      </div>
+
+      <!-- Multi-Head Subspace Switcher Box -->
+      <div class="eigensight-hud-box">
+        <div class="hud-header">
+          <div class="hud-title">
+            <span class="hud-title-dot"></span>
+            <span>8-HEAD SPECIALIZATION INSPECTOR & LASER PROJECTIONS</span>
+          </div>
+          <span class="hud-chip" id="activeHeadChip">HEAD 1: COREFERENCE</span>
+        </div>
+        <div class="hud-content">
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+            <button class="hud-btn cyan-active head-toggle-btn" data-head="0">Head 0: Syntax (Subject-Verb)</button>
+            <button class="hud-btn head-toggle-btn" data-head="1">Head 1: Coreference ("it" → "animal")</button>
+            <button class="hud-btn head-toggle-btn" data-head="2">Head 2: Adjacent Proximity (i ± 1)</button>
+            <button class="hud-btn head-toggle-btn" data-head="3">Head 3: Direct Object Alignment</button>
+            <button class="hud-btn head-toggle-btn" data-head="4">Head 4: Semantic Topic Clustering</button>
+            <button class="hud-btn head-toggle-btn" data-head="5">Head 5: Prepositional Modifiers</button>
+            <button class="hud-btn head-toggle-btn" data-head="6">Head 6: Global Sentence Context</button>
+            <button class="hud-btn head-toggle-btn" data-head="7">Head 7: Delimiter & Punctuation</button>
+          </div>
+          <div style="background:#05070A; border:1px solid rgba(255,255,255,0.08); padding:16px; border-radius:4px; font-family:var(--font-mono); font-size:12px; color:var(--hud-cyan);" id="headDetailsBox">
+            <!-- Dynamic info injected via JS -->
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 07: POSITION-WISE FEED-FORWARD NETWORKS
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-06">
+      <div class="chapter-meta">
+        <span class="chapter-badge">07 / SUBLAYERS: FFN</span>
+        <span class="chapter-time">7 min read</span>
+      </div>
+      <h2 class="chapter-title">Position-Wise Feed-Forward Networks as Associative Memories</h2>
+      <div class="chapter-subtitle">Non-linear projection expanding 4× from 512 to 2048 and contracting back</div>
+
+      <div class="chapter-body">
+        <p>
+          Each layer contains a fully connected feed-forward network applied to each position separately and identically:
+        </p>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">FEED-FORWARD EQUATION</div>
+        <div class="formula-main">FFN(x) = max(0, x · W<sub>1</sub> + b<sub>1</sub>) · W<sub>2</sub> + b<sub>2</sub></div>
+        <div class="formula-dims">W_1 ∈ ℝ^{512 × 2048}, W_2 ∈ ℝ^{2048 × 512} · 2/3 of total Transformer parameters live in FFN</div>
+      </div>
+
+      <!-- FFN Dimension Expansion HUD Box (Animated Neurons) -->
+      <div class="eigensight-hud-box">
+        <div class="hud-header">
+          <div class="hud-title">
+            <span class="hud-title-dot"></span>
+            <span>FFN 4× DIMENSIONAL EXPANSION & FIRING RELU NEURONS</span>
+          </div>
+          <span class="hud-chip">KEY-VALUE MEMORY</span>
+        </div>
+        <div class="hud-content">
+          <div style="display:grid; grid-template-columns:1fr auto 2fr auto 1fr; align-items:center; gap:12px; font-family:var(--font-mono); font-size:11px; text-align:center;">
+            <div style="background:#131920; border:1px solid rgba(255,255,255,0.1); padding:18px 8px; border-radius:4px;">
+              <div style="color:var(--hud-cyan); font-weight:bold;">INPUT x</div>
+              <div style="font-size:14px; color:#fff; margin-top:4px;">d = 512</div>
+            </div>
+            <div style="color:var(--coral-accent); font-weight:bold; font-size:18px;">→ W₁ →</div>
+            <div style="background:#131920; border:1px solid var(--coral-accent); padding:18px 8px; border-radius:4px;">
+              <div style="color:var(--coral-accent); font-weight:bold;">EXPANDED & RELU ACTIVATED</div>
+              <div style="font-size:16px; color:#fff; font-weight:bold; margin-top:4px;">d<sub>ff</sub> = 2048</div>
+              <div style="font-size:10px; color:var(--hud-emerald); margin-top:4px;" id="ffnNeuronStatus">⚡ 342 / 2048 Neurons Firing</div>
+            </div>
+            <div style="color:var(--hud-emerald); font-weight:bold; font-size:18px;">→ W₂ →</div>
+            <div style="background:#131920; border:1px solid rgba(255,255,255,0.1); padding:18px 8px; border-radius:4px;">
+              <div style="color:var(--hud-emerald); font-weight:bold;">OUTPUT</div>
+              <div style="font-size:14px; color:#fff; margin-top:4px;">d = 512</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 08: RESIDUAL HIGHWAYS & LAYERNORM
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-07">
+      <div class="chapter-meta">
+        <span class="chapter-badge">08 / RESIDUAL & LAYERNORM</span>
+        <span class="chapter-time">7 min read</span>
+      </div>
+      <h2 class="chapter-title">Residual Connections & Layer Normalization</h2>
+      <div class="chapter-subtitle">Gradient highways preserving backpropagation through deep stacks</div>
+
+      <div class="chapter-body">
+        <p>
+          Every sub-layer in both encoder and decoder is wrapped in a residual connection followed by layer normalization:
+        </p>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">ADD & NORM RESIDUAL EQUATION</div>
+        <div class="formula-main">Output = LayerNorm( x + Sublayer(x) )</div>
+        <div class="formula-dims">LayerNorm(z) = [ (z - μ) / √(σ² + ε) ] ⊙ γ + β (computed across d_model independently for each token)</div>
+      </div>
+
+      <div class="chapter-body">
+        <p>
+          The residual connection $x + f(x)$ creates an unbroken identity gradient highway $\partial L / \partial x = \partial L / \partial y \cdot (1 + \partial f / \partial x)$. Even if gradients through the sub-layer vanish, the signal persists undiminished via the $1$ term!
+        </p>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 09: CAUSAL DECODER & MASKING
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-08">
+      <div class="chapter-meta">
+        <span class="chapter-badge">09 / DECODER & CAUSALITY</span>
+        <span class="chapter-time">8 min read</span>
+      </div>
+      <h2 class="chapter-title">The Autoregressive Decoder & Causal Masking</h2>
+      <div class="chapter-subtitle">Enforcing the auto-regressive property during parallel training</div>
+
+      <div class="chapter-body">
+        <p>
+          During inference, language models generate tokens one by one: token $t$ depends strictly on $w_1, \dots, w_{t-1}$. But training sequentially would ruin GPU throughput.
+        </p>
+        <p>
+          <strong>Causal Masking resolves this:</strong> All target tokens are fed into the decoder concurrently, but an upper-triangular mask of $-\infty$ is added to the dot-product logits prior to softmax. Since $e^{-\infty} = 0$, attention to future tokens is mathematically prohibited!
+        </p>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">CAUSAL MASK DEFINITION</div>
+        <div class="formula-main">M<sub>ij</sub> = 0 if j ≤ i &nbsp;|&nbsp; -∞ if j > i &nbsp;⟹&nbsp; softmax( (QK<sup>T</sup> / √d<sub>k</sub>) + M )</div>
+        <div class="formula-dims">Ensures exact mathematical equivalence between parallel training and step-by-step inference</div>
+      </div>
+
+      <!-- Interactive Step-by-Step Decoder & Cross-Layer Processor Deck -->
+      <div class="eigensight-hud-box">
+        <div class="hud-header">
+          <div class="hud-title">
+            <span class="hud-title-dot"></span>
+            <span>AUTOREGRESSIVE DECODER & CROSS-LAYER PROCESSING STUDIO (1 TOKEN AT A TIME)</span>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <span class="hud-chip" id="decoderStepChip">TOKEN 3 / 10</span>
+            <span class="hud-chip" id="decoderLayerChip" style="border-color:var(--hud-cyan); color:var(--hud-cyan);">LAYER 1 / 6</span>
+          </div>
+        </div>
+        <div class="hud-content">
+          <!-- Step 1: Sequence Bar (One Token at a Time) -->
+          <div style="margin-bottom:16px;">
+            <div style="font-family:var(--font-mono); font-size:11px; color:var(--hud-muted); margin-bottom:8px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;">
+              <span>AUTOREGRESSIVE SEQUENCE EMISSION:</span>
+              <span id="arSeqStatus" style="color:var(--coral-accent); font-weight:bold;">GENERATING TOKEN t=2: "attention"</span>
+            </div>
+            <div id="arTokenSequenceBar" style="display:flex; flex-wrap:wrap; gap:6px; background:#05070A; padding:10px 14px; border-radius:4px; border:1px solid rgba(255,255,255,0.08);">
+              <!-- Generated tokens injected via JS -->
+            </div>
+          </div>
+
+          <!-- Dual Deck: Causal Mask Matrix + Cross-Layer Pipeline -->
+          <div style="display:grid; grid-template-columns: 1fr 1.35fr; gap:16px; margin-bottom:16px;">
+            <!-- Left: Causal Attention Mask Matrix -->
+            <div style="background:#05070A; border:1px solid rgba(255,255,255,0.08); padding:14px; border-radius:4px;">
+              <div style="font-family:var(--font-mono); font-size:10.5px; color:var(--hud-cyan); font-weight:bold; margin-bottom:8px; display:flex; justify-content:space-between;">
+                <span>CAUSAL MASK MATRIX (t × t)</span>
+                <span style="font-size:9.5px; color:var(--coral-accent);">-∞ CAUSAL LOCKS</span>
+              </div>
+              <div id="causalMaskGrid" style="margin-bottom:8px;">
+                <!-- Grid injected via JS -->
+              </div>
+              <div style="font-family:var(--font-mono); font-size:9.5px; color:var(--hud-muted); line-height:1.4;">
+                Row i can only attend to columns j ≤ i. Future positions (j > i) receive -∞ logit penalty before softmax.
+              </div>
+            </div>
+
+            <!-- Right: Cross-Layer Token Processing Engine (Layer 1 to 6) -->
+            <div style="background:#05070A; border:1px solid rgba(255,255,255,0.08); padding:14px; border-radius:4px; display:flex; flex-direction:column; justify-content:space-between;">
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+                  <span style="font-family:var(--font-mono); font-size:10.5px; color:var(--hud-emerald); font-weight:bold;">
+                    CROSS-LAYER PIPELINE FOR ACTIVE TOKEN:
+                  </span>
+                  <div style="display:flex; gap:4px;" id="crossLayerBtnGroup">
+                    <button class="hud-btn active" data-layer="1" style="padding:2px 7px; font-size:9.5px;">L1</button>
+                    <button class="hud-btn" data-layer="2" style="padding:2px 7px; font-size:9.5px;">L2</button>
+                    <button class="hud-btn" data-layer="3" style="padding:2px 7px; font-size:9.5px;">L3</button>
+                    <button class="hud-btn" data-layer="4" style="padding:2px 7px; font-size:9.5px;">L4</button>
+                    <button class="hud-btn" data-layer="5" style="padding:2px 7px; font-size:9.5px;">L5</button>
+                    <button class="hud-btn" data-layer="6" style="padding:2px 7px; font-size:9.5px;">L6</button>
+                  </div>
+                </div>
+
+                <!-- 4 Sub-layer breakdown cards -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-family:var(--font-mono); font-size:10px;">
+                  <!-- Sublayer 1: Self-Attention Value Addition -->
+                  <div style="background:#0A0D12; border:1px solid rgba(0,255,204,0.2); padding:10px; border-radius:3px;">
+                    <div style="color:var(--hud-cyan); font-weight:bold; margin-bottom:4px; font-size:9.5px;">1. MASKED SELF-ATTN</div>
+                    <div style="color:#FAF9F5; font-size:9px; margin-bottom:4px;">Target Context Addition:</div>
+                    <div id="selfAttnValueBreakdown" style="color:var(--hud-muted); font-size:9px; line-height:1.4;">
+                      <!-- Injected via JS -->
+                    </div>
+                  </div>
+
+                  <!-- Sublayer 2: Cross-Attention Value Addition -->
+                  <div style="background:#0A0D12; border:1px solid rgba(222,93,53,0.3); padding:10px; border-radius:3px;">
+                    <div style="color:var(--coral-accent); font-weight:bold; margin-bottom:4px; font-size:9.5px;">2. CROSS-ATTN (ENCODER)</div>
+                    <div style="color:#FAF9F5; font-size:9px; margin-bottom:4px;">Source Context Addition:</div>
+                    <div id="crossAttnValueBreakdown" style="color:var(--hud-muted); font-size:9px; line-height:1.4;">
+                      <!-- Injected via JS -->
+                    </div>
+                  </div>
+
+                  <!-- Sublayer 3: FFN Associative Expansion -->
+                  <div style="background:#0A0D12; border:1px solid rgba(255,255,255,0.08); padding:10px; border-radius:3px;">
+                    <div style="color:var(--hud-emerald); font-weight:bold; margin-bottom:4px; font-size:9.5px;">3. POSITION-WISE FFN</div>
+                    <div style="color:#FAF9F5; font-size:9px;">Expansion: 512 ⟶ 2048 ⟶ 512</div>
+                    <div id="ffnNeuronStatus" style="color:var(--hud-muted); font-size:9px; margin-top:2px;">
+                      Active Neurons: 412 / 2048 (Sparsity: 79.9%)
+                    </div>
+                  </div>
+
+                  <!-- Sublayer 4: Residual Add & LayerNorm -->
+                  <div style="background:#0A0D12; border:1px solid rgba(255,255,255,0.08); padding:10px; border-radius:3px;">
+                    <div style="color:#FAF9F5; font-weight:bold; margin-bottom:4px; font-size:9.5px;">4. ADD & LAYERNORM</div>
+                    <div style="color:var(--hud-cyan); font-size:9px;">x + Sublayer(x)</div>
+                    <div id="layerNormVariance" style="color:var(--hud-muted); font-size:9px; margin-top:2px;">
+                      μ = 0.00, σ² = 1.00 (Normalized)
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Context Vector Similarity Radar -->
+              <div style="margin-top:10px; background:#020406; border:1px solid rgba(255,255,255,0.06); padding:8px 12px; border-radius:3px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                <div style="font-family:var(--font-mono); font-size:9.5px; color:var(--hud-muted);" id="clVectorMetric">
+                  Token vector shifted through L1: cos(v_target, v_english_attn) = +0.78
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <button class="hud-btn" id="btnStepLayerNext" style="padding:4px 8px; font-size:10px; border-color:var(--hud-cyan);">STEP LAYER ▶</button>
+                  <button class="hud-btn" id="btnAutoPlayLayers" style="padding:4px 8px; font-size:10px;">PLAY L1→L6</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Control Bar -->
+          <div class="hud-bar">
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              <button class="hud-btn" id="btnPrevDecode">◀ PREVIOUS TOKEN</button>
+              <button class="hud-btn active" id="btnNextDecode">NEXT TOKEN ▶</button>
+              <button class="hud-btn" id="btnAutoDecodeSequence">AUTOREGRESSIVE FULL RUN</button>
+              <button class="hud-btn" id="btnResetDecode">RESET TO STEP 1</button>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:11px; color:var(--hud-cyan);" id="currentGenTokenLabel">
+              Currently Predicting: "attention"
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 10: CROSS-ATTENTION
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-09">
+      <div class="chapter-meta">
+        <span class="chapter-badge">10 / CROSS-ATTENTION</span>
+        <span class="chapter-time">8 min read</span>
+      </div>
+      <h2 class="chapter-title">Cross-Attention: The Encoder-Decoder Bridge</h2>
+      <div class="chapter-subtitle">Queries from the Decoder attend over Keys and Values from the Encoder</div>
+
+      <div class="chapter-body">
+        <p>
+          In the middle sub-layer of every decoder layer, the model performs cross-attention. Here, the <strong>Queries</strong> come from the previous decoder sub-layer (representing what has been translated so far), while the <strong>Keys and Values</strong> come from the final output of the 6-layer encoder stack (representing the full source sentence).
+        </p>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">CROSS-ATTENTION EQUATION</div>
+        <div class="formula-main">Q = Decoder<sub>prev</sub> · W<sup>Q</sup>, &nbsp; K = Encoder<sub>final</sub> · W<sup>K</sup>, &nbsp; V = Encoder<sub>final</sub> · W<sup>V</sup></div>
+        <div class="formula-dims">Attention matrix shape is [N_target × N_source] (bipartite language translation alignment)</div>
+      </div>
+
+      <!-- Interactive Cross-Attention Alignment Box -->
+      <div class="eigensight-hud-box">
+        <div class="hud-header">
+          <div class="hud-title">
+            <span class="hud-title-dot"></span>
+            <span>CROSS-ATTENTION ALIGNMENT (ENGLISH → FRENCH)</span>
+          </div>
+          <span class="hud-chip">SEQ-TO-SEQ BRIDGE</span>
+        </div>
+        <div class="hud-content">
+          <div id="crossAlignSvgWrap" style="background:#05070A; border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:16px;">
+            <!-- SVG alignment injected via JS -->
+          </div>
+          <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-muted); margin-top:8px;">
+            Click on any French target token to trace cross-attention query rays back to corresponding English source tokens.
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 11: OPTIMIZATION & TRAINING REGIME
+         ====================================================================== -->
+    <article class="chapter-card" id="ch-10">
+      <div class="chapter-meta">
+        <span class="chapter-badge">11 / OPTIMIZATION</span>
+        <span class="chapter-time">6 min read</span>
+      </div>
+      <h2 class="chapter-title">Training Regime, Noam Warmup & Regularization</h2>
+      <div class="chapter-subtitle">Stabilizing early attention weights with dynamic learning rate scheduling</div>
+
+      <div class="chapter-body">
+        <p>
+          Training transformers requires delicate optimization. The authors employed the Adam optimizer with $\beta_1 = 0.9, \beta_2 = 0.98, \epsilon = 10^{-9}$ and designed the <strong>Noam Learning Rate Schedule</strong>:
+        </p>
+      </div>
+
+      <div class="formula-callout">
+        <div class="formula-tag">NOAM LEARNING RATE FORMULA</div>
+        <div class="formula-main">lrate = d<sub>model</sub><sup>-0.5</sup> · min( step<sup>-0.5</sup>, &nbsp; step · warmup_steps<sup>-1.5</sup> )</div>
+        <div class="formula-dims">warmup_steps = 4000 · Increases linearly for 4k steps, then decays with inverse square root of step number</div>
+      </div>
+
+      <!-- Interactive Learning Rate Curve Box -->
+      <div class="eigensight-hud-box">
+        <div class="hud-header">
+          <div class="hud-title">
+            <span class="hud-title-dot"></span>
+            <span>NOAM LEARNING RATE WARMUP & DECAY PLOT</span>
+          </div>
+          <span class="hud-chip" id="lrValueChip">LR: 0.00070 at step 4000</span>
+        </div>
+        <div class="hud-content">
+          <canvas id="lrCanvas" width="800" height="180" style="width:100%; height:180px; background:#05070A; border-radius:4px; border:1px solid rgba(255,255,255,0.08);"></canvas>
+          <div class="hud-bar">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="color:var(--hud-cyan); font-family:var(--font-mono);">INSPECT TRAINING STEP:</span>
+              <input type="range" id="lrStepSlider" min="100" max="40000" step="200" value="4000" class="hud-slider" />
+              <span id="lrStepVal" style="font-family:var(--font-mono); color:var(--hud-cyan); font-weight:bold;">4000</span>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-muted);">
+              Notice linear warmup up to step 4,000 to prevent early gradient collapse, followed by gentle inverse square-root decay.
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ======================================================================
+         CHAPTER 12: BENCHMARK & PARAMETER HUD
+         ====================================================================== -->
+    <article class="chapter-card" id="benchmark">
+      <div class="chapter-meta">
+        <span class="chapter-badge">12 / BENCHMARK & SPECIFICATIONS</span>
+        <span class="chapter-time">Reference Guide</span>
+      </div>
+      <h2 class="chapter-title">Transformer Benchmark & Specifications Deck</h2>
+      <div class="chapter-subtitle">Parameter accounting and architectural complexity breakdown (Vaswani Table 3)</div>
+
+      <div class="eigensight-hud-box" style="margin-top:20px;">
+        <div class="hud-header">
+          <div class="hud-title">
+            <span class="hud-title-dot"></span>
+            <span>SIH TRANSFORMER BENCHMARK SPECIFICATIONS</span>
+          </div>
+          <span class="hud-chip">OFFICIAL NUMBERS</span>
+        </div>
+        <div class="hud-content">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:20px;">
+            <div style="background:#0E1217; padding:14px; border:1px solid rgba(255,255,255,0.08); border-radius:4px;">
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-muted);">BASE MODEL (d=512, h=8)</div>
+              <div style="font-family:var(--font-mono); font-size:24px; font-weight:bold; color:var(--hud-cyan); margin-top:4px;">65.2 Million</div>
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-emerald); margin-top:2px;">WMT'14 En-De: 27.3 BLEU</div>
+            </div>
+            <div style="background:#0E1217; padding:14px; border:1px solid rgba(255,255,255,0.08); border-radius:4px;">
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-muted);">BIG MODEL (d=1024, h=16)</div>
+              <div style="font-family:var(--font-mono); font-size:24px; font-weight:bold; color:var(--coral-accent); margin-top:4px;">213.8 Million</div>
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-emerald); margin-top:2px;">WMT'14 En-De: 28.4 BLEU (SOTA)</div>
+            </div>
+            <div style="background:#0E1217; padding:14px; border:1px solid rgba(255,255,255,0.08); border-radius:4px;">
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-muted);">TRAINING SPEEDUP</div>
+              <div style="font-family:var(--font-mono); font-size:24px; font-weight:bold; color:#fff; margin-top:4px;">3.5 Days</div>
+              <div style="font-family:var(--font-mono); font-size:10px; color:var(--hud-muted); margin-top:2px;">8 × NVIDIA P100 GPUs</div>
+            </div>
+          </div>
+
+          <div style="font-family:var(--font-mono); font-size:11px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:var(--hud-muted);">
+              <span>PARAMETER DISTRIBUTION</span>
+              <span>BASE: 65.2M / BIG: 213.8M</span>
+            </div>
+            <div style="height:10px; background:rgba(255,255,255,0.08); border-radius:999px; display:flex; overflow:hidden;">
+              <div style="width:30.5%; background:var(--hud-cyan);" title="Base Model (30.5%)"></div>
+              <div style="width:69.5%; background:var(--coral-accent);" title="Big Model Expansion (69.5%)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Footer (Bennett AI Society) -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <div style="font-family:var(--font-display); font-size:18px; font-weight:800; color:#fff; margin-bottom:6px;">
+          AI Society — Bennett University
+        </div>
+        <p style="color:var(--text-muted); max-width:44ch;">
+          Training Minds, One Epoch at a Time. Official open educational archive for Transformer Architecture & Deep Learning Systems.
+        </p>
+      </div>
+      <div>
+        <div style="color:var(--coral-accent); font-weight:bold; margin-bottom:4px;">RESEARCH CONTACT</div>
+        <a href="mailto:ais@bennett.edu.in" style="color:#FAF9F5; text-decoration:none;">ais@bennett.edu.in</a>
+        <div style="color:var(--text-muted); font-size:11px; margin-top:2px;">Plot Nos 8–11, TechZone II, Greater Noida, UP 201310</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ======================================================================
+       INTERACTIVE ANIMATION LOGIC & EMBEDDED EIGENSIGHT ENGINES
+       ====================================================================== -->
+  <script>
+  (() => {
+    'use strict';
+
+    // ------------------------------------------------------------------------
+    // 1. CHAPTER 01 ARCHITECTURE STUDIO (CANONICAL BLUEPRINT & 3D ENGINE)
+    // ------------------------------------------------------------------------
+    const tabCanonical = document.getElementById('tabCanonicalPaper');
+    const tab3d = document.getElementById('tab3dEngine');
+    const tabSplit = document.getElementById('tabSplitView');
+    const archContainer = document.getElementById('archViewsContainer');
+    const paneCanonical = document.getElementById('canonicalPaperPane');
+    const pane3d = document.getElementById('engine3dPane');
+
+    const canvas3d = document.getElementById('main3dCanvas');
+    const ctx3d = canvas3d.getContext('2d');
+    const fpsReadout = document.getElementById('fpsReadout');
+
+    let animPlaying = true;
+    let animSpeed = 1.0;
+    let camAzimuth = 0.04;
+    let camElevation = 0.12;
+    let camDistance = 450;
+    let targetAzimuth = 0.04;
+    let targetElevation = 0.12;
+    let targetDistance = 450;
+
+    // Architecture View Tabs Switcher
+    function setArchMode(mode) {
+      tabCanonical.classList.remove('active');
+      tab3d.classList.remove('active');
+      tabSplit.classList.remove('active');
+      archContainer.classList.remove('mode-split');
+
+      if (mode === 'canonical') {
+        tabCanonical.classList.add('active');
+        paneCanonical.style.display = 'flex';
+        pane3d.style.display = 'none';
+      } else if (mode === '3d') {
+        tab3d.classList.add('active');
+        paneCanonical.style.display = 'none';
+        pane3d.style.display = 'block';
+        resize3d();
+      } else if (mode === 'split') {
+        tabSplit.classList.add('active');
+        archContainer.classList.add('mode-split');
+        paneCanonical.style.display = 'flex';
+        pane3d.style.display = 'block';
+        resize3d();
+      }
+    }
+
+    if (tabCanonical && tab3d && tabSplit) {
+      tabCanonical.addEventListener('click', () => setArchMode('canonical'));
+      tab3d.addEventListener('click', () => setArchMode('3d'));
+      tabSplit.addEventListener('click', () => setArchMode('split'));
+    }
+
+    // Interactive Canonical Diagram Inspector Data
+    const compSpecs = {
+      'output_probs': {
+        type: 'MODEL OUTPUT DISTRIBUTION',
+        title: 'Output Probabilities P(w_t | w_{<t})',
+        math: 'P(w) = softmax(z_t) = [p_1, p_2, ..., p_{37000}]',
+        dims: 'Normalized probability vector over |V| = 37,000 subwords',
+        link: '#ch-07',
+        btnText: 'EXPLORE EMBEDDINGS & SOFTMAX ▶'
+      },
+      'linear_softmax': {
+        type: 'FINAL PROJECTION SUBLAYER',
+        title: 'Linear Projection & Softmax Layer',
+        math: 'Logits = z · W_{embed}^T + b_{out}  ⇒  P = softmax(Logits / τ)',
+        dims: 'Weight matrix tied with input embedding: W ∈ ℝ^{37000 × 512}',
+        link: '#ch-07',
+        btnText: 'EXPLORE WEIGHT TYING ▶'
+      },
+      'decoder_norm': {
+        type: 'RESIDUAL NORMALIZATION',
+        title: 'Decoder Add & Layer Normalization',
+        math: 'Output = LayerNorm(x + Sublayer(x)),  μ = 0, σ² = 1',
+        dims: 'Normalizes across d_{model}=512 independently per token position',
+        link: '#ch-06',
+        btnText: 'EXPLORE LAYERNORM ▶'
+      },
+      'decoder_ffn': {
+        type: 'ASSOCIATIVE MEMORY SUBLAYER',
+        title: 'Decoder Position-Wise Feed-Forward Network',
+        math: 'FFN(x) = max(0, x W_1 + b_1) W_2 + b_2',
+        dims: 'W_1 ∈ ℝ^{512 × 2048}, W_2 ∈ ℝ^{2048 × 512} · 2/3 of layer parameters',
+        link: '#ch-05',
+        btnText: 'EXPLORE FEED FORWARD ▶'
+      },
+      'decoder_cross_mha': {
+        type: 'CROSS-ATTENTION BRIDGE',
+        title: 'Multi-Head Attention (Encoder-Decoder Cross-Attention)',
+        math: 'CrossAttn(Q_{dec}, K_{enc}, V_{enc}) = softmax(Q K^T / √d_k) V',
+        dims: 'Q from Decoder stack, Keys & Values from top of 6-layer Encoder',
+        link: '#ch-09',
+        btnText: 'EXPLORE CROSS-ATTENTION ▶'
+      },
+      'decoder_masked_mha': {
+        type: 'CAUSAL AUTOREGRESSIVE ATTENTION',
+        title: 'Masked Multi-Head Attention (Target Self-Attention)',
+        math: 'Attention(Q, K, V) = softmax((Q K^T / √d_k) + M) V,  M_{ij} = -∞ (j > i)',
+        dims: 'Causal mask forbids position i from attending to future tokens j > i',
+        link: '#ch-08',
+        btnText: 'EXPLORE CAUSAL MASKING ▶'
+      },
+      'output_embedding': {
+        type: 'TARGET REPRESENTATION',
+        title: 'Output Embedding (Shifted Right with <BOS>)',
+        math: 'y_t = TokenLookup(t) · √d_{model} + PE(t)',
+        dims: 'Token vocabulary |V| = 37,000, embedding dimension d_{model} = 512',
+        link: '#ch-07',
+        btnText: 'EXPLORE EMBEDDINGS ▶'
+      },
+      'encoder_norm': {
+        type: 'RESIDUAL NORMALIZATION',
+        title: 'Encoder Add & Layer Normalization',
+        math: 'x_{out} = LayerNorm(x + Sublayer(x))',
+        dims: 'Unbroken identity gradient highway: ∂L/∂x = ∂L/∂y · (1 + ∂f/∂x)',
+        link: '#ch-06',
+        btnText: 'EXPLORE RESIDUAL HIGHWAYS ▶'
+      },
+      'encoder_ffn': {
+        type: 'ASSOCIATIVE MEMORY SUBLAYER',
+        title: 'Encoder Position-Wise Feed-Forward Network',
+        math: 'FFN(x) = max(0, x W_1 + b_1) W_2 + b_2',
+        dims: 'Projects d_{model} = 512 → d_{ff} = 2048 → d_{model} = 512',
+        link: '#ch-05',
+        btnText: 'EXPLORE FEED FORWARD ▶'
+      },
+      'encoder_mha': {
+        type: 'GLOBAL CONTEXT FUSION',
+        title: 'Encoder Multi-Head Attention (Self-Attention)',
+        math: 'MultiHead(Q,K,V) = Concat(head_1, ..., head_8) W^O,  head_i = softmax(Q_i K_i^T / √64) V_i',
+        dims: 'h = 8 heads, d_k = d_v = 64, d_{model} = 512, complexity O(n²)',
+        link: '#ch-04',
+        btnText: 'EXPLORE MULTI-HEAD ATTENTION ▶'
+      },
+      'input_embedding': {
+        type: 'SOURCE TOKEN LOOKUP',
+        title: 'Input Embedding Table',
+        math: 'x = EmbeddingLookup(token_id) · √d_{model}',
+        dims: 'Matrix E ∈ ℝ^{37000 × 512}, scaled by factor √512 ≈ 22.627',
+        link: '#ch-tokenizer',
+        btnText: 'EXPLORE TOKENIZATION ▶'
+      },
+      'pos_encoding': {
+        type: 'POSITION INJECTION',
+        title: 'Sinusoidal Positional Encoding',
+        math: 'PE_{(pos, 2i)} = sin(pos / 10000^{2i/d}),  PE_{(pos, 2i+1)} = cos(pos / 10000^{2i/d})',
+        dims: 'Fixed sinusoidal wave basis added elementwise to token embedding vectors',
+        link: '#ch-02',
+        btnText: 'EXPLORE POSITIONAL ENCODING ▶'
+      }
+    };
+
+    const archNodes = document.querySelectorAll('.arch-svg-node');
+    const inspType = document.getElementById('archInspType');
+    const inspTitle = document.getElementById('archInspTitle');
+    const inspMath = document.getElementById('archInspMath');
+    const inspDims = document.getElementById('archInspDims');
+    const inspLink = document.getElementById('archInspLink');
+
+    archNodes.forEach(node => {
+      const compKey = node.getAttribute('data-component');
+      const spec = compSpecs[compKey];
+      if (!spec) return;
+
+      node.addEventListener('mouseenter', () => {
+        archNodes.forEach(n => n.classList.remove('is-selected'));
+        node.classList.add('is-selected');
+        inspType.textContent = spec.type;
+        inspTitle.textContent = spec.title;
+        inspMath.textContent = spec.math;
+        inspDims.textContent = spec.dims;
+        inspLink.href = spec.link;
+        inspLink.textContent = spec.btnText;
+      });
+
+      node.addEventListener('click', () => {
+        const targetEl = document.querySelector(spec.link);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // ------------------------------------------------------------------------
+    // 3D EIGENSIGHT TRANSFORMER ENGINE (MATCHING MEDIA_1790367186336.PNG)
+    // ------------------------------------------------------------------------
+    function resize3d() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = canvas3d.clientWidth || 980;
+      const h = canvas3d.clientHeight || 540;
+      if (canvas3d.width !== w * dpr || canvas3d.height !== h * dpr) {
+        canvas3d.width = w * dpr;
+        canvas3d.height = h * dpr;
+      }
+    }
+
+    function project3d(x, y, z, cx, cy) {
+      const cosA = Math.cos(camAzimuth);
+      const sinA = Math.sin(camAzimuth);
+      const cosE = Math.cos(camElevation);
+      const sinE = Math.sin(camElevation);
+
+      const x1 = x * cosA - z * sinA;
+      const z1 = x * sinA + z * cosA;
+
+      const y2 = y * cosE - z1 * sinE;
+      const z2 = y * sinE + z1 * cosE;
+
+      const fov = 440;
+      const depth = camDistance + z2;
+      if (depth <= 10) return null;
+
+      const scale = fov / depth;
+      return {
+        x: cx + x1 * scale,
+        y: cy - y2 * scale,
+        scale: scale,
+        depth: depth
+      };
+    }
+
+    let isDragging = false;
+    let lastMouse = [0, 0];
+    canvas3d.addEventListener('mousedown', e => {
+      isDragging = true;
+      lastMouse = [e.clientX, e.clientY];
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastMouse[0];
+      const dy = e.clientY - lastMouse[1];
+      lastMouse = [e.clientX, e.clientY];
+      targetAzimuth += dx * 0.007;
+      targetElevation = Math.max(-0.4, Math.min(1.0, targetElevation + dy * 0.007));
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+
+    canvas3d.addEventListener('wheel', e => {
+      e.preventDefault();
+      targetDistance = Math.max(220, Math.min(750, targetDistance + e.deltaY * 0.4));
+    }, { passive: false });
+
+    // Dense High-Tech Particles System matching Eigensight screenshot
+    const particles = [];
+    for (let i = 0; i < 350; i++) {
+      const isCross = Math.random() < 0.28;
+      const isEncoder = !isCross && Math.random() < 0.5;
+      particles.push({
+        type: isCross ? 'cross' : (isEncoder ? 'encoder' : 'decoder'),
+        progress: Math.random(),
+        speed: 0.22 + Math.random() * 0.48,
+        offset: (Math.random() - 0.5) * 24,
+        size: 1.8 + Math.random() * 2.2
+      });
+    }
+
+    let lastTime = performance.now();
+    let frameCount = 0;
+    let lastFpsUpdate = performance.now();
+
+    function render3dLoop(now) {
+      resize3d();
+      const dt = Math.min(0.1, (now - lastTime) / 1000);
+      lastTime = now;
+
+      frameCount++;
+      if (now - lastFpsUpdate >= 1000) {
+        const fps = Math.round(frameCount * 1000 / (now - lastFpsUpdate));
+        fpsReadout.textContent = `${fps} FPS · LIVE GPU`;
+        frameCount = 0;
+        lastFpsUpdate = now;
+      }
+
+      camAzimuth += (targetAzimuth - camAzimuth) * 0.12;
+      camElevation += (targetElevation - camElevation) * 0.12;
+      camDistance += (targetDistance - camDistance) * 0.12;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = canvas3d.width;
+      const h = canvas3d.height;
+      const cx = w / 2;
+      const cy = h / 2 + 50 * dpr;
+
+      ctx3d.clearRect(0, 0, w, h);
+
+      // Clean Grid Floor (Cyan Wireframe Grid)
+      ctx3d.strokeStyle = 'rgba(0, 255, 204, 0.12)';
+      ctx3d.lineWidth = 1 * dpr;
+      ctx3d.beginPath();
+      for (let i = -240; i <= 240; i += 40) {
+        const p1 = project3d(i, -135, -200, cx, cy);
+        const p2 = project3d(i, -135, 200, cx, cy);
+        if (p1 && p2) { ctx3d.moveTo(p1.x, p1.y); ctx3d.lineTo(p2.x, p2.y); }
+        const p3 = project3d(-240, -135, i, cx, cy);
+        const p4 = project3d(240, -135, i, cx, cy);
+        if (p3 && p4) { ctx3d.moveTo(p3.x, p3.y); ctx3d.lineTo(p4.x, p4.y); }
+      }
+      ctx3d.stroke();
+
+      // Precision Sleek Blocks matching Eigensight styling
+      function drawSleekBlock(x, y, z, bw, bh, color, strokeColor, tag, subtag) {
+        const pCenter = project3d(x, y, z, cx, cy);
+        if (!pCenter) return;
+        const scale = pCenter.scale;
+        const sw = bw * scale * dpr;
+        const sh = bh * scale * dpr;
+
+        ctx3d.fillStyle = color;
+        ctx3d.strokeStyle = strokeColor;
+        ctx3d.lineWidth = 1.3 * dpr;
+        ctx3d.fillRect(pCenter.x - sw / 2, pCenter.y - sh / 2, sw, sh);
+        ctx3d.strokeRect(pCenter.x - sw / 2, pCenter.y - sh / 2, sw, sh);
+
+        if (tag && scale > 0.55) {
+          ctx3d.fillStyle = '#FFFFFF';
+          ctx3d.font = `bold ${Math.round(8.5 * scale * dpr)}px "IBM Plex Mono", monospace`;
+          ctx3d.textAlign = 'center';
+          ctx3d.fillText(tag, pCenter.x, pCenter.y + (subtag ? -2 : 3) * scale * dpr);
+        }
+        if (subtag && scale > 0.65) {
+          ctx3d.fillStyle = strokeColor;
+          ctx3d.font = `${Math.round(7.2 * scale * dpr)}px "IBM Plex Mono", monospace`;
+          ctx3d.textAlign = 'center';
+          ctx3d.fillText(subtag, pCenter.x, pCenter.y + 7.5 * scale * dpr);
+        }
+      }
+
+      // ENCODER TOWER (X = -135)
+      drawSleekBlock(-135, -110, 0, 106, 18, '#0B151A', '#00ffcc', 'INPUT EMBEDDING', 'd=512 + SinPE');
+      for (let l = 0; l < 6; l++) {
+        const yBase = -70 + l * 44;
+        drawSleekBlock(-135, yBase, 0, 102, 14, '#1C120C', '#DE5D35', `ENC L${l+1}`, 'Multi-Head Attn');
+        drawSleekBlock(-135, yBase + 17, 0, 102, 14, '#0B1814', '#00ffcc', `ENC L${l+1}`, 'Feed-Forward 2048');
+      }
+
+      // DECODER TOWER (X = 135)
+      drawSleekBlock(135, -110, 0, 106, 18, '#0B151A', '#00ffcc', 'OUTPUT EMBEDDING', 'SHIFTED RIGHT + SinPE');
+      for (let l = 0; l < 6; l++) {
+        const yBase = -70 + l * 52;
+        drawSleekBlock(135, yBase, 0, 102, 13, '#1E0E18', '#ff4d88', `DEC L${l+1}`, 'Masked Self-Attn');
+        drawSleekBlock(135, yBase + 16, 0, 102, 13, '#0E1428', '#3b82f6', `DEC L${l+1}`, 'Cross-Attention');
+        drawSleekBlock(135, yBase + 32, 0, 102, 13, '#0B1814', '#00ffcc', `DEC L${l+1}`, 'Feed-Forward 2048');
+      }
+      drawSleekBlock(135, 260, 0, 106, 18, '#241A0B', '#f59e0b', 'LINEAR + SOFTMAX', '|V| = 37,000');
+
+      // Cross-Attention Highway Arc Line
+      ctx3d.strokeStyle = 'rgba(59, 130, 246, 0.55)';
+      ctx3d.lineWidth = 1.6 * dpr;
+      ctx3d.beginPath();
+      const pStart = project3d(-135, 175, 0, cx, cy);
+      const pEnd = project3d(135, 80, 0, cx, cy);
+      if (pStart && pEnd) {
+        ctx3d.moveTo(pStart.x, pStart.y);
+        ctx3d.bezierCurveTo(pStart.x + 80 * dpr, pStart.y - 70 * dpr, pEnd.x - 80 * dpr, pEnd.y - 70 * dpr, pEnd.x, pEnd.y);
+      }
+      ctx3d.stroke();
+
+      // Render Eigensight-Style Particles
+      if (animPlaying) {
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.progress = (p.progress + dt * p.speed * animSpeed) % 1.0;
+
+          let px = 0, py = 0, pz = p.offset;
+          let pCol = '#00ffcc';
+
+          if (p.type === 'encoder') {
+            px = -135 + p.offset * 0.6;
+            py = -110 + p.progress * 295;
+            pCol = '#00ffcc';
+          } else if (p.type === 'decoder') {
+            px = 135 + p.offset * 0.6;
+            py = -110 + p.progress * 375;
+            pCol = '#DE5D35';
+          } else {
+            const t = p.progress;
+            px = -135 + 270 * t;
+            py = 175 + (-95) * t + Math.sin(t * Math.PI) * 65;
+            pCol = '#3b82f6';
+          }
+
+          const proj = project3d(px, py, pz, cx, cy);
+          if (proj) {
+            ctx3d.fillStyle = pCol;
+            ctx3d.beginPath();
+            ctx3d.arc(proj.x, proj.y, p.size * proj.scale * dpr, 0, Math.PI * 2);
+            ctx3d.fill();
+          }
+        }
+      }
+
+      requestAnimationFrame(render3dLoop);
+    }
+
+    // Force first frame render immediately
+    render3dLoop(performance.now());
+
+    document.getElementById('btnToggleAnim').addEventListener('click', function() {
+      animPlaying = !animPlaying;
+      this.textContent = animPlaying ? 'PAUSE STREAM' : 'RESUME STREAM';
+      this.classList.toggle('active', !animPlaying);
+    });
+
+    const btnPresetFront = document.getElementById('btnPresetFront');
+    if (btnPresetFront) {
+      btnPresetFront.addEventListener('click', () => {
+        targetAzimuth = 0.04; targetElevation = 0.12; targetDistance = 450;
+      });
+    }
+    document.getElementById('btnPresetOverview').addEventListener('click', () => {
+      targetAzimuth = 0.45; targetElevation = 0.30; targetDistance = 460;
+    });
+    document.getElementById('btnPresetEncoder').addEventListener('click', () => {
+      targetAzimuth = -0.15; targetElevation = 0.18; targetDistance = 320;
+    });
+    document.getElementById('btnPresetDecoder').addEventListener('click', () => {
+      targetAzimuth = 0.25; targetElevation = 0.18; targetDistance = 320;
+    });
+    document.getElementById('btnPresetCross').addEventListener('click', () => {
+      targetAzimuth = 0.05; targetElevation = 0.40; targetDistance = 480;
+    });
+    const speedSlider = document.getElementById('speedSlider');
+    const speedVal = document.getElementById('speedVal');
+    speedSlider.addEventListener('input', e => {
+      animSpeed = Number(e.target.value);
+      speedVal.textContent = animSpeed.toFixed(1) + 'x';
+    });
+
+
+    // ------------------------------------------------------------------------
+    // 2. INTERACTIVE BPE TOKENIZER STUDIO (NEW!)
+    // ------------------------------------------------------------------------
+    const tokInput = document.getElementById('tokCustomInput');
+    const tokChipsDisplay = document.getElementById('tokenChipsDisplay');
+    const tokCountChip = document.getElementById('tokCountChip');
+    const tokInspectDetails = document.getElementById('tokenInspectDetails');
+
+    // Synthetic BPE Hash map for realistic subword segmentation
+    function simulateBPE(text) {
+      const words = text.trim().split(/\s+/).filter(Boolean);
+      const tokens = [];
+
+      words.forEach(word => {
+        const lower = word.toLowerCase().replace(/[^a-z0-9']/g, '');
+        if (lower === 'transformer') {
+          tokens.push({ text: 'transform', id: 4921, type: 'root' });
+          tokens.push({ text: '##er', id: 268, type: 'suffix' });
+        } else if (lower === 'tokenization') {
+          tokens.push({ text: 'token', id: 19202, type: 'root' });
+          tokens.push({ text: '##ization', id: 3104, type: 'suffix' });
+        } else if (lower === 'transduction') {
+          tokens.push({ text: 'trans', id: 8140, type: 'prefix' });
+          tokens.push({ text: '##duc', id: 18432, type: 'root' });
+          tokens.push({ text: '##tion', id: 940, type: 'suffix' });
+        } else if (lower === 'unbelievable') {
+          tokens.push({ text: 'un', id: 489, type: 'prefix' });
+          tokens.push({ text: '##believ', id: 14209, type: 'root' });
+          tokens.push({ text: '##able', id: 582, type: 'suffix' });
+        } else if (lower === "didn't") {
+          tokens.push({ text: 'did', id: 2106, type: 'word' });
+          tokens.push({ text: "n't", id: 1005, type: 'contraction' });
+        } else {
+          // Standard word or subword
+          let hash = 0;
+          for (let i = 0; i < lower.length; i++) hash = ((hash << 5) - hash) + lower.charCodeAt(i);
+          const pseudoId = Math.abs(hash) % 36000 + 500;
+          tokens.push({ text: word, id: pseudoId, type: 'word' });
+        }
+      });
+      return tokens;
+    }
+
+    function renderTokens() {
+      const tokens = simulateBPE(tokInput.value);
+      tokCountChip.textContent = `${tokens.length} TOKENS GENERATED`;
+
+      let html = '';
+      tokens.forEach((tok, idx) => {
+        const isSub = tok.text.startsWith('##');
+        const bg = isSub ? 'rgba(222, 93, 53, 0.2)' : 'rgba(0, 255, 204, 0.15)';
+        const border = isSub ? 'var(--coral-accent)' : 'var(--hud-cyan)';
+        const textCol = isSub ? '#ff8c69' : 'var(--hud-cyan)';
+
+        html += `
+          <div class="token-chip" style="background:${bg}; border:1px solid ${border}; color:${textCol};" onclick="window.__inspectToken(${idx})">
+            <span style="font-weight:bold;">${tok.text}</span>
+            <span style="font-size:9px; opacity:0.75; background:rgba(0,0,0,0.4); padding:1px 4px; border-radius:2px;">ID: ${tok.id}</span>
+          </div>
+        `;
+      });
+      tokChipsDisplay.innerHTML = html;
+      updateVectorTokens(tokens);
+    }
+
+    window.__inspectToken = idx => {
+      const tokens = simulateBPE(tokInput.value);
+      const tok = tokens[idx];
+      selectedTokenA = idx;
+      updateCosineMetricReadout();
+      tokInspectDetails.innerHTML = `
+        <div style="color:#FAF9F5; font-size:12px; font-weight:bold; margin-bottom:4px;">TOKEN: "${tok.text}" (Index ${idx})</div>
+        <div><strong>Vocabulary ID:</strong> <span style="color:var(--hud-cyan); font-weight:bold;">${tok.id}</span> / 37,000</div>
+        <div><strong>Token Type:</strong> ${tok.type.toUpperCase()}</div>
+        <div><strong>Bytes:</strong> [${Array.from(tok.text).map(c => c.charCodeAt(0)).join(', ')}]</div>
+        <div style="margin-top:4px; color:var(--hud-emerald);">Vector Row: EmbeddingTable[${tok.id}] ⟶ ℝ<sup>512</sup></div>
+      `;
+    };
+
+    // ------------------------------------------------------------------------
+    // 2B. 3D CONTINUOUS VECTOR SPACE PROJECTOR ENGINE (ℝ^{d_model} ⟶ ℝ³)
+    // ------------------------------------------------------------------------
+    const vecCanvas = document.getElementById('vectorSpaceCanvas');
+    const vecCtx = vecCanvas ? vecCanvas.getContext('2d') : null;
+    const vecChip = document.getElementById('vecCosineSimChip');
+    const vecStatus = document.getElementById('vectorMetricStatus');
+    const btnResetVecCam = document.getElementById('btnResetVecCam');
+    const btnToggleOriginVectors = document.getElementById('btnToggleOriginVectors');
+    const btnToggleSimArcs = document.getElementById('btnToggleSimArcs');
+    const btnAnimateSpin = document.getElementById('btnAnimateSpin');
+
+    let vecCam = {
+      azimuth: 0.65,
+      elevation: 0.38,
+      distance: 360,
+      targetAzimuth: 0.65,
+      targetElevation: 0.38,
+      targetDistance: 360
+    };
+
+    let showOriginVectors = true;
+    let showSimilarityArcs = true;
+    let isAutoSpinning = true;
+    let selectedTokenA = 0;
+    let selectedTokenB = 1;
+    let hoveredTokenIdx = -1;
+    let isDraggingVec = false;
+    let lastVecMouseX = 0;
+    let lastVecMouseY = 0;
+    let currentVectorTokens = [];
+    let vecPulseTick = 0;
+
+    // Vector Space Modes: 'static' | 'context' | 'autoregress'
+    let vecMode = 'static';
+    let vecContextDepth = 3;
+    let vecAutoStep = 2;
+    let vecAutoPlayInterval = null;
+
+    const btnModeStaticVec = document.getElementById('btnModeStaticVec');
+    const btnModeContextAdd = document.getElementById('btnModeContextAdd');
+    const btnModeAutoregress = document.getElementById('btnModeAutoregress');
+    const vecContextControlRow = document.getElementById('vecContextControlRow');
+    const vecContextDepthSlider = document.getElementById('vecContextDepthSlider');
+    const vecContextDepthVal = document.getElementById('vecContextDepthVal');
+    const btnStepContextDepth = document.getElementById('btnStepContextDepth');
+    const vecAutoregressControlRow = document.getElementById('vecAutoregressControlRow');
+    const btnVecAutoStepPrev = document.getElementById('btnVecAutoStepPrev');
+    const btnVecAutoStepNext = document.getElementById('btnVecAutoStepNext');
+    const btnVecAutoPlay = document.getElementById('btnVecAutoPlay');
+    const vecAutoStepBadge = document.getElementById('vecAutoStepBadge');
+
+    const SEMANTIC_VEC_MAP = {
+      'attention':   { x: 135, y: 75,  z: -45, dx: 25,  dy: 35,  dz: -10, cluster: 'Self-Attention Mechanism' },
+      'is':          { x: 20,  y: -45, z: -30, dx: 25,  dy: 20,  dz: 15,  cluster: 'Copular Verb / Syntactic' },
+      'all':         { x: 55,  y: -20, z: 55,  dx: 20,  dy: 25,  dz: -15, cluster: 'Universal Quantifier' },
+      'you':         { x: -30, y: -60, z: 40,  dx: 25,  dy: 30,  dz: -20, cluster: 'Second-Person Pronoun' },
+      'need':        { x: 95,  y: 35,  z: -65, dx: 35,  dy: 35,  dz: 20,  cluster: 'Modal Auxiliary Verb' },
+      'transform':   { x: 145, y: 85,  z: 50,  dx: 15,  dy: 20,  dz: 10,  cluster: 'Deep Architecture' },
+      '##er':        { x: 125, y: 105, z: 65,  dx: -15, dy: -20, dz: -15, cluster: 'Agentive Morpheme' },
+      'token':       { x: 60,  y: 125, z: -85, dx: 20,  dy: 15,  dz: 25,  cluster: 'Discrete Unit' },
+      '##ization':   { x: 80,  y: 140, z: -70, dx: -20, dy: -15, dz: -15, cluster: 'Nominalizing Suffix' },
+      'trans':       { x: 115, y: 55,  z: 85,  dx: 10,  dy: 25,  dz: 15,  cluster: 'Latinate Prefix' },
+      '##duc':       { x: 95,  y: 75,  z: 105, dx: -15, dy: -15, dz: -20, cluster: 'Bound Root Morpheme' },
+      '##tion':      { x: 85,  y: 100, z: 100, dx: -20, dy: -25, dz: -15, cluster: 'Nominalizing Suffix' },
+      'did':         { x: -40, y: -75, z: -30, dx: 15,  dy: 20,  dz: 10,  cluster: 'Past Auxiliary Verb' },
+      "n't":         { x: -65, y: -65, z: -15, dx: 25,  dy: 15,  dz: -10, cluster: 'Negation Particle' },
+      'un':          { x: -90, y: 40,  z: -80, dx: 20,  dy: 35,  dz: 20,  cluster: 'Negative Prefix' },
+      '##believ':    { x: -70, y: 80,  z: -60, dx: -15, dy: -15, dz: -10, cluster: 'Cognitive Stem' },
+      '##able':      { x: -50, y: 100, z: -40, dx: -20, dy: -20, dz: -20, cluster: 'Adjectival Suffix' },
+      'the':         { x: 10,  y: -50, z: -15, dx: 20,  dy: 15,  dz: 15,  cluster: 'Definite Determiner' },
+      'neural':      { x: 130, y: 65,  z: -30, dx: 15,  dy: 25,  dz: 10,  cluster: 'Deep Learning Domain' },
+      'network':     { x: 110, y: 90,  z: -20, dx: 25,  dy: 15,  dz: 15,  cluster: 'Computational Graph' },
+      'sequence':    { x: 75,  y: 105, z: -50, dx: 30,  dy: 20,  dz: 20,  cluster: 'Temporal Series' }
+    };
+
+    function computeTokenVector(tok, idx, total) {
+      const clean = tok.text.toLowerCase().replace(/[^a-z0-9']/g, '');
+      if (SEMANTIC_VEC_MAP[clean]) {
+        const item = SEMANTIC_VEC_MAP[clean];
+        return {
+          x: item.x,
+          y: item.y,
+          z: item.z,
+          dx: item.dx,
+          dy: item.dy,
+          dz: item.dz,
+          cluster: item.cluster
+        };
+      }
+
+      let hash = 0;
+      for (let i = 0; i < clean.length; i++) {
+        hash = (hash * 33 + clean.charCodeAt(i)) & 0x7fffffff;
+      }
+      const angleAz = ((hash % 360) * Math.PI) / 180;
+      const angleEl = (((Math.floor(hash / 360) % 130) - 65) * Math.PI) / 180;
+      const rad = 100 + ((Math.floor(hash / 46800) % 45));
+
+      const isSub = tok.text.startsWith('##');
+      return {
+        x: Math.round(rad * Math.cos(angleEl) * Math.cos(angleAz)),
+        y: Math.round(rad * Math.sin(angleEl)),
+        z: Math.round(rad * Math.cos(angleEl) * Math.sin(angleAz)),
+        dx: isSub ? -18 : 22,
+        dy: isSub ? -18 : 28,
+        dz: isSub ? -12 : 16,
+        cluster: isSub ? 'Subword Morpheme' : 'Lexical Representation'
+      };
+    }
+
+    function updateVectorTokens(tokens) {
+      currentVectorTokens = tokens.map((tok, idx) => {
+        const vec = computeTokenVector(tok, idx, tokens.length);
+        const norm = Math.sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z) || 1;
+        return {
+          text: tok.text,
+          id: tok.id,
+          type: tok.type,
+          baseX: vec.x,
+          baseY: vec.y,
+          baseZ: vec.z,
+          deltaX: vec.dx,
+          deltaY: vec.dy,
+          deltaZ: vec.dz,
+          x: vec.x,
+          y: vec.y,
+          z: vec.z,
+          norm: norm,
+          cluster: vec.cluster,
+          screenX: 0,
+          screenY: 0,
+          scale: 1,
+          depth: 0
+        };
+      });
+
+      if (currentVectorTokens.length > 0) {
+        selectedTokenA = 0;
+        selectedTokenB = currentVectorTokens.length > 1 ? 1 : null;
+        if (vecAutoStep > currentVectorTokens.length) vecAutoStep = currentVectorTokens.length;
+      } else {
+        selectedTokenA = null;
+        selectedTokenB = null;
+      }
+      updateCosineMetricReadout();
+    }
+
+    function calcCosineSim(a, b) {
+      if (!a || !b) return null;
+      const dot = a.x * b.x + a.y * b.y + a.z * b.z;
+      const magA = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z) || 1;
+      const magB = Math.sqrt(b.x * b.x + b.y * b.y + b.z * b.z) || 1;
+      const cos = Math.max(-1, Math.min(1, dot / (magA * magB)));
+      const deg = (Math.acos(cos) * 180) / Math.PI;
+      const dist = Math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2 + (a.z - b.z)**2);
+      return { dot, cos, deg, dist, magA, magB };
+    }
+
+    function updateCosineMetricReadout() {
+      if (!vecChip || !vecStatus) return;
+
+      if (vecMode === 'context') {
+        const factor = vecContextDepth / 6;
+        if (selectedTokenA !== null && currentVectorTokens[selectedTokenA]) {
+          const a = currentVectorTokens[selectedTokenA];
+          const neighbor = currentVectorTokens[selectedTokenB || (selectedTokenA > 0 ? 0 : 1)] || a;
+          const m = calcCosineSim(a, neighbor);
+          const cosBase = Math.max(0.05, m.cos - 0.45 * factor);
+          const cosNow = m.cos;
+          
+          vecChip.innerHTML = `VALUE ADDITION (L${vecContextDepth}/6): <span style="color:#f59e0b; font-weight:bold;">Δv = +${(0.48*factor).toFixed(2)}·V("${neighbor.text}")</span> · cos("${a.text}", "${neighbor.text}") = <span style="color:var(--hud-cyan); font-weight:bold;">+${cosNow.toFixed(3)}</span>`;
+          vecStatus.innerHTML = `
+            <strong>Token "${a.text}":</strong> Base Vector: [${a.baseX}, ${a.baseY}, ${a.baseZ}] + <span style="color:#f59e0b; font-weight:bold;">Context Shift Δv [${Math.round(a.deltaX*factor)}, ${Math.round(a.deltaY*factor)}, ${Math.round(a.deltaZ*factor)}]</span> ⟶ Contextualized: [${Math.round(a.x)}, ${Math.round(a.y)}, ${Math.round(a.z)}] | Cosine shifted: +${cosBase.toFixed(2)} ⟶ <span style="color:var(--hud-emerald); font-weight:bold;">+${cosNow.toFixed(2)} (${m.deg.toFixed(1)}°)</span>
+          `;
+        } else {
+          vecChip.textContent = `CONTEXT ENRICHMENT: VALUE VECTORS SHIFT TOKEN COORDINATES THROUGH 6 LAYERS`;
+          vecStatus.textContent = `Slide Layer Depth to watch Value addition vectors Δv pull tokens into contextualized semantic clusters.`;
+        }
+        return;
+      }
+
+      if (vecMode === 'autoregress') {
+        if (vecAutoStepBadge) vecAutoStepBadge.textContent = `TOKEN ${vecAutoStep} / ${currentVectorTokens.length}`;
+        const activeTok = currentVectorTokens[vecAutoStep - 1];
+        if (activeTok) {
+          const pastTokens = currentVectorTokens.slice(0, vecAutoStep - 1).map(t => `"${t.text}"`);
+          const pastLabel = pastTokens.length > 0 ? pastTokens.join(', ') : 'None (&lt;BOS&gt;)';
+          vecChip.innerHTML = `AUTOREGRESSIVE t=${vecAutoStep}: EMITTING <span style="color:var(--coral-accent); font-weight:bold;">"${activeTok.text}"</span> (CAUSAL WINDOW: ${vecAutoStep} TOKENS)`;
+          vecStatus.innerHTML = `
+            <strong>Emitted Token:</strong> "${activeTok.text}" [${activeTok.x}, ${activeTok.y}, ${activeTok.z}] · 
+            <strong>Causal Attention Window:</strong> [${pastLabel}] · 
+            <span style="color:#ef4444; font-weight:bold;">${currentVectorTokens.length - vecAutoStep} Future Tokens Causally Masked (-∞)</span>
+          `;
+        }
+        return;
+      }
+
+      // Static Mode
+      if (selectedTokenA !== null && selectedTokenB !== null && currentVectorTokens[selectedTokenA] && currentVectorTokens[selectedTokenB]) {
+        const a = currentVectorTokens[selectedTokenA];
+        const b = currentVectorTokens[selectedTokenB];
+        const m = calcCosineSim(a, b);
+        const cosStr = (m.cos >= 0 ? '+' : '') + m.cos.toFixed(3);
+        const signCls = m.cos > 0.6 ? 'var(--hud-emerald)' : (m.cos > 0.2 ? 'var(--hud-cyan)' : 'var(--coral-accent)');
+        
+        vecChip.innerHTML = `cos("${a.text}", "${b.text}") = <span style="color:${signCls}; font-weight:bold;">${cosStr}</span> (θ = ${m.deg.toFixed(1)}°)`;
+        
+        let qualitative = 'Orthogonal / Disparate Concepts';
+        if (m.cos > 0.75) qualitative = 'High Semantic & Structural Collinearity';
+        else if (m.cos > 0.4) qualitative = 'Moderate Syntactic / Domain Association';
+        else if (m.cos < -0.2) qualitative = 'Opposite / Complementary Embeddings';
+
+        vecStatus.innerHTML = `
+          <strong>Vector A:</strong> "${a.text}" [${a.x}, ${a.y}, ${a.z}] · 
+          <strong>Vector B:</strong> "${b.text}" [${b.x}, ${b.y}, ${b.z}] · 
+          <strong>Dot:</strong> ${m.dot.toFixed(0)} · <strong>Euclidean L2:</strong> ${m.dist.toFixed(1)} · 
+          <span style="color:${signCls}; font-weight:bold;">${qualitative}</span>
+        `;
+      } else if (selectedTokenA !== null && currentVectorTokens[selectedTokenA]) {
+        const a = currentVectorTokens[selectedTokenA];
+        vecChip.innerHTML = `TOKEN "${a.text}" SELECTED · SELECT SECOND TOKEN FOR COSINE ANGLE`;
+        vecStatus.innerHTML = `<strong>Vector A:</strong> "${a.text}" [${a.x}, ${a.y}, ${a.z}] ‖v‖=${a.norm.toFixed(1)} · Category: ${a.cluster}. Click any second token.`;
+      } else {
+        vecChip.textContent = `CLICK ANY 2 TOKENS FOR COSINE SIMILARITY`;
+        vecStatus.textContent = `Drag to rotate 3D vector space. Scroll to zoom. Click tokens to calculate cosine angle.`;
+      }
+    }
+
+    function projectVec3D(x, y, z, cx, cy, cam) {
+      const cosA = Math.cos(cam.azimuth);
+      const sinA = Math.sin(cam.azimuth);
+      const x1 = x * cosA + z * sinA;
+      const z1 = -x * sinA + z * cosA;
+      const y1 = y;
+
+      const cosE = Math.cos(cam.elevation);
+      const sinE = Math.sin(cam.elevation);
+      const y2 = y1 * cosE - z1 * sinE;
+      const z2 = y1 * sinE + z1 * cosE;
+      const x2 = x1;
+
+      const focal = 460;
+      const zCam = z2 + cam.distance;
+      if (zCam < 10) return null;
+      const scale = focal / zCam;
+
+      return {
+        screenX: cx + x2 * scale,
+        screenY: cy - y2 * scale,
+        scale: scale,
+        depth: z2
+      };
+    }
+
+    function renderVectorSpace() {
+      if (!vecCanvas || !vecCtx) return;
+
+      const rect = vecCanvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.floor(rect.width) || vecCanvas.clientWidth || vecCanvas.parentElement?.clientWidth || 980;
+      const h = Math.floor(rect.height) || vecCanvas.clientHeight || 370;
+
+      if (w <= 0 || h <= 0) {
+        requestAnimationFrame(renderVectorSpace);
+        return;
+      }
+
+      if (vecCanvas.width !== Math.floor(w * dpr) || vecCanvas.height !== Math.floor(h * dpr)) {
+        vecCanvas.width = Math.floor(w * dpr);
+        vecCanvas.height = Math.floor(h * dpr);
+      }
+
+      vecCtx.save();
+      vecCtx.scale(dpr, dpr);
+      vecCtx.clearRect(0, 0, w, h);
+
+      if (isAutoSpinning && !isDraggingVec) {
+        vecCam.targetAzimuth += 0.0035;
+      }
+      vecCam.azimuth += (vecCam.targetAzimuth - vecCam.azimuth) * 0.1;
+      vecCam.elevation += (vecCam.targetElevation - vecCam.elevation) * 0.1;
+      vecCam.distance += (vecCam.targetDistance - vecCam.distance) * 0.1;
+      vecPulseTick += 0.04;
+
+      const cx = w / 2;
+      const cy = h / 2 + 15;
+
+      // 1. Background grid & subtle radial illumination
+      const radGrad = vecCtx.createRadialGradient(cx, cy, 10, cx, cy, w * 0.6);
+      radGrad.addColorStop(0, 'rgba(0, 255, 204, 0.04)');
+      radGrad.addColorStop(0.5, 'rgba(10, 15, 24, 0.6)');
+      radGrad.addColorStop(1, 'rgba(2, 4, 6, 0.95)');
+      vecCtx.fillStyle = radGrad;
+      vecCtx.fillRect(0, 0, w, h);
+
+      // 2. Ground Plane XZ Grid (at Y = -70)
+      const groundY = -70;
+      vecCtx.lineWidth = 1;
+
+      [50, 100, 150, 200].forEach(r => {
+        vecCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        vecCtx.beginPath();
+        for (let a = 0; a <= Math.PI * 2 + 0.1; a += 0.1) {
+          const px = r * Math.cos(a);
+          const pz = r * Math.sin(a);
+          const p = projectVec3D(px, groundY, pz, cx, cy, vecCam);
+          if (p) {
+            if (a === 0) vecCtx.moveTo(p.screenX, p.screenY);
+            else vecCtx.lineTo(p.screenX, p.screenY);
+          }
+        }
+        vecCtx.stroke();
+      });
+
+      const gridExtent = 180;
+      const gridStep = 45;
+      vecCtx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+      for (let g = -gridExtent; g <= gridExtent; g += gridStep) {
+        const p1 = projectVec3D(g, groundY, -gridExtent, cx, cy, vecCam);
+        const p2 = projectVec3D(g, groundY, gridExtent, cx, cy, vecCam);
+        if (p1 && p2) {
+          vecCtx.beginPath();
+          vecCtx.moveTo(p1.screenX, p1.screenY);
+          vecCtx.lineTo(p2.screenX, p2.screenY);
+          vecCtx.stroke();
+        }
+        const q1 = projectVec3D(-gridExtent, groundY, g, cx, cy, vecCam);
+        const q2 = projectVec3D(gridExtent, groundY, g, cx, cy, vecCam);
+        if (q1 && q2) {
+          vecCtx.beginPath();
+          vecCtx.moveTo(q1.screenX, q1.screenY);
+          vecCtx.lineTo(q2.screenX, q2.screenY);
+          vecCtx.stroke();
+        }
+      }
+
+      // 3. Coordinate Axes passing through (0, 0, 0)
+      const originP = projectVec3D(0, 0, 0, cx, cy, vecCam);
+      const axisLen = 170;
+
+      const axes = [
+        { x: axisLen, y: 0, z: 0, label: '+X [Syntactic]', col: '#DE5D35' },
+        { x: 0, y: axisLen, z: 0, label: '+Y [Semantic Valence]', col: '#00FFCC' },
+        { x: 0, y: 0, z: axisLen, label: '+Z [Morphology]', col: '#38bdf8' }
+      ];
+
+      vecCtx.setLineDash([3, 4]);
+      vecCtx.lineWidth = 1;
+      [
+        { x: -axisLen, y: 0, z: 0 },
+        { x: 0, y: -axisLen * 0.7, z: 0 },
+        { x: 0, y: 0, z: -axisLen }
+      ].forEach(neg => {
+        const p = projectVec3D(neg.x, neg.y, neg.z, cx, cy, vecCam);
+        if (originP && p) {
+          vecCtx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+          vecCtx.beginPath();
+          vecCtx.moveTo(originP.screenX, originP.screenY);
+          vecCtx.lineTo(p.screenX, p.screenY);
+          vecCtx.stroke();
+        }
+      });
+      vecCtx.setLineDash([]);
+
+      axes.forEach(ax => {
+        const p = projectVec3D(ax.x, ax.y, ax.z, cx, cy, vecCam);
+        if (originP && p) {
+          vecCtx.strokeStyle = ax.col;
+          vecCtx.fillStyle = ax.col;
+          vecCtx.lineWidth = 1.6;
+          vecCtx.beginPath();
+          vecCtx.moveTo(originP.screenX, originP.screenY);
+          vecCtx.lineTo(p.screenX, p.screenY);
+          vecCtx.stroke();
+
+          vecCtx.beginPath();
+          vecCtx.arc(p.screenX, p.screenY, 3, 0, Math.PI * 2);
+          vecCtx.fill();
+
+          vecCtx.font = '9px "JetBrains Mono", monospace';
+          vecCtx.fillText(ax.label, p.screenX + 6, p.screenY - 4);
+        }
+      });
+
+      // 4. Update Token 3D Coordinates depending on Mode
+      const contextFactor = vecMode === 'context' ? (vecContextDepth / 6) : 0;
+      currentVectorTokens.forEach((tok, idx) => {
+        if (vecMode === 'context') {
+          tok.x = tok.baseX + contextFactor * tok.deltaX;
+          tok.y = tok.baseY + contextFactor * tok.deltaY;
+          tok.z = tok.baseZ + contextFactor * tok.deltaZ;
+        } else {
+          tok.x = tok.baseX;
+          tok.y = tok.baseY;
+          tok.z = tok.baseZ;
+        }
+
+        const p = projectVec3D(tok.x, tok.y, tok.z, cx, cy, vecCam);
+        if (p) {
+          tok.screenX = p.screenX;
+          tok.screenY = p.screenY;
+          tok.scale = p.scale;
+          tok.depth = p.depth;
+        }
+
+        // Project base coordinate for Value Addition vector display
+        const bp = projectVec3D(tok.baseX, tok.baseY, tok.baseZ, cx, cy, vecCam);
+        if (bp) {
+          tok.baseScreenX = bp.screenX;
+          tok.baseScreenY = bp.screenY;
+        }
+      });
+
+      // Autoregressive visibility cut-off
+      const maxAutoregressVisible = vecMode === 'autoregress' ? vecAutoStep : currentVectorTokens.length;
+
+      // 5. Ground Projection Drop-lines (Depth Cues)
+      currentVectorTokens.forEach((tok, idx) => {
+        if (!tok.screenX || idx >= maxAutoregressVisible) return;
+        const groundP = projectVec3D(tok.x, groundY, tok.z, cx, cy, vecCam);
+        if (groundP) {
+          vecCtx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+          vecCtx.setLineDash([2, 3]);
+          vecCtx.lineWidth = 1;
+          vecCtx.beginPath();
+          vecCtx.moveTo(tok.screenX, tok.screenY);
+          vecCtx.lineTo(groundP.screenX, groundP.screenY);
+          vecCtx.stroke();
+          vecCtx.setLineDash([]);
+
+          vecCtx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+          vecCtx.beginPath();
+          vecCtx.ellipse(groundP.screenX, groundP.screenY, 8 * tok.scale, 4 * tok.scale, 0, 0, Math.PI * 2);
+          vecCtx.fill();
+        }
+      });
+
+      // 6. Draw Value Addition Arrows (+ΔV Vector in Context Mode)
+      if (vecMode === 'context' && vecContextDepth > 0) {
+        currentVectorTokens.forEach((tok, idx) => {
+          if (!tok.screenX || !tok.baseScreenX) return;
+          const isSel = idx === selectedTokenA || idx === selectedTokenB;
+          const isHover = idx === hoveredTokenIdx;
+
+          // Draw base node phantom outline
+          vecCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+          vecCtx.setLineDash([2, 2]);
+          vecCtx.beginPath();
+          vecCtx.arc(tok.baseScreenX, tok.baseScreenY, 5 * tok.scale, 0, Math.PI * 2);
+          vecCtx.stroke();
+          vecCtx.setLineDash([]);
+
+          // Glowing Amber Value Addition Arrow Δv
+          const arrowCol = isSel ? '#f59e0b' : (isHover ? '#fbbf24' : 'rgba(245, 158, 11, 0.65)');
+          vecCtx.strokeStyle = arrowCol;
+          vecCtx.lineWidth = isSel ? 2.4 : 1.5;
+          vecCtx.beginPath();
+          vecCtx.moveTo(tok.baseScreenX, tok.baseScreenY);
+          vecCtx.lineTo(tok.screenX, tok.screenY);
+          vecCtx.stroke();
+
+          // Arrowhead at current contextualized position
+          const angle = Math.atan2(tok.screenY - tok.baseScreenY, tok.screenX - tok.baseScreenX);
+          vecCtx.fillStyle = arrowCol;
+          vecCtx.beginPath();
+          vecCtx.moveTo(tok.screenX, tok.screenY);
+          vecCtx.lineTo(tok.screenX - 8 * Math.cos(angle - Math.PI / 6), tok.screenY - 8 * Math.sin(angle - Math.PI / 6));
+          vecCtx.lineTo(tok.screenX - 8 * Math.cos(angle + Math.PI / 6), tok.screenY - 8 * Math.sin(angle + Math.PI / 6));
+          vecCtx.closePath();
+          vecCtx.fill();
+
+          // Floating ΔV Tag
+          if (isSel) {
+            const midX = (tok.baseScreenX + tok.screenX) * 0.5;
+            const midY = (tok.baseScreenY + tok.screenY) * 0.5;
+            vecCtx.fillStyle = '#f59e0b';
+            vecCtx.font = 'bold 9px "JetBrains Mono", monospace';
+            vecCtx.fillText('+ΔV [Value Added]', midX + 8, midY - 4);
+          }
+        });
+      }
+
+      // 7. Draw Origin Vectors (Rays from (0,0,0) to Token)
+      if (showOriginVectors && originP) {
+        currentVectorTokens.forEach((tok, idx) => {
+          if (!tok.screenX || idx >= maxAutoregressVisible) return;
+          const isSub = tok.text.startsWith('##');
+          const isSelA = idx === selectedTokenA;
+          const isSelB = idx === selectedTokenB;
+          const isHover = idx === hoveredTokenIdx;
+          const isAutoregressActive = vecMode === 'autoregress' && idx === maxAutoregressVisible - 1;
+
+          let col = isSub ? 'rgba(222, 93, 53, 0.55)' : 'rgba(0, 255, 204, 0.55)';
+          let lWidth = 1.4;
+
+          if (isAutoregressActive) {
+            col = '#00FFCC';
+            lWidth = 2.8;
+          } else if (isSelA || isSelB) {
+            col = isSelA ? '#00FFCC' : '#DE5D35';
+            lWidth = 2.4;
+          } else if (isHover) {
+            col = '#FAF9F5';
+            lWidth = 2.0;
+          }
+
+          vecCtx.strokeStyle = col;
+          vecCtx.lineWidth = lWidth;
+          vecCtx.beginPath();
+          vecCtx.moveTo(originP.screenX, originP.screenY);
+          vecCtx.lineTo(tok.screenX, tok.screenY);
+          vecCtx.stroke();
+
+          const midX = (originP.screenX + tok.screenX) * 0.5;
+          const midY = (originP.screenY + tok.screenY) * 0.5;
+          const angle = Math.atan2(tok.screenY - originP.screenY, tok.screenX - originP.screenX);
+          vecCtx.fillStyle = col;
+          vecCtx.beginPath();
+          vecCtx.moveTo(midX, midY);
+          vecCtx.lineTo(midX - 7 * Math.cos(angle - Math.PI / 6), midY - 7 * Math.sin(angle - Math.PI / 6));
+          vecCtx.lineTo(midX - 7 * Math.cos(angle + Math.PI / 6), midY - 7 * Math.sin(angle + Math.PI / 6));
+          vecCtx.closePath();
+          vecCtx.fill();
+        });
+      }
+
+      // 8. Draw Similarity Arcs between pairs
+      if (showSimilarityArcs && currentVectorTokens.length > 1) {
+        if (vecMode === 'autoregress') {
+          // In autoregressive mode: similarity connects strictly from active token to previous tokens
+          const activeIdx = maxAutoregressVisible - 1;
+          const actTok = currentVectorTokens[activeIdx];
+          if (actTok && actTok.screenX) {
+            for (let j = 0; j < activeIdx; j++) {
+              const prevTok = currentVectorTokens[j];
+              if (!prevTok.screenX) continue;
+              const m = calcCosineSim(actTok, prevTok);
+              if (m) {
+                vecCtx.strokeStyle = 'rgba(0, 255, 204, 0.7)';
+                vecCtx.lineWidth = 1.6;
+                vecCtx.setLineDash([3, 3]);
+                vecCtx.beginPath();
+                vecCtx.moveTo(actTok.screenX, actTok.screenY);
+                vecCtx.lineTo(prevTok.screenX, prevTok.screenY);
+                vecCtx.stroke();
+                vecCtx.setLineDash([]);
+              }
+            }
+          }
+        } else {
+          // Standard collinear web
+          for (let i = 0; i < currentVectorTokens.length; i++) {
+            for (let j = i + 1; j < currentVectorTokens.length; j++) {
+              const tok1 = currentVectorTokens[i];
+              const tok2 = currentVectorTokens[j];
+              if (!tok1.screenX || !tok2.screenX) continue;
+
+              const m = calcCosineSim(tok1, tok2);
+              if (m && m.cos > 0.6) {
+                const alpha = Math.min(0.6, (m.cos - 0.5) * 1.2);
+                vecCtx.strokeStyle = `rgba(0, 255, 204, ${alpha})`;
+                vecCtx.lineWidth = 1;
+                vecCtx.setLineDash([3, 3]);
+                vecCtx.beginPath();
+                vecCtx.moveTo(tok1.screenX, tok1.screenY);
+                vecCtx.lineTo(tok2.screenX, tok2.screenY);
+                vecCtx.stroke();
+                vecCtx.setLineDash([]);
+              }
+            }
+          }
+        }
+      }
+
+      // 9. Active Cosine Arc between Selected Token A and B
+      if (vecMode !== 'autoregress' && selectedTokenA !== null && selectedTokenB !== null && currentVectorTokens[selectedTokenA] && currentVectorTokens[selectedTokenB]) {
+        const a = currentVectorTokens[selectedTokenA];
+        const b = currentVectorTokens[selectedTokenB];
+        if (a.screenX && b.screenX) {
+          vecCtx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+          vecCtx.lineWidth = 2.0;
+          vecCtx.beginPath();
+          vecCtx.moveTo(a.screenX, a.screenY);
+          vecCtx.lineTo(b.screenX, b.screenY);
+          vecCtx.stroke();
+
+          const midX = (a.screenX + b.screenX) * 0.5;
+          const midY = (a.screenY + b.screenY) * 0.5;
+          const m = calcCosineSim(a, b);
+
+          vecCtx.fillStyle = '#05070A';
+          vecCtx.strokeStyle = '#00FFCC';
+          vecCtx.lineWidth = 1;
+          const tagW = 90;
+          const tagH = 20;
+          vecCtx.fillRect(midX - tagW / 2, midY - tagH / 2, tagW, tagH);
+          vecCtx.strokeRect(midX - tagW / 2, midY - tagH / 2, tagW, tagH);
+
+          vecCtx.fillStyle = '#FAF9F5';
+          vecCtx.font = 'bold 9.5px "JetBrains Mono", monospace';
+          vecCtx.textAlign = 'center';
+          vecCtx.textBaseline = 'middle';
+          vecCtx.fillText(`cos: ${(m.cos >= 0 ? '+' : '') + m.cos.toFixed(2)} (${m.deg.toFixed(0)}°)`, midX, midY);
+        }
+      }
+
+      // 10. Draw Origin Point (0,0,0)
+      if (originP) {
+        vecCtx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        vecCtx.beginPath();
+        vecCtx.arc(originP.screenX, originP.screenY, 5, 0, Math.PI * 2);
+        vecCtx.fill();
+        vecCtx.fillStyle = '#FAF9F5';
+        vecCtx.beginPath();
+        vecCtx.arc(originP.screenX, originP.screenY, 2, 0, Math.PI * 2);
+        vecCtx.fill();
+        vecCtx.font = '9px "JetBrains Mono", monospace';
+        vecCtx.textAlign = 'left';
+        vecCtx.fillStyle = 'rgba(255,255,255,0.4)';
+        vecCtx.fillText('(0,0,0)', originP.screenX + 6, originP.screenY + 4);
+      }
+
+      // 11. Draw Token Nodes (Sorted by Depth z)
+      const sortedTokens = currentVectorTokens.map((tok, origIdx) => ({ tok, origIdx }))
+        .filter(item => item.tok.screenX !== undefined)
+        .sort((i1, i2) => i1.tok.depth - i2.tok.depth);
+
+      sortedTokens.forEach(({ tok, origIdx }) => {
+        const isSelA = origIdx === selectedTokenA;
+        const isSelB = origIdx === selectedTokenB;
+        const isHover = origIdx === hoveredTokenIdx;
+        const isSub = tok.text.startsWith('##');
+        const isMaskedFuture = vecMode === 'autoregress' && origIdx >= maxAutoregressVisible;
+        const isAutoregressActive = vecMode === 'autoregress' && origIdx === maxAutoregressVisible - 1;
+
+        const baseRadius = (isSub ? 6 : 8) * tok.scale;
+        const nodeColor = isSub ? '#DE5D35' : '#00FFCC';
+
+        // If masked in autoregressive mode
+        if (isMaskedFuture) {
+          vecCtx.strokeStyle = 'rgba(239, 68, 68, 0.35)';
+          vecCtx.setLineDash([2, 3]);
+          vecCtx.lineWidth = 1;
+          vecCtx.beginPath();
+          vecCtx.arc(tok.screenX, tok.screenY, baseRadius, 0, Math.PI * 2);
+          vecCtx.stroke();
+          vecCtx.setLineDash([]);
+
+          vecCtx.font = '8px "JetBrains Mono", monospace';
+          vecCtx.fillStyle = 'rgba(239, 68, 68, 0.6)';
+          vecCtx.textAlign = 'center';
+          vecCtx.fillText(`[t=${origIdx+1}: -∞]`, tok.screenX, tok.screenY - baseRadius - 4);
+          return;
+        }
+
+        // Outer glow
+        const glowRad = baseRadius * (isHover || isSelA || isSelB || isAutoregressActive ? 3.0 : 1.8);
+        const glow = vecCtx.createRadialGradient(tok.screenX, tok.screenY, 1, tok.screenX, tok.screenY, glowRad);
+        glow.addColorStop(0, isAutoregressActive ? 'rgba(0, 255, 204, 0.85)' : (isSelA ? 'rgba(0, 255, 204, 0.7)' : (isSelB ? 'rgba(222, 93, 53, 0.7)' : (isSub ? 'rgba(222, 93, 53, 0.35)' : 'rgba(0, 255, 204, 0.35)'))));
+        glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        vecCtx.fillStyle = glow;
+        vecCtx.beginPath();
+        vecCtx.arc(tok.screenX, tok.screenY, glowRad, 0, Math.PI * 2);
+        vecCtx.fill();
+
+        // Pulsing selection ring
+        if (isSelA || isSelB || isHover || isAutoregressActive) {
+          vecCtx.strokeStyle = isAutoregressActive ? '#00FFCC' : (isSelA ? '#00FFCC' : (isSelB ? '#DE5D35' : '#FAF9F5'));
+          vecCtx.lineWidth = isAutoregressActive ? 2.2 : 1.5;
+          vecCtx.beginPath();
+          const pulseR = baseRadius + 3 + Math.sin(vecPulseTick * 3) * 1.8;
+          vecCtx.arc(tok.screenX, tok.screenY, pulseR, 0, Math.PI * 2);
+          vecCtx.stroke();
+        }
+
+        // Inner solid core
+        vecCtx.fillStyle = isAutoregressActive ? '#00FFCC' : (isSelA ? '#00FFCC' : (isSelB ? '#DE5D35' : (isHover ? '#FAF9F5' : nodeColor)));
+        vecCtx.beginPath();
+        vecCtx.arc(tok.screenX, tok.screenY, baseRadius, 0, Math.PI * 2);
+        vecCtx.fill();
+
+        // White nucleus center
+        vecCtx.fillStyle = '#FFFFFF';
+        vecCtx.beginPath();
+        vecCtx.arc(tok.screenX, tok.screenY, baseRadius * 0.4, 0, Math.PI * 2);
+        vecCtx.fill();
+
+        // Floating 3D Badge (Token Text + ID)
+        vecCtx.font = `bold ${Math.max(10, Math.round(11 * tok.scale))}px "JetBrains Mono", monospace`;
+        vecCtx.textAlign = 'center';
+        vecCtx.textBaseline = 'bottom';
+
+        const labelY = tok.screenY - baseRadius - 5;
+        const txt = tok.text;
+        const textMetrics = vecCtx.measureText(txt);
+        const padX = 6;
+        const bW = textMetrics.width + padX * 2;
+        const bH = 15;
+
+        vecCtx.fillStyle = isAutoregressActive ? 'rgba(0, 255, 204, 0.3)' : (isSelA ? 'rgba(0, 255, 204, 0.25)' : (isSelB ? 'rgba(222, 93, 53, 0.25)' : 'rgba(5, 7, 10, 0.85)'));
+        vecCtx.strokeStyle = isAutoregressActive ? '#00FFCC' : (isSelA ? '#00FFCC' : (isSelB ? '#DE5D35' : (isSub ? 'rgba(222, 93, 53, 0.4)' : 'rgba(0, 255, 204, 0.4)')));
+        vecCtx.lineWidth = 1;
+        vecCtx.fillRect(tok.screenX - bW / 2, labelY - bH, bW, bH);
+        vecCtx.strokeRect(tok.screenX - bW / 2, labelY - bH, bW, bH);
+
+        vecCtx.fillStyle = isAutoregressActive ? '#00FFCC' : (isSelA ? '#00FFCC' : (isSelB ? '#ff8c69' : '#FAF9F5'));
+        vecCtx.fillText(txt, tok.screenX, labelY - 2);
+
+        if (tok.scale > 0.7) {
+          vecCtx.font = '8px "JetBrains Mono", monospace';
+          vecCtx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+          const tag = isAutoregressActive ? `[t=${origIdx+1} ACTIVE]` : `[#${tok.id}]`;
+          vecCtx.fillText(tag, tok.screenX, labelY + 9);
+        }
+      });
+
+      vecCtx.restore();
+      requestAnimationFrame(renderVectorSpace);
+    }
+
+    // Mouse Interaction for 3D Vector Space
+    if (vecCanvas) {
+      vecCanvas.addEventListener('mousedown', e => {
+        isDraggingVec = true;
+        lastVecMouseX = e.clientX;
+        lastVecMouseY = e.clientY;
+        vecCanvas.style.cursor = 'grabbing';
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDraggingVec) {
+          isDraggingVec = false;
+          if (vecCanvas) vecCanvas.style.cursor = 'grab';
+        }
+      });
+
+      vecCanvas.addEventListener('mousemove', e => {
+        const rect = vecCanvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        if (isDraggingVec) {
+          const dx = e.clientX - lastVecMouseX;
+          const dy = e.clientY - lastVecMouseY;
+          vecCam.targetAzimuth += dx * 0.008;
+          vecCam.targetElevation = Math.max(-1.1, Math.min(1.1, vecCam.targetElevation + dy * 0.008));
+          lastVecMouseX = e.clientX;
+          lastVecMouseY = e.clientY;
+        } else {
+          let foundIdx = -1;
+          for (let i = currentVectorTokens.length - 1; i >= 0; i--) {
+            const tok = currentVectorTokens[i];
+            if (!tok.screenX) continue;
+            const dist = Math.hypot(mx - tok.screenX, my - tok.screenY);
+            if (dist < 18) {
+              foundIdx = i;
+              break;
+            }
+          }
+          hoveredTokenIdx = foundIdx;
+          vecCanvas.style.cursor = foundIdx >= 0 ? 'pointer' : 'grab';
+        }
+      });
+
+      vecCanvas.addEventListener('click', e => {
+        if (hoveredTokenIdx >= 0) {
+          const clicked = hoveredTokenIdx;
+          if (selectedTokenA === null) {
+            selectedTokenA = clicked;
+          } else if (selectedTokenB === null) {
+            if (clicked === selectedTokenA) {
+              selectedTokenA = null;
+            } else {
+              selectedTokenB = clicked;
+            }
+          } else {
+            if (clicked === selectedTokenA) {
+              selectedTokenA = selectedTokenB;
+              selectedTokenB = null;
+            } else if (clicked === selectedTokenB) {
+              selectedTokenB = null;
+            } else {
+              selectedTokenA = selectedTokenB;
+              selectedTokenB = clicked;
+            }
+          }
+          updateCosineMetricReadout();
+          if (typeof window.__inspectToken === 'function') {
+            window.__inspectToken(clicked);
+          }
+        }
+      });
+
+      vecCanvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        vecCam.targetDistance = Math.max(160, Math.min(650, vecCam.targetDistance + e.deltaY * 0.4));
+      }, { passive: false });
+    }
+
+    // Mode Switcher Controls
+    function setVecMode(mode) {
+      vecMode = mode;
+      if (btnModeStaticVec) btnModeStaticVec.classList.toggle('active', mode === 'static');
+      if (btnModeContextAdd) btnModeContextAdd.classList.toggle('active', mode === 'context');
+      if (btnModeAutoregress) btnModeAutoregress.classList.toggle('active', mode === 'autoregress');
+
+      if (vecContextControlRow) vecContextControlRow.style.display = mode === 'context' ? 'flex' : 'none';
+      if (vecAutoregressControlRow) vecAutoregressControlRow.style.display = mode === 'autoregress' ? 'flex' : 'none';
+
+      if (mode !== 'autoregress' && vecAutoPlayInterval) {
+        clearInterval(vecAutoPlayInterval);
+        vecAutoPlayInterval = null;
+        if (btnVecAutoPlay) {
+          btnVecAutoPlay.classList.remove('active');
+          btnVecAutoPlay.textContent = 'AUTO PLAY';
+        }
+      }
+
+      updateCosineMetricReadout();
+    }
+
+    if (btnModeStaticVec) btnModeStaticVec.addEventListener('click', () => setVecMode('static'));
+    if (btnModeContextAdd) btnModeContextAdd.addEventListener('click', () => setVecMode('context'));
+    if (btnModeAutoregress) btnModeAutoregress.addEventListener('click', () => setVecMode('autoregress'));
+
+    if (vecContextDepthSlider) {
+      vecContextDepthSlider.addEventListener('input', e => {
+        vecContextDepth = parseInt(e.target.value);
+        if (vecContextDepthVal) vecContextDepthVal.textContent = 'LAYER ' + vecContextDepth + ' / 6';
+        updateCosineMetricReadout();
+      });
+    }
+
+    if (btnStepContextDepth) {
+      btnStepContextDepth.addEventListener('click', () => {
+        vecContextDepth = (vecContextDepth + 1) % 7;
+        if (vecContextDepthSlider) vecContextDepthSlider.value = vecContextDepth;
+        if (vecContextDepthVal) vecContextDepthVal.textContent = 'LAYER ' + vecContextDepth + ' / 6';
+        updateCosineMetricReadout();
+      });
+    }
+
+    if (btnVecAutoStepPrev) {
+      btnVecAutoStepPrev.addEventListener('click', () => {
+        if (vecAutoStep > 1) {
+          vecAutoStep--;
+          updateCosineMetricReadout();
+        }
+      });
+    }
+
+    if (btnVecAutoStepNext) {
+      btnVecAutoStepNext.addEventListener('click', () => {
+        if (vecAutoStep < currentVectorTokens.length) {
+          vecAutoStep++;
+          updateCosineMetricReadout();
+        }
+      });
+    }
+
+    if (btnVecAutoPlay) {
+      btnVecAutoPlay.addEventListener('click', () => {
+        if (vecAutoPlayInterval) {
+          clearInterval(vecAutoPlayInterval);
+          vecAutoPlayInterval = null;
+          btnVecAutoPlay.classList.remove('active');
+          btnVecAutoPlay.textContent = 'AUTO PLAY';
+        } else {
+          btnVecAutoPlay.classList.add('active');
+          btnVecAutoPlay.textContent = 'PAUSE';
+          vecAutoPlayInterval = setInterval(() => {
+            if (vecAutoStep >= currentVectorTokens.length) {
+              vecAutoStep = 1;
+            } else {
+              vecAutoStep++;
+            }
+            updateCosineMetricReadout();
+          }, 1100);
+        }
+      });
+    }
+
+    if (btnResetVecCam) {
+      btnResetVecCam.addEventListener('click', () => {
+        vecCam.targetAzimuth = 0.65;
+        vecCam.targetElevation = 0.38;
+        vecCam.targetDistance = 360;
+      });
+    }
+
+    if (btnToggleOriginVectors) {
+      btnToggleOriginVectors.addEventListener('click', () => {
+        showOriginVectors = !showOriginVectors;
+        btnToggleOriginVectors.classList.toggle('active', showOriginVectors);
+      });
+    }
+
+    if (btnToggleSimArcs) {
+      btnToggleSimArcs.addEventListener('click', () => {
+        showSimilarityArcs = !showSimilarityArcs;
+        btnToggleSimArcs.classList.toggle('active', showSimilarityArcs);
+      });
+    }
+
+    if (btnAnimateSpin) {
+      btnAnimateSpin.addEventListener('click', () => {
+        isAutoSpinning = !isAutoSpinning;
+        btnAnimateSpin.classList.toggle('active', isAutoSpinning);
+      });
+      btnAnimateSpin.classList.add('active');
+    }
+
+    document.getElementById('btnRunTokenize').addEventListener('click', renderTokens);
+    tokInput.addEventListener('keydown', e => { if (e.key === 'Enter') renderTokens(); });
+
+    document.querySelectorAll('.tok-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tokInput.value = btn.getAttribute('data-text');
+        renderTokens();
+      });
+    });
+    renderTokens();
+    renderVectorSpace();
+    requestAnimationFrame(renderVectorSpace);
+
+
+    // ------------------------------------------------------------------------
+    // 3. EMBEDDING MAGNITUDE COMPARISON (ANIMATED WAVES)
+    // ------------------------------------------------------------------------
+    let embWaveOffset = 0;
+    function animateEmbeddings() {
+      const cRaw = document.getElementById('rawEmbCanvas');
+      const cScaled = document.getElementById('scaledEmbCanvas');
+      if (!cRaw || !cScaled) return;
+
+      const ctxR = cRaw.getContext('2d');
+      const ctxS = cScaled.getContext('2d');
+
+      ctxR.clearRect(0, 0, 340, 130);
+      ctxS.clearRect(0, 0, 340, 130);
+      embWaveOffset += 0.05;
+
+      // Raw noisy wave (low magnitude ~1.0)
+      ctxR.strokeStyle = '#ef4444';
+      ctxR.lineWidth = 1.5;
+      ctxR.beginPath();
+      for (let x = 0; x < 340; x++) {
+        const val = Math.sin(x * 0.12 + embWaveOffset) * 6 + Math.sin(x * 0.3) * 4;
+        const y = 65 - val;
+        if (x === 0) ctxR.moveTo(x, y); else ctxR.lineTo(x, y);
+      }
+      ctxR.stroke();
+
+      // Scaled wave (x √512 ≈ 22.63)
+      ctxS.strokeStyle = '#00ffcc';
+      ctxS.lineWidth = 2.0;
+      ctxS.beginPath();
+      for (let x = 0; x < 340; x++) {
+        const val = Math.sin(x * 0.08 + embWaveOffset) * 45;
+        const y = 65 - val;
+        if (x === 0) ctxS.moveTo(x, y); else ctxS.lineTo(x, y);
+      }
+      ctxS.stroke();
+
+      requestAnimationFrame(animateEmbeddings);
+    }
+    requestAnimationFrame(animateEmbeddings);
+
+
+    // ------------------------------------------------------------------------
+    // 4. POSITIONAL ENCODINGS CONTINUOUS WAVE SPECTRUM
+    // ------------------------------------------------------------------------
+    const posCanvas = document.getElementById('posHeatmapCanvas');
+    const posSlider = document.getElementById('posSeqSlider');
+    const posVal = document.getElementById('posSeqVal');
+    let posPhase = 0;
+
+    function renderPositionalSpectrum() {
+      if (!posCanvas) return;
+      const ctx = posCanvas.getContext('2d');
+      const w = posCanvas.width;
+      const h = posCanvas.height;
+      const numTokens = Number(posSlider.value);
+      const d_model = 64;
+
+      const cellW = w / d_model;
+      const cellH = h / numTokens;
+      ctx.clearRect(0, 0, w, h);
+      posPhase += 0.02;
+
+      for (let pos = 0; pos < numTokens; pos++) {
+        for (let d = 0; d < d_model; d++) {
+          const i = Math.floor(d / 2);
+          const denom = Math.pow(10000, (2 * i) / 512);
+          const wave = Math.sin(pos / denom + (posPhase * (1 / (i + 1))));
+          const val = (d % 2 === 0) ? wave : Math.cos(pos / denom + (posPhase * (1 / (i + 1))));
+
+          let r, g, b;
+          if (val > 0) {
+            r = Math.round(222 * val);
+            g = Math.round(93 * val);
+            b = Math.round(53 * val);
+          } else {
+            const abs = -val;
+            r = Math.round(43 * abs);
+            g = Math.round(108 * abs);
+            b = Math.round(176 * abs);
+          }
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(d * cellW, pos * cellH, cellW - 0.5, cellH - 0.5);
+        }
+      }
+      requestAnimationFrame(renderPositionalSpectrum);
+    }
+    requestAnimationFrame(renderPositionalSpectrum);
+
+    posSlider.addEventListener('input', e => {
+      posVal.textContent = e.target.value;
+    });
+
+
+    // ------------------------------------------------------------------------
+    // 5. SCALED DOT-PRODUCT ATTENTION HEATMAP
+    // ------------------------------------------------------------------------
+    const attnSentenceInput = document.getElementById('attnSentenceInput');
+    const tempScaleSlider = document.getElementById('tempScaleSlider');
+    const tempScaleVal = document.getElementById('tempScaleVal');
+    const heatmapContainer = document.getElementById('heatmapContainer');
+    const entropyBadge = document.getElementById('entropyBadge');
+
+    function computeAttentionMatrix(text, temp = 8.0) {
+      const tokens = text.trim().split(/\s+/).filter(Boolean);
+      const N = tokens.length;
+      if (N === 0) return;
+
+      const scores = [];
+      const weights = [];
+      let totalEntropy = 0;
+
+      for (let i = 0; i < N; i++) {
+        scores[i] = [];
+        weights[i] = [];
+        let maxS = -Infinity;
+
+        for (let j = 0; j < N; j++) {
+          let dot = (Math.sin(i * 3 + j * 7) * 4.0);
+          if (tokens[i].toLowerCase() === 'it' && tokens[j].toLowerCase() === 'animal') dot = 18.0;
+          if (tokens[i].toLowerCase() === 'tired' && tokens[j].toLowerCase() === 'animal') dot = 14.0;
+          if (i === j) dot += 5.0;
+
+          const scaled = dot / Math.max(0.1, temp);
+          scores[i][j] = scaled;
+          if (scaled > maxS) maxS = scaled;
+        }
+
+        let sumExp = 0;
+        for (let j = 0; j < N; j++) {
+          const exp = Math.exp(scores[i][j] - maxS);
+          weights[i][j] = exp;
+          sumExp += exp;
+        }
+
+        let rowEntropy = 0;
+        for (let j = 0; j < N; j++) {
+          weights[i][j] /= sumExp;
+          const p = weights[i][j];
+          if (p > 1e-6) rowEntropy -= p * Math.log2(p);
+        }
+        totalEntropy += rowEntropy;
+      }
+
+      entropyBadge.textContent = `ENTROPY: ${(totalEntropy / N).toFixed(2)} bits`;
+
+      const cellSize = Math.max(26, Math.min(46, 520 / N));
+      const svgW = cellSize * N + 110;
+      const svgH = cellSize * N + 60;
+
+      let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" style="width:100%; max-width:${svgW}px; font-family:var(--font-mono); select-none;">`;
+      
+      for (let j = 0; j < N; j++) {
+        const x = 100 + j * cellSize + cellSize / 2;
+        svg += `<text x="${x}" y="32" fill="#94A3B8" font-size="9.5" text-anchor="middle" transform="rotate(-30 ${x} 32)">${tokens[j]}</text>`;
+      }
+
+      for (let i = 0; i < N; i++) {
+        const y = 48 + i * cellSize + cellSize / 2;
+        svg += `<text x="92" y="${y + 3}" fill="#94A3B8" font-size="10" text-anchor="end">${tokens[i]}</text>`;
+
+        for (let j = 0; j < N; j++) {
+          const val = weights[i][j];
+          const alpha = Math.min(1.0, Math.max(0.04, val * 1.2));
+          const fill = `rgba(222, 93, 53, ${alpha.toFixed(3)})`;
+          const border = val > 0.4 ? '#00ffcc' : 'rgba(255,255,255,0.08)';
+          const xp = 100 + j * cellSize;
+          const yp = 48 + i * cellSize;
+
+          svg += `
+            <g style="cursor:pointer;" onclick="alert('Query: \"${tokens[i]}\"\\nKey: \"${tokens[j]}\"\\nSoftmax Probability: ${(val * 100).toFixed(1)}%')">
+              <rect x="${xp}" y="${yp}" width="${cellSize - 2}" height="${cellSize - 2}" rx="2" fill="${fill}" stroke="${border}" stroke-width="${val > 0.4 ? '1.5' : '0.8'}"/>
+              <text x="${xp + cellSize/2}" y="${yp + cellSize/2 + 3}" fill="${val > 0.35 ? '#fff' : '#64748B'}" font-size="8.5" text-anchor="middle">${val.toFixed(2)}</text>
+            </g>
+          `;
+        }
+      }
+      svg += `</svg>`;
+      heatmapContainer.innerHTML = svg;
+    }
+
+    computeAttentionMatrix(attnSentenceInput.value, 8.0);
+    attnSentenceInput.addEventListener('input', () => {
+      computeAttentionMatrix(attnSentenceInput.value, Number(tempScaleSlider.value));
+    });
+    tempScaleSlider.addEventListener('input', e => {
+      const t = Number(e.target.value);
+      tempScaleVal.textContent = t.toFixed(1);
+      computeAttentionMatrix(attnSentenceInput.value, t);
+    });
+
+
+    // ------------------------------------------------------------------------
+    // 6. MULTI-HEAD ATTENTION HEAD SPECIALIZATION
+    // ------------------------------------------------------------------------
+    const headDetailsBox = document.getElementById('headDetailsBox');
+    const activeHeadChip = document.getElementById('activeHeadChip');
+    const headDescs = [
+      { name: "HEAD 0: SYNTACTIC DEPENDENCIES", info: "Attends from main verbs ('cross', 'compute') directly to their subjects ('animal') and predicate modifiers. Captures grammar tree relations." },
+      { name: "HEAD 1: PRONOUN COREFERENCE", info: "Disambiguates pronouns: 'it' attends with >85% weight to antecedent 'animal'. If changed to 'too wide', it flips to attend to 'street'." },
+      { name: "HEAD 2: ADJACENT PROXIMITY", info: "Strong diagonal band attending to immediate predecessor (i-1) and successor (i+1), mimicking n-gram convolutional filters." },
+      { name: "HEAD 3: DIRECT OBJECT ALIGNMENT", info: "Connects transitive verbs with direct object nouns across intervening adverbs and clauses." },
+      { name: "HEAD 4: SEMANTIC CLUSTERING", info: "Binds semantically associated words (e.g. 'animal', 'street', 'tired') regardless of sentence position." },
+      { name: "HEAD 5: PREPOSITIONAL MODIFIERS", info: "Traces prepositional phrases ('because it was', 'for sequence transduction') back to the governing verb." },
+      { name: "HEAD 6: GLOBAL SENTENCE CONTEXT", info: "Diffuse, low-entropy attention that aggregates holistic context across the entire sequence into delimiter tokens." },
+      { name: "HEAD 7: PUNCTUATION & DELIMITERS", info: "Attends to punctuation marks (periods, commas) to determine phrase boundaries and sentence termination." }
+    ];
+
+    function showHeadInfo(h) {
+      activeHeadChip.textContent = headDescs[h].name;
+      headDetailsBox.innerHTML = `
+        <div style="font-weight:bold; color:#fff; margin-bottom:4px;">${headDescs[h].name}</div>
+        <div style="color:#CBD5E1; line-height:1.5;">${headDescs[h].info}</div>
+      `;
+    }
+    showHeadInfo(0);
+
+    const headBtns = document.querySelectorAll('.head-toggle-btn');
+    headBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        headBtns.forEach(b => b.classList.remove('cyan-active'));
+        btn.classList.add('cyan-active');
+        const h = Number(btn.getAttribute('data-head'));
+        showHeadInfo(h);
+      });
+    });
+
+
+    // ------------------------------------------------------------------------
+    // 7. FFN FIRING NEURONS SIMULATION
+    // ------------------------------------------------------------------------
+    const ffnNeuronStatus = document.getElementById('ffnNeuronStatus');
+    setInterval(() => {
+      if (!ffnNeuronStatus) return;
+      const count = Math.floor(280 + Math.random() * 120);
+      ffnNeuronStatus.textContent = `⚡ ${count} / 2048 Neurons Firing (Sparsity: ${(100 - count/2048*100).toFixed(1)}%)`;
+    }, 1200);
+
+
+    // ------------------------------------------------------------------------
+    // 8. AUTOREGRESSIVE DECODER & CROSS-LAYER PROCESSING STUDIO (1 TOKEN AT A TIME)
+    // ------------------------------------------------------------------------
+    const arTokens = ["<BOS>", "L'", "attention", "est", "tout", "ce", "dont", "vous", "avez", "besoin", "<EOS>"];
+    const arSrcTokens = ["Attention", "is", "all", "you", "need"];
+    let decodeStep = 2; // currently at index 2 ("attention")
+    let activeLayer = 1; // 1 to 6
+    let isAutoDecoding = false;
+    let autoDecodeTimer = null;
+    let autoLayerTimer = null;
+
+    const arTokenSequenceBar = document.getElementById('arTokenSequenceBar');
+    const arSeqStatus = document.getElementById('arSeqStatus');
+    const decoderStepChip = document.getElementById('decoderStepChip');
+    const decoderLayerChip = document.getElementById('decoderLayerChip');
+    const causalGrid = document.getElementById('causalMaskGrid');
+    const selfAttnBreakdown = document.getElementById('selfAttnValueBreakdown');
+    const crossAttnBreakdown = document.getElementById('crossAttnValueBreakdown');
+    const clVectorMetric = document.getElementById('clVectorMetric');
+    const currentGenTokenLabel = document.getElementById('currentGenTokenLabel');
+    const crossLayerBtnGroup = document.getElementById('crossLayerBtnGroup');
+
+    const LAYER_ALIGNMENT_SPECS = {
+      1: { sim: 0.45, label: 'Early Syntactic Fusion' },
+      2: { sim: 0.62, label: 'Grammatical Collinearity' },
+      3: { sim: 0.76, label: 'Cross-Lingual Bridge Established' },
+      4: { sim: 0.85, label: 'Deep Semantic Alignment' },
+      5: { sim: 0.92, label: 'Contextual Climax' },
+      6: { sim: 0.97, label: 'Full Semantic Convergence (Logit Ready)' }
+    };
+
+    function renderArStudio() {
+      if (!arTokenSequenceBar || !causalGrid) return;
+
+      const currentTok = arTokens[decodeStep];
+      if (decoderStepChip) decoderStepChip.textContent = `TOKEN ${decodeStep + 1} / ${arTokens.length}`;
+      if (decoderLayerChip) decoderLayerChip.textContent = `LAYER ${activeLayer} / 6`;
+      if (currentGenTokenLabel) currentGenTokenLabel.textContent = `Active Token: "${currentTok}" (Layer ${activeLayer}/6)`;
+      if (arSeqStatus) arSeqStatus.textContent = `GENERATING TOKEN t=${decodeStep}: "${currentTok}"`;
+
+      // 1. Sequence Emission Bar (One Token at a Time)
+      let seqHtml = '';
+      arTokens.forEach((tok, idx) => {
+        if (idx < decodeStep) {
+          seqHtml += `
+            <div style="background:rgba(0,255,204,0.12); border:1px solid rgba(0,255,204,0.4); color:var(--hud-cyan); padding:4px 8px; border-radius:3px; font-family:var(--font-mono); font-size:10px; cursor:pointer;" onclick="window.__jumpDecodeToken(${idx})">
+              <span style="font-weight:bold;">${tok}</span>
+              <span style="font-size:8px; opacity:0.75; margin-left:2px;">✓</span>
+            </div>
+          `;
+        } else if (idx === decodeStep) {
+          seqHtml += `
+            <div style="background:rgba(222,93,53,0.3); border:1px solid var(--coral-accent); color:#FAF9F5; padding:4px 10px; border-radius:3px; font-family:var(--font-mono); font-size:11px; font-weight:bold; box-shadow:0 0 10px rgba(222,93,53,0.4);">
+              <span>${tok}</span>
+              <span style="font-size:8px; color:var(--coral-accent); margin-left:4px;">[t=${idx} ACTIVE]</span>
+            </div>
+          `;
+        } else {
+          seqHtml += `
+            <div style="background:rgba(255,255,255,0.02); border:1px dashed rgba(239,68,68,0.35); color:#64748B; padding:4px 8px; border-radius:3px; font-family:var(--font-mono); font-size:10px; opacity:0.65;">
+              <span>${tok}</span>
+              <span style="font-size:8px; color:#ef4444; margin-left:2px;">-∞</span>
+            </div>
+          `;
+        }
+      });
+      arTokenSequenceBar.innerHTML = seqHtml;
+
+      // 2. Causal Mask Matrix
+      const maxDisplay = Math.min(decodeStep + 3, arTokens.length);
+      let gridHtml = `<div style="display:grid; grid-template-columns:repeat(${maxDisplay}, 1fr); gap:3px; font-family:var(--font-mono); font-size:9.5px;">`;
+      for (let i = 0; i < maxDisplay; i++) {
+        for (let j = 0; j < maxDisplay; j++) {
+          const isFuture = j > i;
+          const isRowActive = i === decodeStep;
+
+          let bg = 'rgba(255,255,255,0.02)';
+          let text = '0';
+          let col = '#475569';
+          let border = 'rgba(255,255,255,0.05)';
+
+          if (isFuture) {
+            bg = 'rgba(239, 68, 68, 0.12)';
+            text = '-∞';
+            col = '#ef4444';
+            border = 'rgba(239, 68, 68, 0.25)';
+          } else if (isRowActive) {
+            bg = 'rgba(222, 93, 53, 0.22)';
+            col = '#fff';
+            border = 'var(--coral-accent)';
+            const diff = i - j;
+            text = diff === 0 ? '0.62' : (diff === 1 ? '0.28' : '0.10');
+          } else if (i < decodeStep) {
+            bg = 'rgba(0, 255, 204, 0.08)';
+            col = '#00ffcc';
+            text = '✓';
+          }
+
+          gridHtml += `
+            <div style="background:${bg}; border:1px solid ${border}; color:${col}; padding:5px 2px; text-align:center; border-radius:2px;" title="Row ${i} (${arTokens[i]}) -> Col ${j} (${arTokens[j]})">
+              ${text}
+            </div>
+          `;
+        }
+      }
+      gridHtml += `</div>`;
+      causalGrid.innerHTML = gridHtml;
+
+      // 3. Cross-Layer Buttons
+      if (crossLayerBtnGroup) {
+        crossLayerBtnGroup.querySelectorAll('button').forEach(btn => {
+          const lay = parseInt(btn.getAttribute('data-layer'));
+          btn.classList.toggle('active', lay === activeLayer);
+        });
+      }
+
+      // 4. Sublayer 1: Masked Self-Attention Value Addition
+      const lInfo = LAYER_ALIGNMENT_SPECS[activeLayer] || LAYER_ALIGNMENT_SPECS[1];
+      let selfHtml = '';
+      if (decodeStep === 0) {
+        selfHtml = `<div style="color:var(--hud-cyan);">Starting token &lt;BOS&gt; has no preceding context.</div>`;
+      } else {
+        const pastTokens = arTokens.slice(0, decodeStep + 1);
+        pastTokens.forEach((pt, pIdx) => {
+          const isSelf = pIdx === decodeStep;
+          const weight = isSelf ? (0.45 / activeLayer).toFixed(2) : ((0.55 / (decodeStep)) * (1 + pIdx * 0.2)).toFixed(2);
+          const barW = Math.round(parseFloat(weight) * 100);
+          selfHtml += `
+            <div style="margin-bottom:3px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="color:${isSelf ? '#FAF9F5' : 'var(--hud-cyan)'};">${pt}:</span>
+              <div style="display:flex; align-items:center; gap:4px; width:60%;">
+                <div style="flex:1; background:rgba(255,255,255,0.06); height:4px; border-radius:2px; overflow:hidden;">
+                  <div style="width:${barW}%; height:100%; background:var(--hud-cyan);"></div>
+                </div>
+                <span style="font-size:8.5px; color:#FAF9F5; min-width:24px;">${weight}</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+      if (selfAttnBreakdown) selfAttnBreakdown.innerHTML = selfHtml;
+
+      // 5. Sublayer 2: Cross-Attention Value Addition (from English Encoder)
+      let crossHtml = '';
+      arSrcTokens.forEach((st, sIdx) => {
+        let weight = 0.05;
+        if (currentTok.toLowerCase().includes('attention') && st.toLowerCase() === 'attention') weight = 0.75 + activeLayer * 0.03;
+        else if (currentTok.toLowerCase() === 'est' && st.toLowerCase() === 'is') weight = 0.72 + activeLayer * 0.03;
+        else if (currentTok.toLowerCase() === 'besoin' && st.toLowerCase() === 'need') weight = 0.81 + activeLayer * 0.02;
+        else if (currentTok.toLowerCase() === 'tout' && st.toLowerCase() === 'all') weight = 0.68 + activeLayer * 0.03;
+        else weight = (0.25 / 4).toFixed(2);
+
+        weight = Math.min(0.95, weight);
+        const barW = Math.round(weight * 100);
+        crossHtml += `
+          <div style="margin-bottom:3px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:var(--coral-accent);">${st}:</span>
+            <div style="display:flex; align-items:center; gap:4px; width:60%;">
+              <div style="flex:1; background:rgba(255,255,255,0.06); height:4px; border-radius:2px; overflow:hidden;">
+                <div style="width:${barW}%; height:100%; background:var(--coral-accent);"></div>
+              </div>
+              <span style="font-size:8.5px; color:#FAF9F5; min-width:24px;">${weight.toFixed(2)}</span>
+            </div>
+          </div>
+        `;
+      });
+      if (crossAttnBreakdown) crossAttnBreakdown.innerHTML = crossHtml;
+
+      // 6. Context Vector Metric
+      if (clVectorMetric) {
+        clVectorMetric.innerHTML = `
+          <strong>L${activeLayer} Alignment:</strong> cos(<strong>v</strong><sub>target</sub>, <strong>v</strong><sub>source</sub>) = 
+          <span style="color:var(--hud-cyan); font-weight:bold;">+${lInfo.sim.toFixed(3)}</span> · 
+          <span style="color:var(--hud-emerald);">${lInfo.label}</span>
+        `;
+      }
+    }
+
+    window.__jumpDecodeToken = idx => {
+      decodeStep = idx;
+      activeLayer = 1;
+      renderArStudio();
+    };
+
+    if (crossLayerBtnGroup) {
+      crossLayerBtnGroup.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeLayer = parseInt(btn.getAttribute('data-layer'));
+          renderArStudio();
+        });
+      });
+    }
+
+    const btnPrevDecode = document.getElementById('btnPrevDecode');
+    const btnNextDecode = document.getElementById('btnNextDecode');
+    const btnResetDecode = document.getElementById('btnResetDecode');
+    const btnStepLayerNext = document.getElementById('btnStepLayerNext');
+    const btnAutoPlayLayers = document.getElementById('btnAutoPlayLayers');
+    const btnAutoDecodeSequence = document.getElementById('btnAutoDecodeSequence');
+
+    if (btnPrevDecode) {
+      btnPrevDecode.addEventListener('click', () => {
+        if (decodeStep > 0) {
+          decodeStep--;
+          activeLayer = 1;
+          renderArStudio();
+        }
+      });
+    }
+
+    if (btnNextDecode) {
+      btnNextDecode.addEventListener('click', () => {
+        if (decodeStep < arTokens.length - 1) {
+          decodeStep++;
+          activeLayer = 1;
+          renderArStudio();
+        }
+      });
+    }
+
+    if (btnResetDecode) {
+      btnResetDecode.addEventListener('click', () => {
+        decodeStep = 1;
+        activeLayer = 1;
+        renderArStudio();
+      });
+    }
+
+    if (btnStepLayerNext) {
+      btnStepLayerNext.addEventListener('click', () => {
+        if (activeLayer < 6) {
+          activeLayer++;
+        } else {
+          activeLayer = 1;
+          if (decodeStep < arTokens.length - 1) decodeStep++;
+        }
+        renderArStudio();
+      });
+    }
+
+    if (btnAutoPlayLayers) {
+      btnAutoPlayLayers.addEventListener('click', () => {
+        if (autoLayerTimer) {
+          clearInterval(autoLayerTimer);
+          autoLayerTimer = null;
+          btnAutoPlayLayers.textContent = 'PLAY L1→L6';
+        } else {
+          btnAutoPlayLayers.textContent = 'PAUSE';
+          autoLayerTimer = setInterval(() => {
+            if (activeLayer < 6) {
+              activeLayer++;
+              renderArStudio();
+            } else {
+              clearInterval(autoLayerTimer);
+              autoLayerTimer = null;
+              btnAutoPlayLayers.textContent = 'PLAY L1→L6';
+            }
+          }, 500);
+        }
+      });
+    }
+
+    if (btnAutoDecodeSequence) {
+      btnAutoDecodeSequence.addEventListener('click', () => {
+        if (isAutoDecoding) {
+          clearInterval(autoDecodeTimer);
+          autoDecodeTimer = null;
+          isAutoDecoding = false;
+          btnAutoDecodeSequence.textContent = 'AUTOREGRESSIVE FULL RUN';
+        } else {
+          isAutoDecoding = true;
+          btnAutoDecodeSequence.textContent = 'PAUSE RUN';
+          autoDecodeTimer = setInterval(() => {
+            if (activeLayer < 6) {
+              activeLayer++;
+            } else {
+              activeLayer = 1;
+              if (decodeStep < arTokens.length - 1) {
+                decodeStep++;
+              } else {
+                decodeStep = 0;
+              }
+            }
+            renderArStudio();
+          }, 600);
+        }
+      });
+    }
+
+    renderArStudio();
+
+
+    // ------------------------------------------------------------------------
+    // 9. CROSS-ATTENTION ALIGNMENT (ENCODER → DECODER)
+    // ------------------------------------------------------------------------
+    const srcTokens = ["Attention", "is", "all", "you", "need"];
+    const tgtTokens = ["L'", "attention", "est", "tout", "ce", "dont", "vous", "avez", "besoin"];
+    let selectedTgt = 1;
+
+    function renderCrossAlignment() {
+      const wrap = document.getElementById('crossAlignSvgWrap');
+      const w = 720;
+      const h = 180;
+      let svg = `<svg viewBox="0 0 ${w} ${h}" style="width:100%; font-family:var(--font-mono); select-none;">`;
+
+      const srcY = 30;
+      const tgtY = 150;
+      const srcSpacing = w / (srcTokens.length + 1);
+      const tgtSpacing = w / (tgtTokens.length + 1);
+
+      for (let t = 0; t < tgtTokens.length; t++) {
+        const tx = (t + 1) * tgtSpacing;
+        const isActive = t === selectedTgt;
+
+        for (let s = 0; s < srcTokens.length; s++) {
+          const sx = (s + 1) * srcSpacing;
+          const match = (srcTokens[s].toLowerCase().includes('attention') && tgtTokens[t].toLowerCase().includes('attention')) ||
+                        (srcTokens[s].toLowerCase() === 'is' && tgtTokens[t].toLowerCase() === 'est') ||
+                        (srcTokens[s].toLowerCase() === 'need' && tgtTokens[t].toLowerCase() === 'besoin');
+
+          const strokeAlpha = isActive ? (match ? 1.0 : 0.15) : 0.06;
+          const strokeCol = match ? '#00ffcc' : '#DE5D35';
+          const strokeWidth = isActive && match ? 2.5 : 1.0;
+
+          svg += `<path d="M ${sx} ${srcY + 8} C ${sx} ${srcY + 50}, ${tx} ${tgtY - 50}, ${tx} ${tgtY - 8}"
+                        fill="none" stroke="${strokeCol}" stroke-opacity="${strokeAlpha}" stroke-width="${strokeWidth}" />`;
+        }
+      }
+
+      for (let s = 0; s < srcTokens.length; s++) {
+        const sx = (s + 1) * srcSpacing;
+        svg += `
+          <g>
+            <circle cx="${sx}" cy="${srcY}" r="4.5" fill="#00ffcc" />
+            <text x="${sx}" y="${srcY - 10}" fill="#00ffcc" font-size="11" text-anchor="middle" font-weight="600">${srcTokens[s]}</text>
+          </g>
+        `;
+      }
+
+      for (let t = 0; t < tgtTokens.length; t++) {
+        const tx = (t + 1) * tgtSpacing;
+        const isSel = t === selectedTgt;
+        svg += `
+          <g style="cursor:pointer;" onclick="window.__selectTgt(${t})">
+            <circle cx="${tx}" cy="${tgtY}" r="${isSel ? 6 : 4}" fill="${isSel ? '#DE5D35' : '#94A3B8'}" />
+            <text x="${tx}" y="${tgtY + 18}" fill="${isSel ? '#DE5D35' : '#94A3B8'}" font-size="11" text-anchor="middle" font-weight="${isSel ? '700' : '400'}">${tgtTokens[t]}</text>
+          </g>
+        `;
+      }
+
+      svg += `</svg>`;
+      wrap.innerHTML = svg;
+    }
+    window.__selectTgt = idx => {
+      selectedTgt = idx;
+      renderCrossAlignment();
+    };
+    renderCrossAlignment();
+
+
+    // ------------------------------------------------------------------------
+    // 10. NOAM LEARNING RATE PLOT (ANIMATED TRAINING CURSOR)
+    // ------------------------------------------------------------------------
+    const lrCanvas = document.getElementById('lrCanvas');
+    const lrSlider = document.getElementById('lrStepSlider');
+    const lrVal = document.getElementById('lrStepVal');
+    const lrChip = document.getElementById('lrValueChip');
+
+    function renderNoamCurve(currentStep = 4000) {
+      if (!lrCanvas) return;
+      const ctx = lrCanvas.getContext('2d');
+      const w = lrCanvas.width;
+      const h = lrCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const maxSteps = 40000;
+      const warmup = 4000;
+      const d_model = 512;
+
+      function getLR(step) {
+        return Math.pow(d_model, -0.5) * Math.min(Math.pow(step, -0.5), step * Math.pow(warmup, -1.5));
+      }
+
+      const peakLR = getLR(warmup);
+      const curLR = getLR(currentStep);
+      lrChip.textContent = `LR: ${curLR.toFixed(5)} AT STEP ${currentStep}`;
+
+      ctx.strokeStyle = '#00ffcc';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      for (let x = 0; x < w; x++) {
+        const step = (x / w) * maxSteps;
+        const lr = getLR(Math.max(1, step));
+        const y = h - 20 - (lr / peakLR) * (h - 40);
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      const warmupX = (warmup / maxSteps) * w;
+      ctx.strokeStyle = 'rgba(222, 93, 53, 0.6)';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(warmupX, 10);
+      ctx.lineTo(warmupX, h - 20);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#DE5D35';
+      ctx.font = '10px "IBM Plex Mono", monospace';
+      ctx.fillText('WARMUP: 4000 STEPS', warmupX + 6, 24);
+
+      const curX = (currentStep / maxSteps) * w;
+      const curY = h - 20 - (curLR / peakLR) * (h - 40);
+      ctx.fillStyle = '#DE5D35';
+      ctx.beginPath();
+      ctx.arc(curX, curY, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    renderNoamCurve(4000);
+
+    lrSlider.addEventListener('input', e => {
+      const st = Number(e.target.value);
+      lrVal.textContent = st;
+      renderNoamCurve(st);
+    });
+
+  })();
+  </script>
+</body>
+</html>
