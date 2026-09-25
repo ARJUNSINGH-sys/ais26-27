@@ -123,7 +123,7 @@ export default function Footer() {
                 <span className="text-accent">.</span>
               </h2>
               <p className="mt-5 max-w-[36ch] text-[14px] leading-[1.6] text-ink-soft">
-                Bennett University&apos;s artificial intelligence society —
+                Bennett University&apos;s artificial intelligence society,
                 training minds, one epoch at a time.
               </p>
             </div>
@@ -245,7 +245,7 @@ export default function Footer() {
         <div className="footer-text-ticker flex w-max whitespace-nowrap">
           {Array.from({ length: 8 }).map((_, i) => (
             <span key={i} className="flex items-center gap-0 px-0">
-              <span className="px-5">© {new Date().getFullYear()} AI Society — Bennett University</span>
+              <span className="px-5">© {new Date().getFullYear()} AI Society · Bennett University</span>
               <span aria-hidden className="opacity-40">.</span>
               <span className="px-5">Greater Noida · India</span>
               <span aria-hidden className="opacity-40">.</span>

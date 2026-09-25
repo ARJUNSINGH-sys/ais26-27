@@ -17,7 +17,7 @@ export default function Nav({ isMenuOpen = false, onToggleMenu }: NavProps) {
       <div className={`absolute left-0 top-0 z-50 ${barClass}`}>
         <Link
           href="/"
-          aria-label="AI Society — Bennett University"
+          aria-label="AI Society, Bennett University"
           className="flex items-center group py-2"
         >
           <span

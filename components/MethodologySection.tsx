@@ -100,7 +100,7 @@ export default function MethodologySection() {
             </h2>
           </div>
           <p className="max-w-[34ch] text-[14px] leading-[1.6] text-ink-soft sm:text-right">
-            Every epoch is structured scientific inquiry — rigorous benchmarking
+            Every epoch is structured scientific inquiry: rigorous benchmarking
             and collective development, not merely syntax.
           </p>
         </div>
