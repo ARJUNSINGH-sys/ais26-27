@@ -12,7 +12,7 @@ const INDEX_LINKS = [
 
 const CHANNELS = [
   { href: "https://github.com", label: "GitHub" },
-  { href: "https://instagram.com", label: "Instagram" },
+  { href: "https://www.instagram.com/ais_bennett/", label: "Instagram" },
   { href: "https://linkedin.com", label: "LinkedIn" },
   { href: "https://www.bennett.edu.in", label: "Bennett University" },
 ];
@@ -214,7 +214,7 @@ export default function Footer() {
       {/* Looping photo strip on the accent frame */}
       <div className="mt-2 flex items-stretch gap-2">
         <a
-          href="https://instagram.com"
+          href="https://www.instagram.com/ais_bennett/"
           target="_blank"
           rel="noopener noreferrer"
           className="hidden w-[140px] shrink-0 flex-col items-start justify-center rounded-2xl bg-ground px-4 py-3 sm:flex"
