@@ -78,7 +78,7 @@ export default function TransformersArticlePage() {
             <p className="text-[16px] sm:text-[18px] text-[#75716B] max-w-2xl leading-[1.6]">
               Eliminating recurrence in favor of global multi-head self-attention.
               Experience how queries, keys, and values replace temporal bottlenecks with
-              constant-path \(O(1)\) attention highways.
+              constant-path <MathTex math="O(1)" /> attention highways.
             </p>
             <div className="flex flex-wrap items-center gap-6 mt-6 font-mono text-[11px] uppercase tracking-wider text-[#75716B]">
               <span>Read Time: 12 min</span>
@@ -104,14 +104,14 @@ export default function TransformersArticlePage() {
               <div className="lg:col-span-6 text-[14px] text-[#4A4742] leading-[1.7] space-y-4">
                 <p>
                   Recurrent architectures (RNNs and LSTMs) process sequences step-by-step.
-                  To link token \(x_1\) to token \(x_{100}\), the gradient must survive
+                  To link token <MathTex math="x_1" /> to token <MathTex math="x_{100}" />, the gradient must survive
                   a chain of 100 non-linear matrix multiplications. This causes the classic
                   vanishing gradient problem and forces strictly sequential training.
                 </p>
                 <p>
                   The <strong>Transformer architecture</strong> discards recurrence entirely.
                   Every token can attend directly to every other token in a single operation,
-                  reducing the maximum signal path length from \(O(n)\) to \(O(1)\):
+                  reducing the maximum signal path length from <MathTex math="O(n)" /> to <MathTex math="O(1)" />:
                 </p>
                 <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 font-mono text-[13px] rounded-[2px]">
                   <div className="text-[11px] text-[#75716B] uppercase mb-1">Attention Matrix Formulation</div>
@@ -239,13 +239,13 @@ export default function TransformersArticlePage() {
                     <strong>1. Positional Encoding:</strong> Injects sequence order without recurrent loops using sinusoidal waves of varying frequencies.
                   </div>
                   <div className="p-3 bg-white border border-[#1A1816]/10 rounded">
-                    <strong>2. Scaled Dot-Product:</strong> Scales the inner product of queries and keys by \(\sqrt{d_k}\) to prevent vanishing softmax gradients.
+                    <strong>2. Scaled Dot-Product:</strong> Scales the inner product of queries and keys by <MathTex math="1/\sqrt{d_k}" /> to prevent vanishing softmax gradients.
                   </div>
                   <div className="p-3 bg-white border border-[#1A1816]/10 rounded">
-                    <strong>3. Multi-Head Projection:</strong> Projects \(Q, K, V\) into \(h=8\) distinct subspaces, allowing the model to jointly attend to semantic and syntactic roles.
+                    <strong>3. Multi-Head Projection:</strong> Projects <MathTex math="Q, K, V" /> into <MathTex math="h=8" /> distinct subspaces, allowing the model to jointly attend to semantic and syntactic roles.
                   </div>
                   <div className="p-3 bg-white border border-[#1A1816]/10 rounded">
-                    <strong>4. Residual Connections:</strong> \(x + \mathrm{Sublayer}(x)\) ensures stable gradient flow across deep 6-to-96 layer stacks.
+                    <strong>4. Residual Connections:</strong> <MathTex math="x + \mathrm{Sublayer}(x)" /> ensures stable gradient flow across deep 6-to-96 layer stacks.
                   </div>
                 </div>
               </div>
@@ -355,7 +355,7 @@ export default function TransformersArticlePage() {
             <div className="border border-[#1A1816]/15 bg-[#FAF9F5] p-6 sm:p-8 rounded-[2px]">
               <p className="text-[14px] text-[#4A4742] leading-[1.7] mb-6">
                 During generation, tokens are predicted one-by-one. The causal lookahead mask sets all future
-                attention logits to \(-\infty\) so the model cannot peek ahead into tokens it hasn&apos;t generated yet:
+                attention logits to <MathTex math="-\infty" /> so the model cannot peek ahead into tokens it hasn&apos;t generated yet:
               </p>
 
               {/* Generation Stepper Controls */}
