@@ -21,8 +21,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title:
-    "AI Society — Bennett University | Training Minds, One Epoch at a Time",
+  title: {
+    default:
+      "AI Society, Bennett University | Training Minds, One Epoch at a Time",
+    template: "%s | AI Society, Bennett University",
+  },
   description:
     "Bennett University's premier artificial intelligence student specialization society. Dedicated to deep learning research, intelligent systems, hackathons, and technical workshops.",
   keywords: [
