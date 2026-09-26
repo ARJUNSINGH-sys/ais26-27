@@ -9,21 +9,11 @@ interface FoldMenuProps {
 }
 
 const NAV_LINKS = [
-  { prefix: "01", label: "HOME", href: "/", tag: "OVERVIEW" },
-  { prefix: "02", label: "TEAMS", href: "/team", tag: "COHORT & MENTORS" },
-  {
-    prefix: "03",
-    label: "EVENTS",
-    href: "/events",
-    tag: "TALKS & HACKATHONS",
-  },
-  {
-    prefix: "04",
-    label: "RESOURCES",
-    href: "/resources",
-    tag: "AI LAB & ARCHIVE",
-  },
-  { prefix: "05", label: "ROADMAP", href: "/roadmap", tag: "COMING SOON" },
+  { label: "Home", href: "/" },
+  { label: "Teams", href: "/team" },
+  { label: "Events", href: "/events" },
+  { label: "Resources", href: "/resources" },
+  { label: "Roadmap", href: "/roadmap" },
 ];
 
 const SOCIALS = [
@@ -99,17 +89,8 @@ export default function FoldMenu({
           }}
         />
 
-        {/* Header: Status Indicator + Unified Close Button */}
-        <div className="menu-header relative z-10 flex shrink-0 items-center justify-between border-b border-white/10 px-6 py-4 sm:px-7 sm:py-4.5">
-          <div className="flex items-center gap-2.5 text-[11px] font-mono tracking-widest uppercase text-white/60">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span className="text-white font-bold">AI SOCIETY</span>
-            <span className="text-white/40">· ED. 26-27</span>
-          </div>
-
+        {/* Header: Unified Close Button */}
+        <div className="menu-header relative z-10 flex shrink-0 items-center justify-end border-b border-white/10 px-6 py-4 sm:px-7 sm:py-4.5">
           <button
             type="button"
             onClick={onClose}
@@ -121,58 +102,34 @@ export default function FoldMenu({
           </button>
         </div>
 
-        {/* Primary Navigation Links — balanced spacing without large voids */}
+        {/* Primary Navigation Links — pure links */}
         <nav
           aria-label="Primary navigation"
-          className="relative z-10 flex flex-col gap-1 sm:gap-1.5 px-4 py-3 sm:px-6 sm:py-4 overflow-y-auto no-scrollbar"
+          className="relative z-10 flex flex-col gap-1 sm:gap-1.5 px-4 py-4 sm:px-6 sm:py-5 overflow-y-auto no-scrollbar"
         >
-          <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/30 px-4 mb-1 block shrink-0">
-            INDEX / NAVIGATION
-          </span>
-
           {NAV_LINKS.map((item) => (
             <div key={item.label} className="menu-nav-item w-full shrink-0">
               <a
                 href={item.href}
                 onClick={(e) => handleLinkClick(e, item.href)}
                 tabIndex={isOpen ? 0 : -1}
-                className="group flex items-center justify-between rounded-2xl px-4 py-2.5 sm:py-3 transition-all duration-200 cursor-pointer select-none hover:bg-white/[0.06]"
+                className="group flex items-center justify-between rounded-2xl px-5 py-3 sm:py-3.5 transition-all duration-200 cursor-pointer select-none hover:bg-white/[0.06]"
               >
-                <div className="flex items-center gap-4">
-                  <span className="w-7 font-mono text-[13px] text-[#DE5D35] group-hover:text-white font-semibold tracking-wider transition-colors duration-200">
-                    {item.prefix}
-                  </span>
+                <span className="font-display text-[22px] sm:text-[26px] md:text-[28px] font-bold tracking-tight text-[#FAF9F5] group-hover:text-[#DE5D35] transition-colors duration-200">
+                  {item.label}
+                </span>
 
-                  <span className="font-display text-[24px] sm:text-[28px] md:text-[30px] font-extrabold tracking-[-0.03em] leading-none text-[#FAF9F5] group-hover:text-[#DE5D35] transition-colors duration-200">
-                    {item.label}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2.5">
-                  <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-white/35 group-hover:text-white/70 transition-colors duration-200 hidden sm:inline">
-                    {item.tag}
-                  </span>
-                  <span className="text-[14px] text-[#DE5D35] opacity-0 -translate-x-1.5 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0">
-                    →
-                  </span>
-                </div>
+                <span className="text-[16px] text-[#DE5D35] opacity-0 -translate-x-1.5 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0">
+                  →
+                </span>
               </a>
             </div>
           ))}
         </nav>
 
         {/* Footer info & coordinates */}
-        <div className="menu-footer relative z-10 shrink-0 border-t border-white/10 bg-black/25 px-6 py-4.5 sm:px-7 sm:py-5 text-[11px] font-mono text-white/60">
-          <div className="mb-3">
-            <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/35 block mb-0.5">
-              CAMPUS HEADQUARTERS
-            </span>
-            <span className="text-[12px] text-white/80 leading-relaxed block">
-              Plot Nos 8–11, TechZone II, Greater Noida, UP 201310
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between pt-2.5 border-t border-white/5 text-[11px]">
+        <div className="menu-footer relative z-10 shrink-0 border-t border-white/10 bg-black/25 px-6 py-4 sm:px-7 sm:py-4.5 text-[11px] font-mono text-white/60">
+          <div className="flex items-center justify-between text-[11px]">
             <a
               href="mailto:ais@bennett.edu.in"
               className="text-white/80 hover:text-[#DE5D35] transition-colors inline-flex items-center gap-1.5"

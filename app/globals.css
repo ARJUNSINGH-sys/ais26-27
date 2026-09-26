@@ -7,26 +7,37 @@
    ══════════════════════════════════════════════════════════════════ */
 
 @theme {
+  /* ══════════════════════════════════════════════════════════════════
+     AI SOCIETY — 4-COLOR BRAND PALETTE
+     1. Black:   #0E0D0C
+     2. White:   #FFFFFF
+     3. Orange:  #DD6E2D (Pantone P 30-8 C)
+     4. Purple:  #3F1E46 (Pantone P 95-16 C)
+     ══════════════════════════════════════════════════════════════════ */
+  --color-black: #0e0d0c;
+  --color-white: #ffffff;
+  --color-orange: #dd6e2d;
+  --color-purple: #3f1e46;
+
   /* Surfaces */
   --color-ground: #efece6;
   --color-panel: #e3dfd7;
-  --color-dark: #1a1816;
+  --color-dark: #0e0d0c;
 
   /* Ink */
   --color-ink: #1a1816;
   --color-ink-soft: #75716b;
 
-  /* Accent — reserved for the bento quadrant */
-  --color-accent: #de5d35;
+  /* Accent */
+  --color-accent: #dd6e2d;
 
   /* Hairlines */
   --color-line: rgba(26, 24, 22, 0.12);
   --color-line-soft: rgba(26, 24, 22, 0.06);
 
   /* Type */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display:
-    var(--font-inter-tight), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-sans: var(--font-albert-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-unbounded), ui-sans-serif, sans-serif;
 
   /* Geometry */
   --radius-card: 32px;

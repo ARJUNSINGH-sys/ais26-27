@@ -257,14 +257,14 @@ export default function ResourcesPage() {
           {/* Section Header */}
           <header className="relative z-10 max-w-[64ch] mb-12 sm:mb-16">
             <div className="flex items-center gap-2 mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#DD6E2D]" />
               <span className="text-[11px] font-mono font-medium tracking-[0.18em] uppercase text-[#75716B]">
-                03 / OPEN ARCHIVE · AIS BENNETT UNIVERSITY
+                03 / LEARNING CENTER · AIS BENNETT UNIVERSITY
               </span>
             </div>
 
             <h1 className="text-[40px] sm:text-[64px] font-black tracking-[-0.035em] leading-[0.98] uppercase text-[#1A1816] mb-5 font-display">
-              Explore Published Articles.
+              Learning Center.
             </h1>
 
             <p className="text-[16px] text-[#75716B] leading-[1.65]">

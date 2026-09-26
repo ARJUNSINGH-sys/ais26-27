@@ -5,7 +5,17 @@ export const dynamic = "force-static";
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://bennettai.github.io/ai-society";
 
-const PAGES = ["", "/events", "/resources", "/team", "/roadmap"];
+const PAGES = [
+  "",
+  "/events",
+  "/learning",
+  "/resources",
+  "/team",
+  "/alumni",
+  "/newsletter",
+  "/blog",
+  "/roadmap",
+];
 
 // Keep in sync with the articles listed in app/resources/page.tsx
 const ESSAYS = [
