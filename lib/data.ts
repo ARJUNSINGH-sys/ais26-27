@@ -1,3 +1,5 @@
+import { assetPath } from "@/lib/basePath";
+
 export interface EventItem {
   id: string;
   slug: string;
@@ -29,7 +31,7 @@ export const eventsData: EventItem[] = [
     title: "Club Carnival",
     date: "JULY 2024",
     category: "Induction & Orientation",
-    image: "/images/event-club-carnival.png",
+    image: assetPath("/images/event-club-carnival.png"),
     shortDesc:
       "Annual club induction festival welcoming freshers to the frontier of AI research, interactive model demos, and tech roadmaps.",
     location: "Main Audi, BU",
@@ -40,7 +42,7 @@ export const eventsData: EventItem[] = [
     title: "AI 101",
     date: "AUGUST 2024",
     category: "Foundations Workshop",
-    image: "/images/event-ai-101.png",
+    image: assetPath("/images/event-ai-101.png"),
     shortDesc:
       "Comprehensive introductory workshop decoding gradient descent, deep neural representations, and hands-on PyTorch development.",
     location: "T-Block Seminar Hall",
@@ -51,7 +53,7 @@ export const eventsData: EventItem[] = [
     title: "AI Hunt 2.0",
     date: "SEPTEMBER 2024",
     category: "Algorithmic Scavenger Hunt",
-    image: "/images/event-ai-hunt.png",
+    image: assetPath("/images/event-ai-hunt.png"),
     shortDesc:
       "High-octane 48-hour cryptic challenge deciphering adversarial perturbations, neural steganography, and logic gates.",
     location: "Campus-Wide",
@@ -62,7 +64,7 @@ export const eventsData: EventItem[] = [
     title: "TechArena 2025",
     date: "FEBRUARY 2025",
     category: "Flagship Symposium",
-    image: "/images/event-tech-arena.png",
+    image: assetPath("/images/event-tech-arena.png"),
     shortDesc:
       "The premier collegiate tech fest featuring national multi-track hackathons, research keynotes, and rapid prototyping leagues.",
     location: "Auditorium Complex",
@@ -73,7 +75,7 @@ export const eventsData: EventItem[] = [
     title: "Project Showcase",
     date: "MARCH 2025",
     category: "Demo Day & Research Expo",
-    image: "/images/event-project-showcase.png",
+    image: assetPath("/images/event-project-showcase.png"),
     shortDesc:
       "Public exposition of ten member-engineered production models, vision-language systems, and agentic workflows.",
     location: "Engineering Atrium",
@@ -84,7 +86,7 @@ export const eventsData: EventItem[] = [
     title: "XR & GenAI Workshop",
     date: "APRIL 2025",
     category: "Specialized Masterclass",
-    image: "/images/event-workshop.png",
+    image: assetPath("/images/event-workshop.png"),
     shortDesc:
       "Advanced technical deep-dive bridging Spatial Computing, 3D Gaussian Splatting, and multi-modal diffusion pipelines.",
     location: "AI Labs",

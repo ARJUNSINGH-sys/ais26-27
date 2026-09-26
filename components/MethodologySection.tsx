@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { useRef } from "react";
+import { assetPath } from "@/lib/basePath";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -20,7 +21,7 @@ const STEPS = [
     numeral: "02",
     title: "Training & optimisation",
     note: "Fine-tuning weights, evaluating inference latency, and running adversarial perturbation tests.",
-    preview: "/images/event-ai-101.png",
+    preview: assetPath("/images/event-ai-101.png"),
   },
   {
     numeral: "03",
@@ -100,7 +101,7 @@ export default function MethodologySection() {
             </h2>
           </div>
           <p className="max-w-[34ch] text-[14px] leading-[1.6] text-ink-soft sm:text-right">
-            Every epoch is structured scientific inquiry — rigorous benchmarking
+            Every epoch is structured scientific inquiry: rigorous benchmarking
             and collective development, not merely syntax.
           </p>
         </div>

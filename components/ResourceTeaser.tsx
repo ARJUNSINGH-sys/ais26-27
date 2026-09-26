@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
+import { assetPath } from "@/lib/basePath";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -88,7 +89,7 @@ export default function ResourceTeaser() {
           {/* Background: User-provided gradient image */}
           <div className="absolute -inset-y-8 inset-x-0 overflow-hidden pointer-events-none select-none">
             <Image
-              src="/gradient/1.png"
+              src={assetPath("/gradient/1.png")}
               alt=""
               aria-hidden="true"
               fill

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { assetPath } from "@/lib/basePath";
 
 const INDEX_LINKS = [
   { href: "#hero", label: "01 / Overview" },
@@ -12,21 +13,21 @@ const INDEX_LINKS = [
 
 const CHANNELS = [
   { href: "https://github.com", label: "GitHub" },
-  { href: "https://instagram.com", label: "Instagram" },
+  { href: "https://www.instagram.com/ais_bennett/", label: "Instagram" },
   { href: "https://linkedin.com", label: "LinkedIn" },
   { href: "https://www.bennett.edu.in", label: "Bennett University" },
 ];
 
 /* Strip of life-at-AIS photographs that loops forever. */
 const MARQUEE_IMAGES = [
-  "/images/hero1.jpg",
-  "/images/clubbattle.jpg",
-  "/images/event-ai-101.png",
-  "/images/hero3.jpg",
-  "/images/event-workshop.png",
-  "/images/hero2.jpg",
-  "/images/event-tech-arena.png",
-  "/images/event-project-showcase.png",
+  assetPath("/images/hero1.jpg"),
+  assetPath("/images/clubbattle.jpg"),
+  assetPath("/images/event-ai-101.png"),
+  assetPath("/images/hero3.jpg"),
+  assetPath("/images/event-workshop.png"),
+  assetPath("/images/hero2.jpg"),
+  assetPath("/images/event-tech-arena.png"),
+  assetPath("/images/event-project-showcase.png"),
 ];
 
 function MarqueeHalf() {
@@ -116,14 +117,14 @@ export default function Footer() {
               <span
                 aria-hidden
                 className="block h-12 w-[190px] bg-left bg-contain bg-no-repeat brightness-0"
-                style={{ backgroundImage: "url('/images/ais-logo.png')" }}
+                style={{ backgroundImage: `url('${assetPath("/images/ais-logo.png")}')` }}
               />
               <h2 className="mt-6 font-display text-[clamp(44px,6.5vw,92px)] font-extrabold leading-[0.95] tracking-[-0.04em]">
                 AI Society
                 <span className="text-accent">.</span>
               </h2>
               <p className="mt-5 max-w-[36ch] text-[14px] leading-[1.6] text-ink-soft">
-                Bennett University&apos;s artificial intelligence society —
+                Bennett University&apos;s artificial intelligence society,
                 training minds, one epoch at a time.
               </p>
             </div>
@@ -214,7 +215,7 @@ export default function Footer() {
       {/* Looping photo strip on the accent frame */}
       <div className="mt-2 flex items-stretch gap-2">
         <a
-          href="https://instagram.com"
+          href="https://www.instagram.com/ais_bennett/"
           target="_blank"
           rel="noopener noreferrer"
           className="hidden w-[140px] shrink-0 flex-col items-start justify-center rounded-2xl bg-ground px-4 py-3 sm:flex"
@@ -245,7 +246,7 @@ export default function Footer() {
         <div className="footer-text-ticker flex w-max whitespace-nowrap">
           {Array.from({ length: 8 }).map((_, i) => (
             <span key={i} className="flex items-center gap-0 px-0">
-              <span className="px-5">© {new Date().getFullYear()} AI Society — Bennett University</span>
+              <span className="px-5">© {new Date().getFullYear()} AI Society · Bennett University</span>
               <span aria-hidden className="opacity-40">.</span>
               <span className="px-5">Greater Noida · India</span>
               <span aria-hidden className="opacity-40">.</span>

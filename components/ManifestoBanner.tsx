@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { assetPath } from "@/lib/basePath";
 
 export default function ManifestoBanner() {
   return (
@@ -34,7 +35,7 @@ export default function ManifestoBanner() {
           className="pointer-events-none relative flex-shrink-0 md:absolute md:right-0 md:top-0 md:h-full md:w-[45%]"
         >
           <Image
-            src="/butterfly.svg"
+            src={assetPath("/butterfly.svg")}
             alt=""
             fill
             sizes="(min-width: 768px) 45vw, 100vw"

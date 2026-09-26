@@ -1,17 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Inter_Tight } from "next/font/google";
+import { Albert_Sans, Unbounded } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const albertSans = Albert_Sans({
+  variable: "--font-albert-sans",
   subsets: ["latin"],
   display: "swap",
 });
 
-const interTight = Inter_Tight({
-  variable: "--font-inter-tight",
+const unbounded = Unbounded({
+  variable: "--font-unbounded",
   subsets: ["latin"],
-  weight: ["200", "400", "600", "700", "800"],
   display: "swap",
 });
 
@@ -21,8 +20,15 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title:
-    "AI Society — Bennett University | Training Minds, One Epoch at a Time",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ||
+      "https://bennettai.github.io/ai-society",
+  ),
+  title: {
+    default:
+      "AI Society, Bennett University | Training Minds, One Epoch at a Time",
+    template: "%s | AI Society, Bennett University",
+  },
   description:
     "Bennett University's premier artificial intelligence student specialization society. Dedicated to deep learning research, intelligent systems, hackathons, and technical workshops.",
   keywords: [
@@ -44,7 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${interTight.variable}`}>
+    <html lang="en" className={`${albertSans.variable} ${unbounded.variable}`}>
       <body className="min-h-screen flex flex-col">{children}</body>
     </html>
   );

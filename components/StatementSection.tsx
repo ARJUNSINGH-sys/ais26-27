@@ -92,8 +92,8 @@ export default function StatementSection() {
                 ✦
               </span>
               <span>AI Society</span>
-            </span>{" "}
-            — engineering autonomous systems, neural architectures, and{" "}
+            </span>
+            , engineering autonomous systems, neural architectures, and{" "}
             <span className="statement-chip chip inline-flex">
               <span className="text-accent" aria-hidden>
                 ◉

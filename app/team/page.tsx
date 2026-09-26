@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, useState } from "react";
 import FoldLayout from "@/components/FoldLayout";
 import Image from "next/image";
+import { assetPath } from "@/lib/basePath";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -194,7 +195,7 @@ export default function TeamPage() {
                     OUR TEAM
                   </h1>
                 </div>
-                <span className="team-hero-edition absolute -top-1 -right-7 sm:-right-10 md:-right-12 font-mono text-[22px] sm:text-[32px] md:text-[38px] font-normal text-[#1A1816]/60 will-change-transform">
+                <span className="team-hero-edition absolute -top-1 right-0 font-mono text-[22px] sm:text-[32px] md:text-[38px] font-normal text-[#1A1816]/60 will-change-transform">
                   26–27
                 </span>
               </div>
@@ -266,7 +267,7 @@ export default function TeamPage() {
               className="pointer-events-none absolute -top-32 sm:-top-44 lg:-top-56 right-[-60px] sm:right-[-30px] lg:right-[-15px] xl:right-[-5px] w-[420px] sm:w-[560px] lg:w-[680px] xl:w-[760px] h-[320px] sm:h-[420px] lg:h-[500px] xl:h-[560px] -rotate-12 transform origin-center z-0"
             >
               <Image
-                src="/butterfly.svg"
+                src={assetPath("/butterfly.svg")}
                 alt=""
                 fill
                 className="object-contain object-right brightness-0 opacity-65"

@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { useRef } from "react";
+import { assetPath } from "@/lib/basePath";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -15,28 +16,28 @@ if (typeof window !== "undefined") {
  * with no overlay, badge, or label. Alt text carries the meaning instead.
  */
 const COLUMN_ONE = {
-  src: "/images/event-club-carnival.png",
+  src: assetPath("/images/event-club-carnival.png"),
   alt: "Members gathered at the Club Carnival induction festival",
 };
 
 const COLUMN_TWO = [
   {
-    src: "/images/event-ai-101.png",
+    src: assetPath("/images/event-ai-101.png"),
     alt: "Attendees working through the AI 101 foundations workshop",
   },
   {
-    src: "/images/event-ai-hunt.png",
+    src: assetPath("/images/event-ai-hunt.png"),
     alt: "Teams competing in the AI Hunt 2.0 algorithmic challenge",
   },
 ];
 
 const COLUMN_THREE = [
   {
-    src: "/images/event-tech-arena.png",
+    src: assetPath("/images/event-tech-arena.png"),
     alt: "The TechArena 2025 symposium hall in session",
   },
   {
-    src: "/images/event-project-showcase.png",
+    src: assetPath("/images/event-project-showcase.png"),
     alt: "Student projects on display at the Project Showcase expo",
   },
 ];

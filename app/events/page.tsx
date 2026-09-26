@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import FoldLayout from "@/components/FoldLayout";
+import { assetPath } from "@/lib/basePath";
 
 interface ExtendedEvent {
   id: string;
@@ -28,7 +29,7 @@ const ALL_EVENTS: ExtendedEvent[] = [
     date: "FEBRUARY 2025",
     year: "2025",
     category: "FLAGSHIP",
-    image: "/images/event-tech-arena.png",
+    image: assetPath("/images/event-tech-arena.png"),
     shortDesc:
       "The premier national collegiate tech symposium featuring multi-track hackathons, keynote research panels, and rapid AI prototyping leagues.",
     fullDesc:
@@ -49,7 +50,7 @@ const ALL_EVENTS: ExtendedEvent[] = [
     date: "SEPTEMBER 2024",
     year: "2024",
     category: "HACKATHONS",
-    image: "/images/event-ai-hunt.png",
+    image: assetPath("/images/event-ai-hunt.png"),
     shortDesc:
       "A high-octane 48-hour cryptic technical scavenger hunt deciphering adversarial perturbations, neural steganography, and algorithmic logic gates.",
     fullDesc:
@@ -70,7 +71,7 @@ const ALL_EVENTS: ExtendedEvent[] = [
     date: "APRIL 2025",
     year: "2025",
     category: "WORKSHOPS",
-    image: "/images/event-workshop.png",
+    image: assetPath("/images/event-workshop.png"),
     shortDesc:
       "Advanced technical deep-dive bridging Spatial Computing, 3D Gaussian Splatting, and real-time multi-modal diffusion pipelines.",
     fullDesc:
@@ -91,7 +92,7 @@ const ALL_EVENTS: ExtendedEvent[] = [
     date: "MARCH 2025",
     year: "2025",
     category: "DEMO DAYS",
-    image: "/images/event-project-showcase.png",
+    image: assetPath("/images/event-project-showcase.png"),
     shortDesc:
       "Public exposition of ten member-engineered production models, vision-language systems, and autonomous agentic workflows.",
     fullDesc:
@@ -112,7 +113,7 @@ const ALL_EVENTS: ExtendedEvent[] = [
     date: "AUGUST 2024",
     year: "2024",
     category: "WORKSHOPS",
-    image: "/images/event-ai-101.png",
+    image: assetPath("/images/event-ai-101.png"),
     shortDesc:
       "Comprehensive introductory bootcamp decoding gradient descent, loss landscapes, and practical PyTorch implementation from scratch.",
     fullDesc:
@@ -133,7 +134,7 @@ const ALL_EVENTS: ExtendedEvent[] = [
     date: "JULY 2024",
     year: "2024",
     category: "FLAGSHIP",
-    image: "/images/event-club-carnival.png",
+    image: assetPath("/images/event-club-carnival.png"),
     shortDesc:
       "Annual club induction festival welcoming freshers to the frontier of AI research, interactive model demos, and tech roadmaps.",
     fullDesc:
