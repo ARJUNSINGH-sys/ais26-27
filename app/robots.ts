@@ -1,8 +1,13 @@
 import type { MetadataRoute } from "next";
 
+export const dynamic = "force-static";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://bennettai.github.io/ai-society";
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: "*", allow: "/" },
-    sitemap: "https://ais26-27.vercel.app/sitemap.xml",
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { assetPath } from "@/lib/basePath";
 
 const INDEX_LINKS = [
   { href: "#hero", label: "01 / Overview" },
@@ -19,14 +20,14 @@ const CHANNELS = [
 
 /* Strip of life-at-AIS photographs that loops forever. */
 const MARQUEE_IMAGES = [
-  "/images/hero1.jpg",
-  "/images/clubbattle.jpg",
-  "/images/event-ai-101.png",
-  "/images/hero3.jpg",
-  "/images/event-workshop.png",
-  "/images/hero2.jpg",
-  "/images/event-tech-arena.png",
-  "/images/event-project-showcase.png",
+  assetPath("/images/hero1.jpg"),
+  assetPath("/images/clubbattle.jpg"),
+  assetPath("/images/event-ai-101.png"),
+  assetPath("/images/hero3.jpg"),
+  assetPath("/images/event-workshop.png"),
+  assetPath("/images/hero2.jpg"),
+  assetPath("/images/event-tech-arena.png"),
+  assetPath("/images/event-project-showcase.png"),
 ];
 
 function MarqueeHalf() {
@@ -116,7 +117,7 @@ export default function Footer() {
               <span
                 aria-hidden
                 className="block h-12 w-[190px] bg-left bg-contain bg-no-repeat brightness-0"
-                style={{ backgroundImage: "url('/images/ais-logo.png')" }}
+                style={{ backgroundImage: `url('${assetPath("/images/ais-logo.png")}')` }}
               />
               <h2 className="mt-6 font-display text-[clamp(44px,6.5vw,92px)] font-extrabold leading-[0.95] tracking-[-0.04em]">
                 AI Society

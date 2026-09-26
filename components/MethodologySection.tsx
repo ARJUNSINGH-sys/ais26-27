@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { useRef } from "react";
+import { assetPath } from "@/lib/basePath";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -20,7 +21,7 @@ const STEPS = [
     numeral: "02",
     title: "Training & optimisation",
     note: "Fine-tuning weights, evaluating inference latency, and running adversarial perturbation tests.",
-    preview: "/images/event-ai-101.png",
+    preview: assetPath("/images/event-ai-101.png"),
   },
   {
     numeral: "03",

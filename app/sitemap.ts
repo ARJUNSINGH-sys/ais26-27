@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://ais26-27.vercel.app";
+export const dynamic = "force-static";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://bennettai.github.io/ai-society";
 
 const PAGES = ["", "/events", "/resources", "/team", "/roadmap"];
 

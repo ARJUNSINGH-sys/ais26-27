@@ -4,6 +4,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef } from "react";
+import { assetPath } from "@/lib/basePath";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -218,8 +219,8 @@ export default function Hero() {
                   {/* Masked Photograph */}
                   <image
                     clipPath={`url(#clip-${p.id})`}
-                    href={p.image}
-                    xlinkHref={p.image}
+                    href={assetPath(p.image)}
+                    xlinkHref={assetPath(p.image)}
                     x={p.x}
                     y={0}
                     width={panelW}
@@ -273,8 +274,8 @@ export default function Hero() {
                 <g key={`m-${p.id}`}>
                   <image
                     clipPath={`url(#clip-m-${p.id})`}
-                    href={p.image}
-                    xlinkHref={p.image}
+                    href={assetPath(p.image)}
+                    xlinkHref={assetPath(p.image)}
                     x={p.mobileX}
                     y={p.mobileY}
                     width={panelW}

@@ -1,8 +1,18 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? (isProd ? "/ai-society" : "");
+
 const nextConfig: NextConfig = {
-  // View transitions in Next.js App Router (React 19) work out-of-the-box
-  // via `import { ViewTransition } from 'react'` with zero configuration required.
+  output: "export",
+  basePath: basePath || undefined,
+  images: {
+    unoptimized: true,
+  },
+  trailingSlash: true,
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
 };
 
 export default nextConfig;

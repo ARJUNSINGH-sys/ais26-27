@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { assetPath } from "@/lib/basePath";
 
 interface NavProps {
   isMenuOpen?: boolean;
@@ -23,7 +24,7 @@ export default function Nav({ isMenuOpen = false, onToggleMenu }: NavProps) {
           <span
             aria-hidden
             className="block h-12 w-[180px] sm:h-14 sm:w-[215px] md:h-16 md:w-[245px] lg:h-[72px] lg:w-[275px] bg-left bg-contain bg-no-repeat transition-all duration-300 brightness-0 group-hover:opacity-80"
-            style={{ backgroundImage: "url('/images/ais-logo.png')" }}
+            style={{ backgroundImage: `url('${assetPath("/images/ais-logo.png")}')` }}
           />
         </Link>
       </div>

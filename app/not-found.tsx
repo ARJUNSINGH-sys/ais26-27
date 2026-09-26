@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import FoldLayout from "@/components/FoldLayout";
+import { assetPath } from "@/lib/basePath";
 
 /* ── Shape paths from shapes.gallery ──────────────────────────────────── */
 const SHAPES = {
@@ -47,7 +48,8 @@ function ShapeImg({
         </clipPath>
       </defs>
       <image
-        href={src}
+        href={assetPath(src)}
+        xlinkHref={assetPath(src)}
         x="0"
         y="0"
         width="256"

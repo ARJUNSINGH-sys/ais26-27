@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { featurePillars } from "@/lib/data";
+import { assetPath } from "@/lib/basePath";
 
 export default function About() {
   return (
@@ -40,7 +41,7 @@ export default function About() {
               <div className="flex items-center gap-4">
                 <div className="relative w-12 h-12 shrink-0 bg-white p-2 rounded-[2px] border border-[#D9D6CF]">
                   <Image
-                    src="/images/bennett-logo.webp"
+                    src={assetPath("/images/bennett-logo.webp")}
                     alt="Bennett University Crest"
                     width={40}
                     height={40}
