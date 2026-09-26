@@ -11,81 +11,149 @@ import MathTex from "@/components/MathTex";
 interface VecToken {
   text: string;
   id: number;
+  x: number;
+  y: number;
   baseX: number;
   baseY: number;
   baseZ: number;
   color: string;
+  cluster: "ml" | "royalty" | "sequence";
 }
 
 const PRESET_VEC_TOKENS: readonly VecToken[] = [
+  // ML Architecture Cluster (Top-Right: x > 0, y > 0)
   {
     text: "attention",
     id: 3721,
+    x: 55,
+    y: 60,
     baseX: 70,
     baseY: 65,
     baseZ: 40,
-    color: "#00FFCC",
+    color: "#DE5D35",
+    cluster: "ml",
   },
-  { text: "all", id: 477, baseX: -40, baseY: 30, baseZ: -20, color: "#52E3A4" },
-  { text: "you", id: 345, baseX: 35, baseY: -50, baseZ: 30, color: "#FFB703" },
+  {
+    text: "all",
+    id: 477,
+    x: -20,
+    y: -55,
+    baseX: -40,
+    baseY: 30,
+    baseZ: -20,
+    color: "#75716B",
+    cluster: "sequence",
+  },
+  {
+    text: "you",
+    id: 345,
+    x: 20,
+    y: -65,
+    baseX: 35,
+    baseY: -50,
+    baseZ: 30,
+    color: "#75716B",
+    cluster: "sequence",
+  },
   {
     text: "need",
     id: 761,
+    x: -35,
+    y: -75,
     baseX: -65,
     baseY: -35,
     baseZ: 50,
-    color: "#FF758F",
+    color: "#75716B",
+    cluster: "sequence",
   },
   {
     text: "transformer",
     id: 10928,
+    x: 75,
+    y: 75,
     baseX: 85,
     baseY: 80,
     baseZ: 45,
-    color: "#00FFCC",
+    color: "#DE5D35",
+    cluster: "ml",
   },
   {
     text: "king",
     id: 2891,
+    x: -65,
+    y: 45,
     baseX: -80,
     baseY: 40,
     baseZ: 60,
-    color: "#9D4EDD",
+    color: "#1A1816",
+    cluster: "royalty",
   },
   {
     text: "queen",
     id: 3122,
+    x: -55,
+    y: 65,
     baseX: -75,
     baseY: 42,
     baseZ: -55,
-    color: "#FF758F",
+    color: "#1A1816",
+    cluster: "royalty",
   },
-  { text: "man", id: 187, baseX: -85, baseY: -20, baseZ: 58, color: "#9D4EDD" },
+  {
+    text: "man",
+    id: 187,
+    x: -70,
+    y: -35,
+    baseX: -85,
+    baseY: -20,
+    baseZ: 58,
+    color: "#1A1816",
+    cluster: "royalty",
+  },
   {
     text: "woman",
     id: 241,
+    x: -60,
+    y: -15,
     baseX: -80,
     baseY: -18,
     baseZ: -57,
-    color: "#FF758F",
+    color: "#1A1816",
+    cluster: "royalty",
   },
   {
     text: "neural",
     id: 4210,
+    x: 40,
+    y: 35,
     baseX: 55,
     baseY: 50,
     baseZ: -45,
-    color: "#52E3A4",
+    color: "#DE5D35",
+    cluster: "ml",
   },
   {
     text: "sequence",
     id: 3110,
+    x: 45,
+    y: -45,
     baseX: 45,
     baseY: -30,
     baseZ: -60,
-    color: "#FFB703",
+    color: "#75716B",
+    cluster: "sequence",
   },
-  { text: "model", id: 894, baseX: 60, baseY: 35, baseZ: 30, color: "#00FFCC" },
+  {
+    text: "model",
+    id: 894,
+    x: 65,
+    y: 30,
+    baseX: 60,
+    baseY: 35,
+    baseZ: 30,
+    color: "#DE5D35",
+    cluster: "ml",
+  },
 ];
 
 const SENTENCE_TOKENS = [
@@ -198,6 +266,48 @@ function computeAttentionWeights(idx: number, head: number): readonly number[] {
   return SENTENCE_TOKENS.map((t) => (t.idx === idx ? 0.65 : remainingShare));
 }
 
+// 2D Cartesian helper for the angle arc sector path between two vectors
+function getAngleArcSector(
+  xA: number,
+  yA: number,
+  xB: number,
+  yB: number,
+  r = 22,
+): string {
+  const angleA = Math.atan2(yA, xA);
+  const angleB = Math.atan2(yB, xB);
+  let diff = angleB - angleA;
+  while (diff < -Math.PI) diff += 2 * Math.PI;
+  while (diff > Math.PI) diff -= 2 * Math.PI;
+
+  const sweep = diff >= 0 ? 1 : 0;
+  const p1x = r * Math.cos(angleA);
+  const p1y = r * Math.sin(angleA);
+  const p2x = r * Math.cos(angleB);
+  const p2y = r * Math.sin(angleB);
+
+  return `M 0 0 L ${p1x.toFixed(2)} ${p1y.toFixed(2)} A ${r} ${r} 0 0 ${sweep} ${p2x.toFixed(2)} ${p2y.toFixed(2)} Z`;
+}
+
+function getAngleMidpoint(
+  xA: number,
+  yA: number,
+  xB: number,
+  yB: number,
+  r = 34,
+): { x: number; y: number } {
+  const angleA = Math.atan2(yA, xA);
+  const angleB = Math.atan2(yB, xB);
+  let diff = angleB - angleA;
+  while (diff < -Math.PI) diff += 2 * Math.PI;
+  while (diff > Math.PI) diff -= 2 * Math.PI;
+  const midAngle = angleA + diff / 2;
+  return {
+    x: r * Math.cos(midAngle),
+    y: r * Math.sin(midAngle),
+  };
+}
+
 export default function TransformersArticlePage() {
   // ── 1. BPE Tokenizer State ──
   const [customText, setCustomText] = useState(
@@ -212,8 +322,7 @@ export default function TransformersArticlePage() {
     bytes: string;
   } | null>(null);
 
-  // ── 2. Vector Space Interactive Canvas State ──
-  const vecCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  // ── 2. 2D Semantic Plane Interactive State ──
   const [vecMode, setVecMode] = useState<"static" | "context" | "autoregress">(
     "static",
   );
@@ -222,37 +331,53 @@ export default function TransformersArticlePage() {
   const [selectedTokenA, setSelectedTokenA] = useState<number | null>(0);
   const [selectedTokenB, setSelectedTokenB] = useState<number | null>(4);
 
-  // Authentically compute exact 3D cosine similarity between selected tokens
+  // Compute displayed 2D token coordinates based on vector mode
+  const displayedTokens = useMemo(() => {
+    return PRESET_VEC_TOKENS.map((t, i) => {
+      let curX = t.x;
+      let curY = t.y;
+
+      if (vecMode === "context") {
+        const shiftRatio = (contextLayer - 1) / 5;
+        const displacements: Record<number, { dx: number; dy: number }> = {
+          0: { dx: -18, dy: -25 },
+          1: { dx: 14, dy: 22 },
+          2: { dx: -10, dy: 16 },
+          3: { dx: 24, dy: 36 },
+          4: { dx: -16, dy: -12 },
+          5: { dx: 10, dy: -12 },
+          6: { dx: 12, dy: -14 },
+          7: { dx: 8, dy: 14 },
+          8: { dx: 10, dy: 12 },
+          9: { dx: -12, dy: -15 },
+          10: { dx: -15, dy: 20 },
+          11: { dx: -14, dy: 12 },
+        };
+        const disp = displacements[i] || { dx: 0, dy: 0 };
+        curX += disp.dx * shiftRatio;
+        curY += disp.dy * shiftRatio;
+      }
+
+      return {
+        ...t,
+        x: curX,
+        y: curY,
+      };
+    });
+  }, [vecMode, contextLayer]);
+
+  // Compute live 2D cosine similarity: cos(theta) = (u . v) / (||u|| ||v||)
   const cosineSim = useMemo(() => {
     if (selectedTokenA === null || selectedTokenB === null) return 0;
-    const a = PRESET_VEC_TOKENS[selectedTokenA];
-    const b = PRESET_VEC_TOKENS[selectedTokenB];
+    const a = displayedTokens[selectedTokenA];
+    const b = displayedTokens[selectedTokenB];
     if (!a || !b) return 0;
-    const dot = a.baseX * b.baseX + a.baseY * b.baseY + a.baseZ * b.baseZ;
-    const magA = Math.hypot(a.baseX, a.baseY, a.baseZ);
-    const magB = Math.hypot(b.baseX, b.baseY, b.baseZ);
+    const dot = a.x * b.x + a.y * b.y;
+    const magA = Math.hypot(a.x, a.y);
+    const magB = Math.hypot(b.x, b.y);
     if (magA === 0 || magB === 0) return 0;
     return Math.max(-1, Math.min(1, dot / (magA * magB)));
-  }, [selectedTokenA, selectedTokenB]);
-
-  // Keep refs for live animation loop to prevent effect teardown and camera angle resets
-  const vecModeRef = useRef(vecMode);
-  vecModeRef.current = vecMode;
-
-  const contextLayerRef = useRef(contextLayer);
-  contextLayerRef.current = contextLayer;
-
-  const autoStepIdxRef = useRef(autoStepIdx);
-  autoStepIdxRef.current = autoStepIdx;
-
-  const selectedTokenARef = useRef(selectedTokenA);
-  selectedTokenARef.current = selectedTokenA;
-
-  const selectedTokenBRef = useRef(selectedTokenB);
-  selectedTokenBRef.current = selectedTokenB;
-
-  const cosineSimRef = useRef(cosineSim);
-  cosineSimRef.current = cosineSim;
+  }, [selectedTokenA, selectedTokenB, displayedTokens]);
 
   // ── 3. Positional Encoding Canvas State ──
   const posCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -270,6 +395,7 @@ export default function TransformersArticlePage() {
 
   // ── 5. Position-Wise FFN Interactive State ──
   const [ffnInputVal, setFfnInputVal] = useState<number>(1.4);
+  const [ffnActivation, setFfnActivation] = useState<"relu" | "gelu">("relu");
 
   // ── 6. Residual Connection Interactive Toggle State ──
   const [residualEnabled, setResidualEnabled] = useState<boolean>(true);
@@ -296,13 +422,11 @@ export default function TransformersArticlePage() {
       }));
     }
 
-    // Guard against division by zero, non-finite, or negative temperatures
     const safeTemp = Math.max(
       0.01,
       Number.isFinite(temperature) ? temperature : 1.0,
     );
 
-    // Bound Top-K cutoff to valid vocabulary index range [1, RAW_LOGITS.length]
     const safeK =
       samplingMethod === "topk"
         ? Math.max(
@@ -314,7 +438,6 @@ export default function TransformersArticlePage() {
           )
         : RAW_LOGITS.length;
 
-    // Numerical stability: Subtract maximum active scaled logit (Log-Sum-Exp trick)
     let maxScaledLogit = -Infinity;
     const scaledLogits: number[] = new Array(RAW_LOGITS.length);
 
@@ -379,7 +502,6 @@ export default function TransformersArticlePage() {
     const subwords: { text: string; id: number; bytes: string }[] = [];
 
     for (const word of rawWords) {
-      // Retain unicode letters, digits, and apostrophes
       const lower = word.toLowerCase().replace(/[^\p{L}\p{N}']/gu, "");
       if (!lower) continue;
 
@@ -387,7 +509,6 @@ export default function TransformersArticlePage() {
         const part1 = lower.slice(0, 5);
         const part2 = `##${lower.slice(5)}`;
 
-        // 32-bit integer arithmetic to prevent floating-point precision overflow
         let h1 = 7;
         for (let i = 0; i < part1.length; i++) {
           h1 = (h1 * 31 + part1.charCodeAt(i)) | 0;
@@ -440,294 +561,7 @@ export default function TransformersArticlePage() {
     runTokenizer(customText);
   }, [runTokenizer, customText]);
 
-  // ── 2D/3D Vector Space Canvas Interactive Renderer ──
-  useEffect(() => {
-    const canvas = vecCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId: number;
-    let azimuth = 0.65;
-    let targetAzimuth = 0.65;
-    let elevation = 0.35;
-    let targetElevation = 0.35;
-    let isDragging = false;
-    let lastX = 0;
-    let lastY = 0;
-    let pulse = 0;
-
-    let width = Math.max(300, canvas.clientWidth || 800);
-    let height = Math.max(200, canvas.clientHeight || 360);
-    let dpr = window.devicePixelRatio || 1;
-
-    const updateDimensions = () => {
-      dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      width = Math.max(300, Math.floor(rect.width) || 800);
-      height = Math.max(200, Math.floor(rect.height) || 360);
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-    };
-
-    updateDimensions();
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateDimensions();
-    });
-    resizeObserver.observe(canvas);
-
-    const onPointerDown = (clientX: number, clientY: number) => {
-      isDragging = true;
-      lastX = clientX;
-      lastY = clientY;
-      canvas.style.cursor = "grabbing";
-    };
-
-    const onPointerMove = (clientX: number, clientY: number) => {
-      if (isDragging) {
-        const dx = clientX - lastX;
-        const dy = clientY - lastY;
-        targetAzimuth += dx * 0.008;
-        targetElevation = Math.max(
-          -1.1,
-          Math.min(1.1, targetElevation + dy * 0.008),
-        );
-        lastX = clientX;
-        lastY = clientY;
-      }
-    };
-
-    const onPointerUp = () => {
-      if (isDragging) {
-        isDragging = false;
-        canvas.style.cursor = "grab";
-      }
-    };
-
-    const onMouseDown = (e: MouseEvent) => {
-      onPointerDown(e.clientX, e.clientY);
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      onPointerMove(e.clientX, e.clientY);
-    };
-
-    const onMouseUp = () => {
-      onPointerUp();
-    };
-
-    const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        onPointerDown(e.touches[0].clientX, e.touches[0].clientY);
-      }
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (isDragging && e.touches.length === 1) {
-        onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
-        if (e.cancelable) {
-          e.preventDefault();
-        }
-      }
-    };
-
-    const onTouchEnd = () => {
-      onPointerUp();
-    };
-
-    canvas.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-
-    canvas.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("touchend", onTouchEnd);
-    window.addEventListener("touchcancel", onTouchEnd);
-
-    const render = () => {
-      ctx.save();
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0, 0, width, height);
-
-      if (!isDragging) {
-        targetAzimuth += 0.0025;
-      }
-      azimuth += (targetAzimuth - azimuth) * 0.08;
-      elevation += (targetElevation - elevation) * 0.08;
-      pulse += 0.04;
-
-      const cx = width / 2;
-      const cy = height / 2 + 10;
-
-      // Dark background gradient
-      const bgGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, width * 0.6);
-      bgGrad.addColorStop(0, "rgba(0, 255, 204, 0.05)");
-      bgGrad.addColorStop(0.5, "rgba(10, 15, 24, 0.95)");
-      bgGrad.addColorStop(1, "rgba(4, 6, 8, 1)");
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, width, height);
-
-      // 3D projection matrix math
-      const cosA = Math.cos(azimuth);
-      const sinA = Math.sin(azimuth);
-      const cosE = Math.cos(elevation);
-      const sinE = Math.sin(elevation);
-
-      const project = (x: number, y: number, z: number) => {
-        const rotX = x * cosA - z * sinA;
-        const tempZ = x * sinA + z * cosA;
-        const rotY = y * cosE - tempZ * sinE;
-        const rotZ = y * sinE + tempZ * cosE;
-
-        const fov = 400 / (400 + rotZ + 150);
-        return {
-          px: cx + rotX * fov * 1.5,
-          py: cy - rotY * fov * 1.5,
-          pz: rotZ,
-          scale: fov,
-        };
-      };
-
-      // Ground plane grid (XZ)
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
-      ctx.lineWidth = 1;
-      for (let r = 40; r <= 160; r += 40) {
-        ctx.beginPath();
-        for (let th = 0; th <= Math.PI * 2; th += 0.2) {
-          const pt = project(Math.cos(th) * r, -50, Math.sin(th) * r);
-          if (th === 0) ctx.moveTo(pt.px, pt.py);
-          else ctx.lineTo(pt.px, pt.py);
-        }
-        ctx.closePath();
-        ctx.stroke();
-      }
-
-      // Origin Axes
-      const o = project(0, 0, 0);
-      const axX = project(90, 0, 0);
-      const axY = project(0, 90, 0);
-      const axZ = project(0, 0, 90);
-
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = "rgba(255, 80, 80, 0.6)";
-      ctx.beginPath();
-      ctx.moveTo(o.px, o.py);
-      ctx.lineTo(axX.px, axX.py);
-      ctx.stroke();
-
-      ctx.strokeStyle = "rgba(80, 255, 80, 0.6)";
-      ctx.beginPath();
-      ctx.moveTo(o.px, o.py);
-      ctx.lineTo(axY.px, axY.py);
-      ctx.stroke();
-
-      ctx.strokeStyle = "rgba(0, 255, 204, 0.7)";
-      ctx.beginPath();
-      ctx.moveTo(o.px, o.py);
-      ctx.lineTo(axZ.px, axZ.py);
-      ctx.stroke();
-
-      // Read current values from refs to avoid restarting the animation loop
-      const curMode = vecModeRef.current;
-      const curContextLayer = contextLayerRef.current;
-      const curAutoStepIdx = autoStepIdxRef.current;
-      const curTokenA = selectedTokenARef.current;
-      const curTokenB = selectedTokenBRef.current;
-      const curCosineSim = cosineSimRef.current;
-
-      // Render tokens
-      const activeTokens = PRESET_VEC_TOKENS.slice(
-        0,
-        curMode === "autoregress"
-          ? curAutoStepIdx + 3
-          : PRESET_VEC_TOKENS.length,
-      );
-
-      const projectedTokens = activeTokens.map((t, i) => {
-        let x = t.baseX;
-        let y = t.baseY;
-        const z = t.baseZ;
-
-        if (curMode === "context") {
-          const shift = curContextLayer * 6;
-          x += (t.id % 2 === 0 ? shift : -shift) * 0.4;
-          y += Math.sin(pulse + i) * 8;
-        }
-
-        const pt = project(x, y, z);
-        return { ...t, ...pt, origIdx: i };
-      });
-
-      // Draw vectors from origin to tokens
-      for (const t of projectedTokens) {
-        ctx.strokeStyle = `${t.color}33`;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(o.px, o.py);
-        ctx.lineTo(t.px, t.py);
-        ctx.stroke();
-
-        ctx.fillStyle = t.color;
-        ctx.beginPath();
-        ctx.arc(t.px, t.py, 4.5 * t.scale, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#FAF9F5";
-        ctx.font = "bold 10px monospace";
-        ctx.fillText(t.text, t.px + 7, t.py + 3);
-      }
-
-      // Draw Cosine Similarity arc if two tokens selected
-      if (
-        curTokenA !== null &&
-        curTokenB !== null &&
-        projectedTokens[curTokenA] &&
-        projectedTokens[curTokenB]
-      ) {
-        const tA = projectedTokens[curTokenA];
-        const tB = projectedTokens[curTokenB];
-
-        ctx.strokeStyle = "#DE5D35";
-        ctx.lineWidth = 2;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.moveTo(tA.px, tA.py);
-        ctx.lineTo(tB.px, tB.py);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        const midX = (tA.px + tB.px) / 2;
-        const midY = (tA.py + tB.py) / 2;
-        ctx.fillStyle = "#DE5D35";
-        ctx.fillRect(midX - 34, midY - 10, 68, 20);
-        ctx.fillStyle = "#FAF9F5";
-        ctx.font = "bold 9px monospace";
-        ctx.textAlign = "center";
-        ctx.fillText(`cos: ${curCosineSim.toFixed(2)}`, midX, midY + 4);
-        ctx.textAlign = "left";
-      }
-
-      ctx.restore();
-      animId = requestAnimationFrame(render);
-    };
-
-    animId = requestAnimationFrame(render);
-
-    return () => {
-      cancelAnimationFrame(animId);
-      resizeObserver.disconnect();
-      canvas.removeEventListener("mousedown", onMouseDown);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-      canvas.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
-      window.removeEventListener("touchcancel", onTouchEnd);
-    };
-  }, []);
-
-  // ── Positional Encoding Spectrum Wave Renderer ──
+  // ── Positional Encoding Spectrum Wave Renderer (Warm Editorial 2D Theme) ──
   useEffect(() => {
     const canvas = posCanvasRef.current;
     if (!canvas) return;
@@ -763,7 +597,8 @@ export default function TransformersArticlePage() {
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, height);
 
-      ctx.fillStyle = "#0A0D12";
+      // Warm editorial inner stage ground
+      ctx.fillStyle = "#F4F1EA";
       ctx.fillRect(0, 0, width, height);
 
       waveOffset += 0.03;
@@ -774,8 +609,9 @@ export default function TransformersArticlePage() {
         const freq = 0.01 + c * 0.018;
         const alpha = 0.8 - c * 0.08;
 
+        // Sine in charcoal #1A1816, Cosine in terracotta #DE5D35
         ctx.strokeStyle = isSine
-          ? `rgba(0, 255, 204, ${alpha})`
+          ? `rgba(26, 24, 22, ${alpha})`
           : `rgba(222, 93, 53, ${alpha})`;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
@@ -792,7 +628,8 @@ export default function TransformersArticlePage() {
         ctx.stroke();
       }
 
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+      // Neutral center axis
+      ctx.strokeStyle = "rgba(26, 24, 22, 0.15)";
       ctx.beginPath();
       ctx.moveTo(0, height / 2);
       ctx.lineTo(width, height / 2);
@@ -810,9 +647,67 @@ export default function TransformersArticlePage() {
     };
   }, []);
 
+  // Compute selected token objects for live cosine rays
+  const tokenAObj =
+    selectedTokenA !== null ? displayedTokens[selectedTokenA] : null;
+  const tokenBObj =
+    selectedTokenB !== null ? displayedTokens[selectedTokenB] : null;
+
+  // Compute sector arc path and mid-point for angle theta in 2D Semantic Plane
+  const angleArcSector = useMemo(() => {
+    if (!tokenAObj || !tokenBObj) return null;
+    return getAngleArcSector(
+      tokenAObj.x,
+      -tokenAObj.y,
+      tokenBObj.x,
+      -tokenBObj.y,
+      24,
+    );
+  }, [tokenAObj, tokenBObj]);
+
+  const angleMidpoint = useMemo(() => {
+    if (!tokenAObj || !tokenBObj) return null;
+    return getAngleMidpoint(
+      tokenAObj.x,
+      -tokenAObj.y,
+      tokenBObj.x,
+      -tokenBObj.y,
+      34,
+    );
+  }, [tokenAObj, tokenBObj]);
+
+  // Autoregressive Trajectory points for Vector Mode 3
+  const arPoints = useMemo(() => {
+    return [
+      { x: 0, y: 0, text: "<BOS>" },
+      { x: 55, y: -60, text: "Attention" },
+      { x: 15, y: -15, text: "is" },
+      { x: -20, y: 55, text: "all" },
+      { x: 20, y: 65, text: "you" },
+      { x: -35, y: 75, text: "need" },
+    ];
+  }, []);
+
+  // FFN Layer calculations for Two-Layer Visualizer
+  const ffnActiveNeurons = Math.round(ffnInputVal * 280);
+  const ffnSparsityPct = (100 - (ffnActiveNeurons / 2048) * 100).toFixed(1);
+  const numActiveNodes = Math.min(
+    13,
+    Math.max(1, Math.round((ffnInputVal / 3.0) * 13)),
+  );
+
   return (
     <FoldLayout>
       <main className="grow pt-28 sm:pt-36 pb-32 bg-[#EFECE6] text-[#1A1816] min-h-screen overflow-x-hidden">
+        <style>{`
+          @media (prefers-reduced-motion: reduce) {
+            *, ::before, ::after {
+              animation-duration: 0.01ms !important;
+              animation-iteration-count: 1 !important;
+              transition-duration: 0.01ms !important;
+            }
+          }
+        `}</style>
         <div className="shell max-w-5xl">
           {/* Breadcrumb & Navigation */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
@@ -854,9 +749,10 @@ export default function TransformersArticlePage() {
             </h1>
             <p className="text-[16px] sm:text-[18px] text-[#75716B] max-w-2xl leading-[1.6]">
               A complete first-principles architectural breakdown: from subword
-              Byte-Pair Encoding and 3D token vector spaces, to sinusoidal
-              positional encoding, feed-forward expansion, residual highways,
-              6-layer dual towers, and final softmax temperature sampling.
+              Byte-Pair Encoding and 2D semantic token spaces, to sinusoidal
+              positional encoding, two-layer feed-forward expansion, residual
+              highways, 6-layer dual towers, and final softmax temperature
+              sampling.
             </p>
             <div className="flex flex-wrap items-center gap-6 mt-6 font-mono text-[11px] uppercase tracking-wider text-[#75716B]">
               <span>Read Time: 16 min</span>
@@ -895,12 +791,18 @@ export default function TransformersArticlePage() {
               </p>
 
               {/* Interactive Tokenizer Input Box */}
-              <div className="p-4 bg-[#141518] text-white rounded-[4px] mb-6 font-mono">
-                <div className="text-[11px] text-[#00FFCC] uppercase mb-2 font-bold flex justify-between">
-                  <span>INTERACTIVE BPE TOKENIZER STUDIO</span>
-                  <span>{tokens.length} TOKENS EXTRACTED</span>
+              <div className="border border-[#1A1816]/15 bg-[#FAF9F5] p-5 rounded-[2px] mb-6 font-mono">
+                <div className="text-[11px] text-[#1A1816] uppercase mb-3 font-bold flex flex-wrap justify-between items-center gap-2 border-b border-[#1A1816]/10 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
+                    <span>INTERACTIVE BPE TOKENIZER STUDIO</span>
+                  </div>
+                  <span className="text-[#DE5D35] font-bold">
+                    {tokens.length} TOKENS EXTRACTED
+                  </span>
                 </div>
-                <div className="flex gap-2 mb-4">
+
+                <div className="flex flex-wrap gap-2 mb-4">
                   <input
                     type="text"
                     value={customText}
@@ -909,13 +811,14 @@ export default function TransformersArticlePage() {
                       setCustomText(val);
                       runTokenizer(val);
                     }}
-                    className="grow bg-[#090A0D] border border-white/20 rounded px-3 py-2 text-[12px] text-white focus:outline-none focus:border-[#00FFCC]"
+                    className="grow bg-[#F4F1EA] border border-[#1A1816]/20 rounded-[2px] px-3 py-2 text-[12px] text-[#1A1816] focus:outline-none focus:border-[#DE5D35]"
                     placeholder="Type any sentence to tokenize..."
+                    aria-label="Sentence to tokenize"
                   />
                   <button
                     type="button"
                     onClick={() => runTokenizer(customText)}
-                    className="px-4 py-2 bg-[#DE5D35] text-white text-[11px] font-bold uppercase rounded hover:bg-[#DE5D35]/90 cursor-pointer"
+                    className="px-4 py-2 bg-[#DE5D35] text-[#FAF9F5] text-[11px] font-bold uppercase rounded-[2px] hover:bg-[#DE5D35]/90 transition-colors cursor-pointer"
                   >
                     TOKENIZE
                   </button>
@@ -928,10 +831,10 @@ export default function TransformersArticlePage() {
                       type="button"
                       key={`token-chip-${tok.id}-${tok.text}`}
                       onClick={() => setInspectedToken(tok)}
-                      className={`px-3 py-1.5 rounded text-[12px] border transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-[2px] text-[12px] border transition-all cursor-pointer ${
                         inspectedToken?.text === tok.text
-                          ? "bg-[#00FFCC] text-black border-[#00FFCC] font-bold shadow-md"
-                          : "bg-white/10 text-white border-white/10 hover:border-white/40"
+                          ? "bg-[#1A1816] text-[#FAF9F5] border-[#1A1816] font-bold"
+                          : "bg-[#F4F1EA] text-[#1A1816] border-[#1A1816]/15 hover:border-[#DE5D35]"
                       }`}
                     >
                       <span className="opacity-60 text-[10px] mr-1">
@@ -944,7 +847,7 @@ export default function TransformersArticlePage() {
 
                 {/* Token Byte & Embedding Inspector */}
                 {inspectedToken && (
-                  <div className="p-3 bg-black/40 border border-white/10 rounded text-[11px] grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-3 bg-[#F4F1EA] border border-[#1A1816]/10 rounded-[2px] text-[11px] grid grid-cols-1 sm:grid-cols-3 gap-3 text-[#1A1816]">
                     <div>
                       <span className="text-[#DE5D35] font-bold block mb-1">
                         TOKEN TEXT
@@ -952,7 +855,7 @@ export default function TransformersArticlePage() {
                       <span>&ldquo;{inspectedToken.text}&rdquo;</span>
                     </div>
                     <div>
-                      <span className="text-[#00FFCC] font-bold block mb-1">
+                      <span className="text-[#1A1816] font-bold block mb-1">
                         VOCABULARY ID
                       </span>
                       <span>
@@ -961,7 +864,7 @@ export default function TransformersArticlePage() {
                       </span>
                     </div>
                     <div>
-                      <span className="text-[#FFB703] font-bold block mb-1">
+                      <span className="text-[#75716B] font-bold block mb-1">
                         ASCII / UTF-8 BYTES
                       </span>
                       <span>0x{inspectedToken.bytes}</span>
@@ -973,39 +876,43 @@ export default function TransformersArticlePage() {
           </section>
 
           {/* ──────────────────────────────────────────────────────────────────
-              SECTION 02: TOKENS IN 3D VECTOR SPACE & CONTEXT ADDITION
+              SECTION 02: 2D INTERACTIVE SEMANTIC PLANE & VECTOR GEOMETRY
               ────────────────────────────────────────────────────────────────── */}
-          <section className="mb-16">
+          <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
               <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
                 02 / Vector Geometry
               </span>
               <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">
-                Tokens in 3D Vector Space &amp; Context Addition
+                Tokens on the 2D Semantic Plane &amp; Cosine Angular Geometry
               </h2>
             </div>
 
             <div className="border border-[#1A1816]/15 bg-[#FAF9F5] p-6 sm:p-8 rounded-[2px] mb-8">
               <p className="text-[14px] text-[#4A4742] leading-[1.7] mb-6">
                 Each token ID is projected into a dense continuous embedding
-                space <MathTex math="d_{model} = 512" />. Tokens with similar
-                semantic meanings cluster together. Drag to orbit the 3D
-                coordinate space, switch between static embeddings and value
-                addition, and inspect vector similarities:
+                space <MathTex math="d_{model} = 512" />. High-dimensional
+                embeddings organize semantic meaning geometrically: tokens with
+                similar contextual roles cluster together. On the 2D semantic
+                plane below, observe semantic cluster hulls, select token pairs,
+                and inspect vector alignment{" "}
+                <MathTex math="\cos(\theta) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\| \|\mathbf{v}\|}" />
+                :
               </p>
 
-              {/* 3D Vector Space HUD Container */}
-              <div className="bg-[#07090C] border border-white/15 rounded-[4px] p-5 font-mono text-white">
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-white/10 pb-3">
+              {/* 2D Semantic Plane Visualizer Container */}
+              <div className="border border-[#1A1816]/15 bg-[#FAF9F5] p-5 rounded-[2px] font-mono mb-6">
+                {/* Header Bar */}
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-[#1A1816]/10 pb-3">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#00FFCC] animate-pulse" />
-                    <span className="text-[11px] font-bold text-[#00FFCC] tracking-wider uppercase">
-                      3D VECTOR SPACE SIMULATOR ·{" "}
-                      <MathTex math="\mathbb{R}^{512} \to \mathbb{R}^3" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
+                    <span className="text-[11px] font-bold text-[#1A1816] tracking-wider uppercase">
+                      2D SEMANTIC PLANE SIMULATOR ·{" "}
+                      <MathTex math="\mathbb{R}^{512} \to \mathbb{R}^2" />
                     </span>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 border border-white/20 text-[#FAF9F5]">
-                    DRAG TO ROTATE · FULL 3D ORBIT
+                  <span className="text-[10px] px-2 py-0.5 rounded-[2px] bg-[#F4F1EA] border border-[#1A1816]/15 text-[#75716B]">
+                    INTERACTIVE 2D VECTOR SPACE · EMBEDDING GEOMETRY
                   </span>
                 </div>
 
@@ -1015,42 +922,42 @@ export default function TransformersArticlePage() {
                     <button
                       type="button"
                       onClick={() => setVecMode("static")}
-                      className={`px-3 py-1.5 rounded border transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-[2px] border font-bold transition-all cursor-pointer ${
                         vecMode === "static"
-                          ? "bg-[#00FFCC] text-black border-[#00FFCC] font-bold"
-                          : "bg-white/5 border-white/20 text-white"
+                          ? "bg-[#1A1816] text-[#FAF9F5] border-[#1A1816]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#1A1816]"
                       }`}
                     >
-                      1. STATIC EMBEDDINGS
+                      1. STATIC SEMANTIC SPACE
                     </button>
                     <button
                       type="button"
                       onClick={() => setVecMode("context")}
-                      className={`px-3 py-1.5 rounded border transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-[2px] border font-bold transition-all cursor-pointer ${
                         vecMode === "context"
-                          ? "bg-[#00FFCC] text-black border-[#00FFCC] font-bold"
-                          : "bg-white/5 border-white/20 text-white"
+                          ? "bg-[#1A1816] text-[#FAF9F5] border-[#1A1816]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#1A1816]"
                       }`}
                     >
-                      2. + VALUE ADDITION (CONTEXT)
+                      2. CONTEXTUALIZED LAYER SHIFT
                     </button>
                     <button
                       type="button"
                       onClick={() => setVecMode("autoregress")}
-                      className={`px-3 py-1.5 rounded border transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-[2px] border font-bold transition-all cursor-pointer ${
                         vecMode === "autoregress"
-                          ? "bg-[#DE5D35] text-white border-[#DE5D35] font-bold"
-                          : "bg-white/5 border-white/20 text-white"
+                          ? "bg-[#DE5D35] text-[#FAF9F5] border-[#DE5D35]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#1A1816]"
                       }`}
                     >
-                      3. AUTOREGRESSIVE (STEP-BY-STEP)
+                      3. AUTOREGRESSIVE TRAJECTORY
                     </button>
                   </div>
 
                   {/* Mode-Specific Sub-Controls */}
                   {vecMode === "context" && (
-                    <div className="flex items-center gap-2 text-[10px]">
-                      <span className="text-[#00FFCC] font-bold">
+                    <div className="flex items-center gap-2 text-[10px] p-1.5 bg-[#F4F1EA] border border-[#1A1816]/10 rounded-[2px]">
+                      <span className="text-[#DE5D35] font-bold">
                         LAYER DEPTH:
                       </span>
                       <input
@@ -1061,34 +968,37 @@ export default function TransformersArticlePage() {
                         onChange={(e) =>
                           setContextLayer(Number(e.target.value))
                         }
-                        className="accent-[#00FFCC]"
+                        className="accent-[#DE5D35] cursor-pointer"
+                        aria-label="Context Layer Depth"
                       />
-                      <span>LAYER {contextLayer} / 6</span>
+                      <span className="font-bold text-[#1A1816]">
+                        LAYER {contextLayer} / 6
+                      </span>
                     </div>
                   )}
 
                   {vecMode === "autoregress" && (
-                    <div className="flex items-center gap-2 text-[10px]">
+                    <div className="flex items-center gap-2 text-[10px] p-1.5 bg-[#F4F1EA] border border-[#1A1816]/10 rounded-[2px]">
                       <button
                         type="button"
                         onClick={() =>
                           setAutoStepIdx((prev) => Math.max(0, prev - 1))
                         }
-                        className="px-2 py-1 bg-white/10 border border-white/20 rounded cursor-pointer"
+                        className="px-2 py-1 bg-[#FAF9F5] border border-[#1A1816]/20 rounded-[2px] text-[#1A1816] font-bold hover:border-[#1A1816] cursor-pointer"
                       >
                         ◀ PREV
                       </button>
                       <span className="text-[#DE5D35] font-bold">
-                        TOKEN {autoStepIdx + 1} / 8
+                        STEP {autoStepIdx + 1} / {arPoints.length}
                       </span>
                       <button
                         type="button"
                         onClick={() =>
                           setAutoStepIdx((prev) =>
-                            Math.min(PRESET_VEC_TOKENS.length - 3, prev + 1),
+                            Math.min(arPoints.length - 1, prev + 1),
                           )
                         }
-                        className="px-2 py-1 bg-[#DE5D35] text-white rounded font-bold cursor-pointer"
+                        className="px-2 py-1 bg-[#DE5D35] text-[#FAF9F5] rounded-[2px] font-bold hover:bg-[#DE5D35]/90 cursor-pointer"
                       >
                         NEXT ▶
                       </button>
@@ -1096,51 +1006,394 @@ export default function TransformersArticlePage() {
                   )}
                 </div>
 
-                {/* Canvas Display */}
-                <canvas
-                  ref={vecCanvasRef}
-                  className="w-full h-[320px] sm:h-[360px] rounded cursor-grab block border border-white/10 mb-4 touch-none"
-                />
+                {/* 2D Coordinate Plane Stage (SVG) */}
+                <div className="bg-[#F4F1EA] border border-[#1A1816]/10 p-3 rounded-[2px] mb-4 overflow-hidden">
+                  <svg
+                    viewBox="-115 -105 230 210"
+                    className="w-full h-[320px] sm:h-[400px] block select-none"
+                    role="img"
+                    aria-label="2D Semantic Plane Coordinate System"
+                  >
+                    <title>2D Semantic Plane Coordinate System</title>
+                    <defs>
+                      <marker
+                        id="arrow-token-a"
+                        viewBox="0 0 10 10"
+                        refX="8"
+                        refY="5"
+                        markerWidth="6"
+                        markerHeight="6"
+                        orient="auto-start-reverse"
+                      >
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#DE5D35" />
+                      </marker>
+                      <marker
+                        id="arrow-token-b"
+                        viewBox="0 0 10 10"
+                        refX="8"
+                        refY="5"
+                        markerWidth="6"
+                        markerHeight="6"
+                        orient="auto-start-reverse"
+                      >
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#1A1816" />
+                      </marker>
+                      <marker
+                        id="arrow-axis"
+                        viewBox="0 0 10 10"
+                        refX="8"
+                        refY="5"
+                        markerWidth="5"
+                        markerHeight="5"
+                        orient="auto-start-reverse"
+                      >
+                        <path
+                          d="M 0 2 L 8 5 L 0 8 z"
+                          fill="rgba(26, 24, 22, 0.4)"
+                        />
+                      </marker>
+                    </defs>
+
+                    {/* Background Gridlines */}
+                    {[-75, -50, -25, 25, 50, 75].map((val) => (
+                      <g key={`gridline-${val}`}>
+                        <line
+                          x1="-100"
+                          y1={val}
+                          x2="100"
+                          y2={val}
+                          stroke="rgba(26, 24, 22, 0.08)"
+                          strokeWidth="0.8"
+                          strokeDasharray="2 2"
+                        />
+                        <line
+                          x1={val}
+                          y1="-95"
+                          x2={val}
+                          y2="95"
+                          stroke="rgba(26, 24, 22, 0.08)"
+                          strokeWidth="0.8"
+                          strokeDasharray="2 2"
+                        />
+                      </g>
+                    ))}
+
+                    {/* Center Axes */}
+                    <line
+                      x1="-102"
+                      y1="0"
+                      x2="102"
+                      y2="0"
+                      stroke="rgba(26, 24, 22, 0.3)"
+                      strokeWidth="1"
+                      markerEnd="url(#arrow-axis)"
+                    />
+                    <line
+                      x1="0"
+                      y1="97"
+                      x2="0"
+                      y2="-97"
+                      stroke="rgba(26, 24, 22, 0.3)"
+                      strokeWidth="1"
+                      markerEnd="url(#arrow-axis)"
+                    />
+
+                    {/* Axis Labels */}
+                    <text
+                      x="104"
+                      y="3"
+                      fill="#75716B"
+                      fontSize="5"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      +X (Syntactic)
+                    </text>
+                    <text
+                      x="2"
+                      y="-98"
+                      fill="#75716B"
+                      fontSize="5"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      +Y (Semantic)
+                    </text>
+                    <text
+                      x="-8"
+                      y="8"
+                      fill="#75716B"
+                      fontSize="5"
+                      fontFamily="monospace"
+                    >
+                      (0,0)
+                    </text>
+
+                    {/* Semantic Cluster Hulls */}
+                    {/* 1. ML Architecture Cluster */}
+                    <polygon
+                      points="30,-25 32,-68 72,-92 92,-75 80,-22 50,-18"
+                      fill="rgba(222, 93, 53, 0.05)"
+                      stroke="rgba(222, 93, 53, 0.3)"
+                      strokeWidth="1"
+                      strokeDasharray="3 3"
+                    />
+                    <text
+                      x="42"
+                      y="-82"
+                      fill="#DE5D35"
+                      fontSize="5.5"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                      letterSpacing="0.05em"
+                    >
+                      ML ARCHITECTURE
+                    </text>
+
+                    {/* 2. Analogy / Royalty Cluster */}
+                    <polygon
+                      points="-82,45 -82,-55 -45,-78 -42,-35 -48,45"
+                      fill="rgba(26, 24, 22, 0.04)"
+                      stroke="rgba(26, 24, 22, 0.25)"
+                      strokeWidth="1"
+                      strokeDasharray="3 3"
+                    />
+                    <text
+                      x="-80"
+                      y="-60"
+                      fill="#1A1816"
+                      fontSize="5.5"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                      letterSpacing="0.05em"
+                    >
+                      ANALOGY / ROYALTY
+                    </text>
+
+                    {/* 3. Grammar / Sequence Cluster */}
+                    <polygon
+                      points="-45,85 -45,45 58,35 58,75 15,88"
+                      fill="rgba(117, 113, 107, 0.05)"
+                      stroke="rgba(117, 113, 107, 0.3)"
+                      strokeWidth="1"
+                      strokeDasharray="3 3"
+                    />
+                    <text
+                      x="-5"
+                      y="82"
+                      fill="#75716B"
+                      fontSize="5.5"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                      letterSpacing="0.05em"
+                    >
+                      GRAMMAR / SEQUENCE
+                    </text>
+
+                    {/* Autoregressive Trajectory Path (Mode 3) */}
+                    {vecMode === "autoregress" && (
+                      <g>
+                        <polyline
+                          points={arPoints
+                            .slice(0, autoStepIdx + 1)
+                            .map((p) => `${p.x},${p.y}`)
+                            .join(" ")}
+                          fill="none"
+                          stroke="#DE5D35"
+                          strokeWidth="1.5"
+                          strokeDasharray="3 3"
+                        />
+                        {arPoints.slice(0, autoStepIdx + 1).map((p, idx) => (
+                          <g key={`ar-traj-node-${p.text}`}>
+                            <circle
+                              cx={p.x}
+                              cy={p.y}
+                              r={idx === autoStepIdx ? 5 : 3}
+                              fill={idx === autoStepIdx ? "#DE5D35" : "#1A1816"}
+                            />
+                            {idx === autoStepIdx && (
+                              <circle
+                                cx={p.x}
+                                cy={p.y}
+                                r="8"
+                                fill="none"
+                                stroke="#DE5D35"
+                                strokeWidth="1"
+                                opacity="0.6"
+                              />
+                            )}
+                          </g>
+                        ))}
+                      </g>
+                    )}
+
+                    {/* Live Cosine Angle Sector Arc */}
+                    {angleArcSector && (
+                      <path
+                        d={angleArcSector}
+                        fill="rgba(222, 93, 53, 0.15)"
+                        stroke="#DE5D35"
+                        strokeWidth="1"
+                        strokeDasharray="2 2"
+                      />
+                    )}
+
+                    {/* Angle theta label */}
+                    {angleMidpoint && (
+                      <text
+                        x={angleMidpoint.x}
+                        y={angleMidpoint.y}
+                        textAnchor="middle"
+                        fill="#DE5D35"
+                        fontSize="6"
+                        fontFamily="monospace"
+                        fontWeight="bold"
+                      >
+                        θ ({cosineSim.toFixed(2)})
+                      </text>
+                    )}
+
+                    {/* Live Ray to Token A (Terracotta) */}
+                    {tokenAObj && (
+                      <line
+                        x1="0"
+                        y1="0"
+                        x2={tokenAObj.x}
+                        y2={-tokenAObj.y}
+                        stroke="#DE5D35"
+                        strokeWidth="1.8"
+                        markerEnd="url(#arrow-token-a)"
+                      />
+                    )}
+
+                    {/* Live Ray to Token B (Charcoal) */}
+                    {tokenBObj && (
+                      <line
+                        x1="0"
+                        y1="0"
+                        x2={tokenBObj.x}
+                        y2={-tokenBObj.y}
+                        stroke="#1A1816"
+                        strokeWidth="1.8"
+                        markerEnd="url(#arrow-token-b)"
+                      />
+                    )}
+
+                    {/* Connecting Chord Between Token A and Token B */}
+                    {tokenAObj && tokenBObj && (
+                      <line
+                        x1={tokenAObj.x}
+                        y1={-tokenAObj.y}
+                        x2={tokenBObj.x}
+                        y2={-tokenBObj.y}
+                        stroke="#DE5D35"
+                        strokeWidth="0.8"
+                        strokeDasharray="3 3"
+                        opacity="0.6"
+                      />
+                    )}
+
+                    {/* Render All Tokens on the Semantic Plane */}
+                    {displayedTokens.map((t, idx) => {
+                      const isA = selectedTokenA === idx;
+                      const isB = selectedTokenB === idx;
+                      const svgY = -t.y;
+
+                      return (
+                        <g key={`plane-token-${t.id}-${t.text}`}>
+                          {/* Active Halo */}
+                          {(isA || isB) && (
+                            <circle
+                              cx={t.x}
+                              cy={svgY}
+                              r="8"
+                              fill="none"
+                              stroke={isA ? "#DE5D35" : "#1A1816"}
+                              strokeWidth="1"
+                              strokeDasharray="2 2"
+                            />
+                          )}
+
+                          {/* Token Node */}
+                          <circle
+                            cx={t.x}
+                            cy={svgY}
+                            r={isA || isB ? 5 : 3.5}
+                            fill={isA ? "#DE5D35" : isB ? "#1A1816" : "#FAF9F5"}
+                            stroke={
+                              isA ? "#DE5D35" : isB ? "#1A1816" : "#75716B"
+                            }
+                            strokeWidth="1.5"
+                          />
+
+                          {/* Label */}
+                          <text
+                            x={t.x + 6}
+                            y={svgY + 2.5}
+                            fill={isA ? "#DE5D35" : isB ? "#1A1816" : "#4A4742"}
+                            fontSize="6"
+                            fontFamily="monospace"
+                            fontWeight={isA || isB ? "bold" : "normal"}
+                          >
+                            {t.text}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
 
                 {/* Token Selector for Cosine Similarity Calculation */}
-                <div className="p-3 bg-black/40 border border-white/10 rounded flex flex-wrap items-center justify-between gap-3 text-[11px]">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[#75716B]">VECTOR A:</span>
-                    <select
-                      value={selectedTokenA ?? 0}
-                      onChange={(e) =>
-                        setSelectedTokenA(Number(e.target.value))
-                      }
-                      className="bg-[#141518] border border-white/20 rounded px-2 py-1 text-white"
-                    >
-                      {PRESET_VEC_TOKENS.map((t, idx) => (
-                        <option key={`vec-token-a-${t.id}`} value={idx}>
-                          &ldquo;{t.text}&rdquo;
-                        </option>
-                      ))}
-                    </select>
+                <div className="p-4 bg-[#F4F1EA] border border-[#1A1816]/10 rounded-[2px] flex flex-wrap items-center justify-between gap-4 text-[11px]">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#DE5D35]" />
+                      <span className="text-[#DE5D35] font-bold">
+                        VECTOR A:
+                      </span>
+                      <select
+                        value={selectedTokenA ?? 0}
+                        onChange={(e) =>
+                          setSelectedTokenA(Number(e.target.value))
+                        }
+                        className="bg-[#FAF9F5] border border-[#DE5D35] rounded-[2px] px-2 py-1 text-[#DE5D35] font-bold cursor-pointer"
+                        aria-label="Select Vector A"
+                      >
+                        {PRESET_VEC_TOKENS.map((t, idx) => (
+                          <option key={`vec-token-a-${t.id}`} value={idx}>
+                            &ldquo;{t.text}&rdquo; ({t.cluster})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                    <span className="text-[#75716B] ml-2">VECTOR B:</span>
-                    <select
-                      value={selectedTokenB ?? 1}
-                      onChange={(e) =>
-                        setSelectedTokenB(Number(e.target.value))
-                      }
-                      className="bg-[#141518] border border-white/20 rounded px-2 py-1 text-white"
-                    >
-                      {PRESET_VEC_TOKENS.map((t, idx) => (
-                        <option key={`vec-token-b-${t.id}`} value={idx}>
-                          &ldquo;{t.text}&rdquo;
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex items-center gap-1.5 ml-2">
+                      <span className="w-2 h-2 rounded-full bg-[#1A1816]" />
+                      <span className="text-[#1A1816] font-bold">
+                        VECTOR B:
+                      </span>
+                      <select
+                        value={selectedTokenB ?? 4}
+                        onChange={(e) =>
+                          setSelectedTokenB(Number(e.target.value))
+                        }
+                        className="bg-[#FAF9F5] border border-[#1A1816] rounded-[2px] px-2 py-1 text-[#1A1816] font-bold cursor-pointer"
+                        aria-label="Select Vector B"
+                      >
+                        {PRESET_VEC_TOKENS.map((t, idx) => (
+                          <option key={`vec-token-b-${t.id}`} value={idx}>
+                            &ldquo;{t.text}&rdquo; ({t.cluster})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="text-[#DE5D35] font-bold">
+                    <span className="text-[#DE5D35] font-bold text-[12px]">
                       COSINE SIMILARITY: {cosineSim.toFixed(3)}
                     </span>
-                    <span className="text-white/40 text-[10px]">
+                    <span className="text-[#75716B] text-[10px]">
                       <MathTex math="\frac{u \cdot v}{\|u\| \|v\|}" />
                     </span>
                   </div>
@@ -1152,7 +1405,7 @@ export default function TransformersArticlePage() {
           {/* ──────────────────────────────────────────────────────────────────
               SECTION 03: POSITIONAL ENCODINGS (HARMONIC SINE/COSINE SPECTRUM)
               ────────────────────────────────────────────────────────────────── */}
-          <section className="mb-16">
+          <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
               <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
                 03 / Harmonic Geometry
@@ -1171,41 +1424,48 @@ export default function TransformersArticlePage() {
                 into the embedding vectors:
               </p>
 
-              <div className="p-4 bg-[#EFECE6] border border-[#1A1816]/10 rounded font-mono text-[13px] text-center my-4 overflow-x-auto">
+              <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px] font-mono text-[13px] text-center my-4 overflow-x-auto">
                 <MathTex
                   math="PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right), \quad PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)"
                   block
                 />
               </div>
 
-              {/* Live Animated Waveform Canvas */}
-              <div className="bg-[#07090C] border border-white/15 rounded-[4px] p-5 font-mono text-white mb-6">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-[11px] text-[#00FFCC] font-bold uppercase">
-                    HARMONIC SINE (CYAN) &amp; COSINE (ORANGE) SPECTRUM
-                  </span>
+              {/* Live Animated Waveform Canvas Container */}
+              <div className="border border-[#1A1816]/15 bg-[#FAF9F5] p-5 rounded-[2px] font-mono mb-6">
+                <div className="flex flex-wrap justify-between items-center gap-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
+                    <span className="text-[11px] text-[#1A1816] font-bold uppercase">
+                      HARMONIC SINE (CHARCOAL) &amp; COSINE (TERRACOTTA)
+                      SPECTRUM
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2 text-[10px]">
-                    <span className="text-white/60">SEQUENCE LENGTH:</span>
+                    <span className="text-[#75716B]">SEQUENCE LENGTH:</span>
                     <input
                       type="range"
                       min="8"
                       max="48"
                       value={posSeqLen}
                       onChange={(e) => setPosSeqLen(Number(e.target.value))}
-                      className="accent-[#00FFCC]"
+                      className="accent-[#DE5D35] cursor-pointer"
+                      aria-label="Sequence Length"
                     />
-                    <span className="text-[#00FFCC] font-bold">
+                    <span className="text-[#DE5D35] font-bold">
                       {posSeqLen} POS
                     </span>
                   </div>
                 </div>
 
-                <canvas
-                  ref={posCanvasRef}
-                  className="w-full h-[160px] sm:h-[180px] rounded block border border-white/10 mb-3"
-                />
+                <div className="bg-[#F4F1EA] border border-[#1A1816]/10 p-2 rounded-[2px] mb-3">
+                  <canvas
+                    ref={posCanvasRef}
+                    className="w-full h-[160px] sm:h-[180px] rounded-[2px] block"
+                  />
+                </div>
 
-                <div className="text-[10px] text-white/50 flex justify-between">
+                <div className="text-[10px] text-[#75716B] flex flex-wrap justify-between gap-2">
                   <span>
                     HIGH FREQUENCIES (Local syntax &amp; immediate neighbours)
                   </span>
@@ -1220,7 +1480,7 @@ export default function TransformersArticlePage() {
           {/* ──────────────────────────────────────────────────────────────────
               SECTION 04: SCALED DOT-PRODUCT & MULTI-HEAD ATTENTION
               ────────────────────────────────────────────────────────────────── */}
-          <section className="mb-16">
+          <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
               <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
                 04 / Attention Mechanics
@@ -1240,7 +1500,7 @@ export default function TransformersArticlePage() {
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="p-4 bg-white border border-[#1A1816]/10 rounded">
+                <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px]">
                   <h3 className="font-mono text-[12px] font-bold uppercase text-[#DE5D35] mb-2">
                     Scaled Dot-Product Attention
                   </h3>
@@ -1252,11 +1512,11 @@ export default function TransformersArticlePage() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-white border border-[#1A1816]/10 rounded">
+                <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px]">
                   <h3 className="font-mono text-[12px] font-bold uppercase text-[#DE5D35] mb-2">
                     Multi-Head Projections (<MathTex math="h=8" />)
                   </h3>
-                  <div className="py-2">
+                  <div className="py-2 overflow-x-auto">
                     <MathTex
                       math="\mathrm{MultiHead}(Q, K, V) = \mathrm{Concat}(\mathrm{head}_1, \dots, \mathrm{head}_h)W^O"
                       block
@@ -1266,7 +1526,7 @@ export default function TransformersArticlePage() {
               </div>
 
               {/* Coreference Resolution Attention Simulator */}
-              <div className="p-5 bg-white border border-[#1A1816]/10 rounded mb-4">
+              <div className="p-5 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px] mb-4">
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                   <span className="font-mono text-[11px] font-bold text-[#DE5D35] uppercase">
                     INTERACTIVE COREFERENCE ATTENTION RESOLUTION
@@ -1275,10 +1535,10 @@ export default function TransformersArticlePage() {
                     <button
                       type="button"
                       onClick={() => setActiveHead(1)}
-                      className={`px-3 py-1 rounded border transition-all cursor-pointer ${
+                      className={`px-3 py-1 rounded-[2px] border font-bold transition-all cursor-pointer ${
                         activeHead === 1
-                          ? "bg-[#DE5D35] text-white border-[#DE5D35] font-bold"
-                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816]"
+                          ? "bg-[#DE5D35] text-[#FAF9F5] border-[#DE5D35]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#DE5D35]"
                       }`}
                     >
                       Head 1 · Coreference (&rarr; animal)
@@ -1286,10 +1546,10 @@ export default function TransformersArticlePage() {
                     <button
                       type="button"
                       onClick={() => setActiveHead(2)}
-                      className={`px-3 py-1 rounded border transition-all cursor-pointer ${
+                      className={`px-3 py-1 rounded-[2px] border font-bold transition-all cursor-pointer ${
                         activeHead === 2
-                          ? "bg-[#DE5D35] text-white border-[#DE5D35] font-bold"
-                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816]"
+                          ? "bg-[#DE5D35] text-[#FAF9F5] border-[#DE5D35]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#DE5D35]"
                       }`}
                     >
                       Head 2 · Syntactic (&rarr; street)
@@ -1304,15 +1564,15 @@ export default function TransformersArticlePage() {
                       type="button"
                       key={item.id}
                       onClick={() => setSelectedAttentionIdx(item.idx)}
-                      className={`relative px-3 py-2 rounded font-mono text-[12px] transition-all border cursor-pointer ${
+                      className={`relative px-3 py-2 rounded-[2px] font-mono text-[12px] transition-all border cursor-pointer ${
                         item.idx === selectedAttentionIdx
-                          ? "bg-[#1A1816] text-[#FAF9F5] border-[#1A1816] font-bold shadow-sm"
+                          ? "bg-[#1A1816] text-[#FAF9F5] border-[#1A1816] font-bold"
                           : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#DE5D35]"
                       }`}
                     >
                       {item.text}
                       <div
-                        className="absolute bottom-0 left-0 right-0 h-1 bg-[#DE5D35] rounded-b transition-all"
+                        className="absolute bottom-0 left-0 right-0 h-1 bg-[#DE5D35] rounded-b-[2px] transition-all"
                         style={{
                           opacity: weights[item.idx],
                           transform: `scaleX(${weights[item.idx]})`,
@@ -1332,7 +1592,7 @@ export default function TransformersArticlePage() {
                       <span className="w-16 text-right font-medium text-[#1A1816]">
                         {item.text}:
                       </span>
-                      <div className="grow bg-[#EFECE6] h-3.5 rounded-xs overflow-hidden">
+                      <div className="grow bg-[#EFECE6] h-3.5 rounded-[2px] overflow-hidden">
                         <div
                           className="h-full bg-[#DE5D35] transition-all duration-300"
                           style={{ width: `${weights[item.idx] * 100}%` }}
@@ -1349,15 +1609,16 @@ export default function TransformersArticlePage() {
           </section>
 
           {/* ──────────────────────────────────────────────────────────────────
-              SECTION 05: POSITION-WISE FEED-FORWARD NETWORK
+              SECTION 05: TWO-LAYER FEED-FORWARD NETWORK REDESIGN
               ────────────────────────────────────────────────────────────────── */}
-          <section className="mb-16">
+          <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
               <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
                 05 / Deep Layers
               </span>
               <h2 className="text-[22px] font-bold text-[#1A1816] mt-0.5">
-                Position-Wise Feed-Forward Networks as Associative Memories
+                Two-Layer Position-Wise Feed-Forward Networks as Associative
+                Memories
               </h2>
             </div>
 
@@ -1367,90 +1628,67 @@ export default function TransformersArticlePage() {
                 space, the <strong>Feed-Forward Network (FFN)</strong> processes
                 each token independently. It projects the embedding dimension 4×
                 from <MathTex math="d_{model} = 512" /> up to{" "}
-                <MathTex math="d_{ff} = 2048" /> with non-linear activation, and
-                contracts back:
+                <MathTex math="d_{ff} = 2048" /> via <MathTex math="W_1" /> with
+                non-linear activation (ReLU or GELU), and contracts back down to{" "}
+                <MathTex math="d_{model} = 512" /> via <MathTex math="W_2" />:
               </p>
 
-              <div className="p-4 bg-[#EFECE6] border border-[#1A1816]/10 rounded font-mono text-[13px] text-center my-4 overflow-x-auto">
+              <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px] font-mono text-[13px] text-center my-4 overflow-x-auto">
                 <MathTex
                   math="\mathrm{FFN}(x) = \max(0, xW_1 + b_1)W_2 + b_2 = \mathrm{ReLU}(xW_1 + b_1)W_2 + b_2"
                   block
                 />
               </div>
 
-              {/* FFN 4x Dimensional Expansion Visualizer */}
-              <div className="p-5 bg-[#0C0E12] border border-white/10 rounded-[4px] font-mono text-white mb-6">
-                <div className="text-[11px] text-[#00FFCC] uppercase font-bold mb-4 flex justify-between items-center">
-                  <span>FFN 4× EXPANSION &amp; NEURON FIRING PIPELINE</span>
-                  <span className="text-white/60">
+              {/* Two-Layer FFN Neural Architecture Visualizer */}
+              <div className="border border-[#1A1816]/15 bg-[#FAF9F5] p-5 rounded-[2px] font-mono mb-6">
+                <div className="text-[11px] text-[#1A1816] uppercase font-bold mb-4 flex flex-wrap justify-between items-center gap-2 border-b border-[#1A1816]/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
+                    <span>
+                      TWO-LAYER NEURAL ARCHITECTURE · W₁ EXPANSION &amp; W₂
+                      PROJECTION
+                    </span>
+                  </div>
+                  <span className="text-[#DE5D35] font-bold">
                     2/3 OF MODEL WEIGHTS LIVE IN FFN
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center text-center text-[12px] mb-6">
-                  {/* Input Block */}
-                  <div className="p-4 bg-[#141820] border border-[#00FFCC]/30 rounded">
-                    <span className="text-[#00FFCC] font-bold block mb-1 text-[11px]">
-                      INPUT TOKEN x
+                {/* Interactive Parameter Controls Bar */}
+                <div className="flex flex-wrap items-center justify-between gap-4 p-3.5 bg-[#F4F1EA] border border-[#1A1816]/10 rounded-[2px] mb-4 text-[11px]">
+                  {/* Activation Toggle */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#75716B] font-bold">
+                      ACTIVATION:
                     </span>
-                    <span className="text-[16px] font-black text-white">
-                      d = 512
-                    </span>
-                    <span className="text-[10px] text-white/50 block mt-1">
-                      Contextualized
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFfnActivation("relu")}
+                      className={`px-3 py-1 rounded-[2px] border font-bold transition-all cursor-pointer ${
+                        ffnActivation === "relu"
+                          ? "bg-[#DE5D35] text-[#FAF9F5] border-[#DE5D35]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#DE5D35]"
+                      }`}
+                    >
+                      ReLU (max(0, z))
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFfnActivation("gelu")}
+                      className={`px-3 py-1 rounded-[2px] border font-bold transition-all cursor-pointer ${
+                        ffnActivation === "gelu"
+                          ? "bg-[#1A1816] text-[#FAF9F5] border-[#1A1816]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#1A1816]"
+                      }`}
+                    >
+                      GELU (x·Φ(x))
+                    </button>
                   </div>
 
-                  <div className="text-[#DE5D35] font-black text-[18px]">
-                    &rarr;{" "}
-                    <span className="text-[10px] block text-white/50">
-                      W₁ ∈ ℝ^(512×2048)
-                    </span>
-                  </div>
-
-                  {/* Expanded Hidden Layer */}
-                  <div className="p-4 bg-[#141820] border border-[#DE5D35] rounded shadow-md relative overflow-hidden">
-                    <div className="absolute top-1 right-2 text-[9px] text-[#00FFCC] animate-pulse">
-                      ● FIRING
-                    </div>
-                    <span className="text-[#DE5D35] font-bold block mb-1 text-[11px]">
-                      EXPANDED HIDDEN LAYER
-                    </span>
-                    <span className="text-[20px] font-black text-white">
-                      d_ff = 2048
-                    </span>
-                    <span className="text-[10px] text-[#52E3A4] block mt-1">
-                      {Math.round(ffnInputVal * 280)} / 2048 Neurons Active
-                    </span>
-                  </div>
-
-                  <div className="text-[#52E3A4] font-black text-[18px]">
-                    &rarr;{" "}
-                    <span className="text-[10px] block text-white/50">
-                      W₂ ∈ ℝ^(2048×512)
-                    </span>
-                  </div>
-
-                  {/* Contracted Output */}
-                  <div className="p-4 bg-[#141820] border border-[#52E3A4]/40 rounded">
-                    <span className="text-[#52E3A4] font-bold block mb-1 text-[11px]">
-                      PROJECTED OUTPUT
-                    </span>
-                    <span className="text-[16px] font-black text-white">
-                      d = 512
-                    </span>
-                    <span className="text-[10px] text-white/50 block mt-1">
-                      Residual Ready
-                    </span>
-                  </div>
-                </div>
-
-                {/* Input Magnitude Slider */}
-                <div className="p-3 bg-black/40 border border-white/10 rounded flex flex-wrap items-center justify-between gap-3 text-[11px]">
-                  <span className="text-white/70">
-                    SIMULATE INPUT VECTOR MAGNITUDE (x):
-                  </span>
-                  <div className="flex items-center gap-3">
+                  {/* Input Magnitude Slider */}
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-[#75716B]">INPUT MAGNITUDE (x):</span>
                     <input
                       type="range"
                       min="0.2"
@@ -1458,17 +1696,308 @@ export default function TransformersArticlePage() {
                       step="0.1"
                       value={ffnInputVal}
                       onChange={(e) => setFfnInputVal(Number(e.target.value))}
-                      className="accent-[#DE5D35]"
+                      className="accent-[#DE5D35] cursor-pointer"
+                      aria-label="Input Magnitude"
                     />
-                    <span className="text-[#DE5D35] font-bold min-w-[40px]">
+                    <span className="text-[#DE5D35] font-bold min-w-[36px]">
                       {ffnInputVal.toFixed(1)}x
                     </span>
                   </div>
-                  <span className="text-[#52E3A4]">
-                    ReLU Sparsity:{" "}
-                    {(100 - ((ffnInputVal * 280) / 2048) * 100).toFixed(1)}%
-                    dead neurons
-                  </span>
+                </div>
+
+                {/* Neural Network SVG Visualizer */}
+                <div className="bg-[#F4F1EA] border border-[#1A1816]/10 p-4 rounded-[2px] mb-4 overflow-hidden">
+                  <svg
+                    viewBox="0 0 700 280"
+                    className="w-full h-[220px] sm:h-[280px] block select-none"
+                    role="img"
+                    aria-label="Two-Layer Feed Forward Neural Network Architecture"
+                  >
+                    <title>
+                      Two-Layer Feed Forward Neural Network Architecture
+                    </title>
+                    {/* Stage Zone Labels */}
+                    <text
+                      x="80"
+                      y="24"
+                      textAnchor="middle"
+                      fill="#1A1816"
+                      fontSize="10"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      INPUT VECTOR x (d=512)
+                    </text>
+                    <text
+                      x="350"
+                      y="16"
+                      textAnchor="middle"
+                      fill="#DE5D35"
+                      fontSize="11"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      EXPANDED HIDDEN LAYER (d_ff = 2048) · 4×
+                    </text>
+                    <text
+                      x="620"
+                      y="24"
+                      textAnchor="middle"
+                      fill="#1A1816"
+                      fontSize="10"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      PROJECTED OUTPUT (d=512)
+                    </text>
+
+                    {/* Weight Matrix Equation Annotations */}
+                    <text
+                      x="215"
+                      y="268"
+                      textAnchor="middle"
+                      fill="#DE5D35"
+                      fontSize="9.5"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      W₁ ∈ ℝ^(512 × 2048) + b₁
+                    </text>
+                    <text
+                      x="485"
+                      y="268"
+                      textAnchor="middle"
+                      fill="#1A1816"
+                      fontSize="9.5"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      W₂ ∈ ℝ^(2048 × 512) + b₂
+                    </text>
+
+                    {/* Synaptic Connection Lines: W1 (Input -> Hidden) */}
+                    {[45, 90, 135, 180, 225].map((inY) =>
+                      [
+                        28, 46, 64, 82, 100, 118, 136, 154, 172, 190, 208, 226,
+                        244,
+                      ].map((hidY, hidIdx) => {
+                        const isNodeActive = hidIdx < numActiveNodes;
+                        return (
+                          <line
+                            key={`w1-syn-${inY}-${hidY}`}
+                            x1="80"
+                            y1={inY}
+                            x2="350"
+                            y2={hidY}
+                            stroke={
+                              isNodeActive
+                                ? "rgba(222, 93, 53, 0.18)"
+                                : "rgba(26, 24, 22, 0.05)"
+                            }
+                            strokeWidth={isNodeActive ? 0.9 : 0.5}
+                          />
+                        );
+                      }),
+                    )}
+
+                    {/* Synaptic Connection Lines: W2 (Hidden -> Output) */}
+                    {[
+                      28, 46, 64, 82, 100, 118, 136, 154, 172, 190, 208, 226,
+                      244,
+                    ].map((hidY, hidIdx) =>
+                      [45, 90, 135, 180, 225].map((outY) => {
+                        const isNodeActive = hidIdx < numActiveNodes;
+                        return (
+                          <line
+                            key={`w2-syn-${hidY}-${outY}`}
+                            x1="350"
+                            y1={hidY}
+                            x2="620"
+                            y2={outY}
+                            stroke={
+                              isNodeActive
+                                ? "rgba(222, 93, 53, 0.18)"
+                                : "rgba(26, 24, 22, 0.05)"
+                            }
+                            strokeWidth={isNodeActive ? 0.9 : 0.5}
+                          />
+                        );
+                      }),
+                    )}
+
+                    {/* Animated Signal Traversal Pulses (Moving Left to Right) */}
+                    {[
+                      { inY: 45, hidY: 28, outY: 45, d1: "0s", d2: "0.9s" },
+                      { inY: 90, hidY: 64, outY: 90, d1: "0.3s", d2: "1.2s" },
+                      {
+                        inY: 135,
+                        hidY: 100,
+                        outY: 135,
+                        d1: "0.6s",
+                        d2: "1.5s",
+                      },
+                      {
+                        inY: 180,
+                        hidY: 136,
+                        outY: 180,
+                        d1: "0.9s",
+                        d2: "1.8s",
+                      },
+                      {
+                        inY: 225,
+                        hidY: 172,
+                        outY: 225,
+                        d1: "1.2s",
+                        d2: "2.1s",
+                      },
+                    ].map((pulse) => (
+                      <g key={`signal-pulse-${pulse.inY}-${pulse.hidY}`}>
+                        {/* W1 pulse */}
+                        <circle r="2.8" fill="#DE5D35">
+                          <animateMotion
+                            path={`M 80 ${pulse.inY} L 350 ${pulse.hidY}`}
+                            dur="1.8s"
+                            repeatCount="indefinite"
+                            begin={pulse.d1}
+                          />
+                        </circle>
+                        {/* W2 pulse */}
+                        <circle r="2.8" fill="#1A1816">
+                          <animateMotion
+                            path={`M 350 ${pulse.hidY} L 620 ${pulse.outY}`}
+                            dur="1.8s"
+                            repeatCount="indefinite"
+                            begin={pulse.d2}
+                          />
+                        </circle>
+                      </g>
+                    ))}
+
+                    {/* Input Layer Nodes (5 nodes representing d=512) */}
+                    {[45, 90, 135, 180, 225].map((y, i) => (
+                      <g key={`in-node-${y}`}>
+                        <circle
+                          cx="80"
+                          cy={y}
+                          r="9"
+                          fill="#1A1816"
+                          stroke="#FAF9F5"
+                          strokeWidth="1.5"
+                        />
+                        <text
+                          x="80"
+                          y={y + 3.5}
+                          textAnchor="middle"
+                          fill="#FAF9F5"
+                          fontSize="7"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                        >
+                          x{i + 1}
+                        </text>
+                      </g>
+                    ))}
+
+                    {/* Hidden Layer Nodes (13 nodes representing d_ff=2048) */}
+                    {[
+                      28, 46, 64, 82, 100, 118, 136, 154, 172, 190, 208, 226,
+                      244,
+                    ].map((y, i) => {
+                      const isActive = i < numActiveNodes;
+                      return (
+                        <g key={`hid-node-${y}`}>
+                          {isActive && (
+                            <circle
+                              cx="350"
+                              cy={y}
+                              r="11"
+                              fill="none"
+                              stroke="#DE5D35"
+                              strokeWidth="1"
+                              opacity="0.4"
+                            />
+                          )}
+                          <circle
+                            cx="350"
+                            cy={y}
+                            r="7.5"
+                            fill={isActive ? "#DE5D35" : "#FAF9F5"}
+                            stroke={
+                              isActive ? "#DE5D35" : "rgba(26, 24, 22, 0.3)"
+                            }
+                            strokeWidth={isActive ? 2 : 1}
+                            strokeDasharray={isActive ? "none" : "2 2"}
+                          />
+                          <text
+                            x="350"
+                            y={y + 3}
+                            textAnchor="middle"
+                            fill={isActive ? "#FAF9F5" : "#75716B"}
+                            fontSize="6"
+                            fontFamily="monospace"
+                            fontWeight="bold"
+                          >
+                            {isActive ? "1" : "0"}
+                          </text>
+                        </g>
+                      );
+                    })}
+
+                    {/* Output Layer Nodes (5 nodes representing d=512) */}
+                    {[45, 90, 135, 180, 225].map((y, i) => (
+                      <g key={`out-node-${y}`}>
+                        <circle
+                          cx="620"
+                          cy={y}
+                          r="9"
+                          fill="#1A1816"
+                          stroke="#FAF9F5"
+                          strokeWidth="1.5"
+                        />
+                        <text
+                          x="620"
+                          y={y + 3.5}
+                          textAnchor="middle"
+                          fill="#FAF9F5"
+                          fontSize="7"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                        >
+                          y{i + 1}
+                        </text>
+                      </g>
+                    ))}
+                  </svg>
+                </div>
+
+                {/* Live Readouts Summary */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px] text-[12px]">
+                  <div>
+                    <span className="text-[#75716B] block mb-0.5 text-[10px] uppercase">
+                      DIMENSIONAL PROJECTION
+                    </span>
+                    <span className="font-bold text-[#1A1816]">
+                      512 → 2048 → 512 (4×)
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[#75716B] block mb-0.5 text-[10px] uppercase">
+                      ACTIVE NEURONS (FIRING)
+                    </span>
+                    <span className="font-bold text-[#DE5D35]">
+                      {ffnActiveNeurons} / 2048 Neurons Active
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[#75716B] block mb-0.5 text-[10px] uppercase">
+                      {ffnActivation === "relu"
+                        ? "RELU SPARSITY"
+                        : "GELU ATTENUATION"}
+                    </span>
+                    <span className="font-bold text-[#1A1816]">
+                      {ffnSparsityPct}% dead neurons
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1477,7 +2006,7 @@ export default function TransformersArticlePage() {
           {/* ──────────────────────────────────────────────────────────────────
               SECTION 06: RESIDUAL CONNECTIONS & GRADIENT HIGHWAYS
               ────────────────────────────────────────────────────────────────── */}
-          <section className="mb-16">
+          <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
               <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
                 06 / Stability &amp; Backprop
@@ -1497,7 +2026,7 @@ export default function TransformersArticlePage() {
                 :
               </p>
 
-              <div className="p-4 bg-[#EFECE6] border border-[#1A1816]/10 rounded font-mono text-[13px] text-center my-4 overflow-x-auto">
+              <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px] font-mono text-[13px] text-center my-4 overflow-x-auto">
                 <MathTex
                   math="\mathrm{Output} = \mathrm{LayerNorm}\left(x + \mathrm{Sublayer}(x)\right) = \left[\frac{(x + \mathrm{Sublayer}(x)) - \mu}{\sqrt{\sigma^2 + \epsilon}}\right] \odot \gamma + \beta"
                   block
@@ -1505,7 +2034,7 @@ export default function TransformersArticlePage() {
               </div>
 
               {/* Interactive Residual Connection Comparison Studio */}
-              <div className="p-5 bg-white border border-[#1A1816]/10 rounded mb-6 font-mono">
+              <div className="p-5 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px] mb-6 font-mono">
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                   <span className="text-[11px] text-[#DE5D35] uppercase font-bold">
                     SIGNAL RETENTION THROUGH 6 DEEP LAYERS
@@ -1514,10 +2043,10 @@ export default function TransformersArticlePage() {
                     <button
                       type="button"
                       onClick={() => setResidualEnabled(true)}
-                      className={`px-3 py-1.5 rounded text-[11px] font-bold uppercase transition-all border cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-[2px] text-[11px] font-bold uppercase transition-all border cursor-pointer ${
                         residualEnabled
-                          ? "bg-[#52E3A4] text-black border-[#52E3A4]"
-                          : "bg-white border-[#1A1816]/20 text-[#1A1816]"
+                          ? "bg-[#1A1816] text-[#FAF9F5] border-[#1A1816]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#1A1816]"
                       }`}
                     >
                       ✓ RESIDUAL SKIP ENABLED (x + Sublayer(x))
@@ -1525,10 +2054,10 @@ export default function TransformersArticlePage() {
                     <button
                       type="button"
                       onClick={() => setResidualEnabled(false)}
-                      className={`px-3 py-1.5 rounded text-[11px] font-bold uppercase transition-all border cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-[2px] text-[11px] font-bold uppercase transition-all border cursor-pointer ${
                         !residualEnabled
-                          ? "bg-[#DE5D35] text-white border-[#DE5D35]"
-                          : "bg-white border-[#1A1816]/20 text-[#1A1816]"
+                          ? "bg-[#DE5D35] text-[#FAF9F5] border-[#DE5D35]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#DE5D35]"
                       }`}
                     >
                       ✗ DISABLE (VANISHING GRADIENT)
@@ -1551,10 +2080,10 @@ export default function TransformersArticlePage() {
                         <span className="w-20 font-bold text-[#1A1816]">
                           LAYER {layer}:
                         </span>
-                        <div className="grow bg-[#EFECE6] h-4 rounded-xs overflow-hidden relative">
+                        <div className="grow bg-[#EFECE6] h-4 rounded-[2px] overflow-hidden relative">
                           <div
                             className={`h-full transition-all duration-500 ${
-                              residualEnabled ? "bg-[#52E3A4]" : "bg-[#DE5D35]"
+                              residualEnabled ? "bg-[#1A1816]" : "bg-[#DE5D35]"
                             }`}
                             style={{ width: `${signal}%` }}
                           />
@@ -1562,7 +2091,7 @@ export default function TransformersArticlePage() {
                         <span
                           className={`w-16 text-right font-bold ${
                             residualEnabled
-                              ? "text-emerald-700"
+                              ? "text-[#1A1816]"
                               : "text-[#DE5D35]"
                           }`}
                         >
@@ -1573,9 +2102,9 @@ export default function TransformersArticlePage() {
                   })}
                 </div>
 
-                <div className="mt-4 p-3 bg-[#FAF9F5] border border-[#1A1816]/10 rounded text-[11px] text-[#75716B]">
+                <div className="mt-4 p-3 bg-[#F4F1EA] border border-[#1A1816]/10 rounded-[2px] text-[11px] text-[#75716B]">
                   {residualEnabled ? (
-                    <span className="text-emerald-800 font-semibold">
+                    <span className="text-[#1A1816] font-semibold">
                       ✓ Gradient Highway Active: Signal flows undiminished
                       across all 6 layers via the identity skip path.
                     </span>
@@ -1594,7 +2123,7 @@ export default function TransformersArticlePage() {
           {/* ──────────────────────────────────────────────────────────────────
               SECTION 07: THE ENCODER & DECODER TOWERS (6 ACTUAL LAYERS)
               ────────────────────────────────────────────────────────────────── */}
-          <section className="mb-16">
+          <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
               <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
                 07 / Full Architecture
@@ -1607,7 +2136,7 @@ export default function TransformersArticlePage() {
             <div className="border border-[#1A1816]/15 bg-[#FAF9F5] p-6 sm:p-8 rounded-[2px] mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 {/* Canonical Paper SVG Blueprint */}
-                <div className="flex justify-center p-4 bg-white border border-[#1A1816]/10 rounded">
+                <div className="flex justify-center p-4 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px]">
                   <svg
                     viewBox="0 0 420 540"
                     className="w-full max-w-[340px] h-auto"
@@ -1622,7 +2151,7 @@ export default function TransformersArticlePage() {
                       y="80"
                       width="160"
                       height="380"
-                      rx="4"
+                      rx="2"
                       fill="#FAF9F5"
                       stroke="#1A1816"
                       strokeWidth="1.5"
@@ -1644,17 +2173,16 @@ export default function TransformersArticlePage() {
                       y="125"
                       width="130"
                       height="42"
-                      rx="3"
-                      fill="#008080"
-                      fillOpacity="0.15"
-                      stroke="#008080"
-                      strokeWidth="1.5"
+                      rx="2"
+                      fill="#F4F1EA"
+                      stroke="#1A1816"
+                      strokeWidth="1.2"
                     />
                     <text
                       x="110"
                       y="150"
                       textAnchor="middle"
-                      fill="#008080"
+                      fill="#1A1816"
                       fontSize="11"
                       fontWeight="bold"
                     >
@@ -1668,8 +2196,7 @@ export default function TransformersArticlePage() {
                       width="110"
                       height="28"
                       rx="2"
-                      fill="#DE5D35"
-                      fillOpacity="0.15"
+                      fill="#FAF9F5"
                       stroke="#DE5D35"
                       strokeWidth="1.2"
                     />
@@ -1690,17 +2217,16 @@ export default function TransformersArticlePage() {
                       y="225"
                       width="130"
                       height="48"
-                      rx="3"
-                      fill="#F4A261"
-                      fillOpacity="0.2"
-                      stroke="#F4A261"
+                      rx="2"
+                      fill="#FAF9F5"
+                      stroke="#1A1816"
                       strokeWidth="1.5"
                     />
                     <text
                       x="110"
                       y="248"
                       textAnchor="middle"
-                      fill="#B25E1A"
+                      fill="#1A1816"
                       fontSize="11"
                       fontWeight="bold"
                     >
@@ -1710,7 +2236,7 @@ export default function TransformersArticlePage() {
                       x="110"
                       y="262"
                       textAnchor="middle"
-                      fill="#B25E1A"
+                      fill="#1A1816"
                       fontSize="10"
                     >
                       Attention
@@ -1723,8 +2249,7 @@ export default function TransformersArticlePage() {
                       width="110"
                       height="28"
                       rx="2"
-                      fill="#DE5D35"
-                      fillOpacity="0.15"
+                      fill="#FAF9F5"
                       stroke="#DE5D35"
                       strokeWidth="1.2"
                     />
@@ -1785,7 +2310,7 @@ export default function TransformersArticlePage() {
                       y="80"
                       width="160"
                       height="380"
-                      rx="4"
+                      rx="2"
                       fill="#FAF9F5"
                       stroke="#1A1816"
                       strokeWidth="1.5"
@@ -1807,17 +2332,16 @@ export default function TransformersArticlePage() {
                       y="125"
                       width="130"
                       height="42"
-                      rx="3"
-                      fill="#008080"
-                      fillOpacity="0.15"
-                      stroke="#008080"
-                      strokeWidth="1.5"
+                      rx="2"
+                      fill="#F4F1EA"
+                      stroke="#1A1816"
+                      strokeWidth="1.2"
                     />
                     <text
                       x="310"
                       y="150"
                       textAnchor="middle"
-                      fill="#008080"
+                      fill="#1A1816"
                       fontSize="11"
                       fontWeight="bold"
                     >
@@ -1831,8 +2355,7 @@ export default function TransformersArticlePage() {
                       width="110"
                       height="28"
                       rx="2"
-                      fill="#DE5D35"
-                      fillOpacity="0.15"
+                      fill="#FAF9F5"
                       stroke="#DE5D35"
                       strokeWidth="1.2"
                     />
@@ -1853,17 +2376,16 @@ export default function TransformersArticlePage() {
                       y="225"
                       width="130"
                       height="48"
-                      rx="3"
-                      fill="#E76F51"
-                      fillOpacity="0.25"
-                      stroke="#E76F51"
+                      rx="2"
+                      fill="#FAF9F5"
+                      stroke="#DE5D35"
                       strokeWidth="1.5"
                     />
                     <text
                       x="310"
                       y="248"
                       textAnchor="middle"
-                      fill="#A83218"
+                      fill="#DE5D35"
                       fontSize="11"
                       fontWeight="bold"
                     >
@@ -1873,7 +2395,7 @@ export default function TransformersArticlePage() {
                       x="310"
                       y="262"
                       textAnchor="middle"
-                      fill="#A83218"
+                      fill="#DE5D35"
                       fontSize="10"
                     >
                       (Q: Dec, K,V: Enc)
@@ -1885,17 +2407,16 @@ export default function TransformersArticlePage() {
                       y="295"
                       width="130"
                       height="48"
-                      rx="3"
-                      fill="#E9C46A"
-                      fillOpacity="0.25"
-                      stroke="#E9C46A"
+                      rx="2"
+                      fill="#FAF9F5"
+                      stroke="#1A1816"
                       strokeWidth="1.5"
                     />
                     <text
                       x="310"
                       y="318"
                       textAnchor="middle"
-                      fill="#8B6D1B"
+                      fill="#1A1816"
                       fontSize="11"
                       fontWeight="bold"
                     >
@@ -1905,7 +2426,7 @@ export default function TransformersArticlePage() {
                       x="310"
                       y="332"
                       textAnchor="middle"
-                      fill="#8B6D1B"
+                      fill="#1A1816"
                       fontSize="10"
                     >
                       Causal Lookahead
@@ -1924,7 +2445,7 @@ export default function TransformersArticlePage() {
 
                 {/* Layer Breakdown */}
                 <div className="space-y-4 text-[13px] text-[#4A4742]">
-                  <div className="p-4 bg-white border border-[#1A1816]/10 rounded">
+                  <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px]">
                     <span className="font-mono text-[11px] font-bold text-[#DE5D35] uppercase block mb-1">
                       ENCODER (6 LAYERS)
                     </span>
@@ -1935,7 +2456,7 @@ export default function TransformersArticlePage() {
                     </p>
                   </div>
 
-                  <div className="p-4 bg-white border border-[#1A1816]/10 rounded">
+                  <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px]">
                     <span className="font-mono text-[11px] font-bold text-[#DE5D35] uppercase block mb-1">
                       CROSS-ATTENTION BRIDGE
                     </span>
@@ -1948,7 +2469,7 @@ export default function TransformersArticlePage() {
                     </p>
                   </div>
 
-                  <div className="p-4 bg-white border border-[#1A1816]/10 rounded">
+                  <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px]">
                     <span className="font-mono text-[11px] font-bold text-[#DE5D35] uppercase block mb-1">
                       DECODER (6 LAYERS)
                     </span>
@@ -1966,7 +2487,7 @@ export default function TransformersArticlePage() {
           {/* ──────────────────────────────────────────────────────────────────
               SECTION 08: AUTOREGRESSIVE NATURE & CAUSAL MASKING
               ────────────────────────────────────────────────────────────────── */}
-          <section className="mb-16">
+          <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
               <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
                 08 / Autoregressive Nature
@@ -1986,7 +2507,7 @@ export default function TransformersArticlePage() {
               </p>
 
               {/* Step By Step Generation Box */}
-              <div className="p-5 bg-white border border-[#1A1816]/10 rounded mb-6 font-mono">
+              <div className="p-5 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px] mb-6 font-mono">
                 <div className="text-[11px] text-[#DE5D35] uppercase font-bold mb-4 flex justify-between items-center">
                   <span>AUTOREGRESSIVE GENERATION SEQUENCE</span>
                   <span>
@@ -2001,10 +2522,10 @@ export default function TransformersArticlePage() {
                       type="button"
                       key={step.stepId}
                       onClick={() => setDecoderStep(step.stepIdx)}
-                      className={`px-3 py-1.5 rounded text-[11px] font-bold uppercase transition-all border cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-[2px] text-[11px] font-bold uppercase transition-all border cursor-pointer ${
                         decoderStep === step.stepIdx
-                          ? "bg-[#DE5D35] text-white border-[#DE5D35] shadow-xs"
-                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:bg-white"
+                          ? "bg-[#DE5D35] text-[#FAF9F5] border-[#DE5D35]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#1A1816]"
                       }`}
                     >
                       Step {step.stepIdx + 1}: &ldquo;{step.token}&rdquo;
@@ -2014,7 +2535,7 @@ export default function TransformersArticlePage() {
 
                 {/* Context Window & Next Token Probabilities */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                  <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/10 rounded">
+                  <div className="p-4 bg-[#F4F1EA] border border-[#1A1816]/10 rounded-[2px]">
                     <div className="text-[10px] text-[#75716B] uppercase mb-2">
                       Context Window (Input to Decoder)
                     </div>
@@ -2022,18 +2543,18 @@ export default function TransformersArticlePage() {
                       {AR_SEQUENCE.slice(0, decoderStep + 1).map((s) => (
                         <span
                           key={`ctx-tok-${s.stepId}`}
-                          className="px-2.5 py-1 bg-white border border-[#1A1816]/20 text-[12px] font-bold rounded"
+                          className="px-2.5 py-1 bg-[#FAF9F5] border border-[#1A1816]/20 text-[12px] font-bold text-[#1A1816] rounded-[2px]"
                         >
                           {s.token}
                         </span>
                       ))}
-                      <span className="px-2.5 py-1 bg-[#DE5D35]/15 border border-[#DE5D35] text-[#DE5D35] text-[12px] font-bold rounded animate-pulse">
+                      <span className="px-2.5 py-1 bg-[#DE5D35]/10 border border-[#DE5D35] text-[#DE5D35] text-[12px] font-bold rounded-[2px]">
                         ? &rarr; Next Token
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/10 rounded">
+                  <div className="p-4 bg-[#F4F1EA] border border-[#1A1816]/10 rounded-[2px]">
                     <div className="text-[10px] text-[#75716B] uppercase mb-2">
                       Top Softmax Predictions
                     </div>
@@ -2057,30 +2578,35 @@ export default function TransformersArticlePage() {
               </div>
 
               {/* Lower Triangular Causal Mask Visualizer */}
-              <div className="p-5 bg-[#07090C] text-white border border-white/10 rounded font-mono">
-                <div className="text-[11px] text-[#00FFCC] uppercase font-bold mb-3 flex justify-between">
-                  <span>
-                    CAUSAL ATTENTION MASK MATRIX (<MathTex math="M_{ij}" />)
-                  </span>
-                  <span className="text-[#DE5D35] text-[10px]">
+              <div className="p-5 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px] font-mono text-[#1A1816]">
+                <div className="text-[11px] text-[#1A1816] uppercase font-bold mb-3 flex flex-wrap justify-between items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
+                    <span>
+                      CAUSAL ATTENTION MASK MATRIX (<MathTex math="M_{ij}" />)
+                    </span>
+                  </div>
+                  <span className="text-[#DE5D35] text-[10px] font-bold">
                     -∞ CAUSAL LOCKOUT
                   </span>
                 </div>
-                <div className="grid grid-cols-5 gap-1.5 max-w-sm mx-auto text-center text-[10px]">
-                  {CAUSAL_MASK_CELLS.map((cell) => (
-                    <div
-                      key={cell.id}
-                      className={`p-2 rounded border ${
-                        cell.isAllowed
-                          ? "bg-[#00FFCC]/20 border-[#00FFCC]/40 text-[#00FFCC] font-bold"
-                          : "bg-[#DE5D35]/20 border-[#DE5D35]/40 text-[#DE5D35]"
-                      }`}
-                    >
-                      {cell.isAllowed ? "0" : "-∞"}
-                    </div>
-                  ))}
+                <div className="bg-[#F4F1EA] border border-[#1A1816]/10 p-4 rounded-[2px] max-w-sm mx-auto my-3">
+                  <div className="grid grid-cols-5 gap-1.5 text-center text-[10px]">
+                    {CAUSAL_MASK_CELLS.map((cell) => (
+                      <div
+                        key={cell.id}
+                        className={`p-2.5 rounded-[2px] border ${
+                          cell.isAllowed
+                            ? "bg-[#1A1816] border-[#1A1816] text-[#FAF9F5] font-bold"
+                            : "bg-[#FAF9F5] border-[#1A1816]/15 text-[#DE5D35]"
+                        }`}
+                      >
+                        {cell.isAllowed ? "0" : "-∞"}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="text-[10px] text-white/50 text-center mt-3">
+                <div className="text-[10px] text-[#75716B] text-center mt-3">
                   Row <MathTex math="i" /> can only attend to columns{" "}
                   <MathTex math="j \le i" />. Future positions receive{" "}
                   <MathTex math="-\infty" /> before softmax.
@@ -2092,7 +2618,7 @@ export default function TransformersArticlePage() {
           {/* ──────────────────────────────────────────────────────────────────
               SECTION 09: FINAL LINEAR PROJECTION & SOFTMAX SAMPLING STUDIO
               ────────────────────────────────────────────────────────────────── */}
-          <section className="mb-16">
+          <section className="mb-16 border-t border-[#1A1816]/15 pt-12">
             <div className="mb-6">
               <span className="text-[11px] font-mono uppercase tracking-widest text-[#75716B]">
                 09 / Output Head
@@ -2118,7 +2644,7 @@ export default function TransformersArticlePage() {
                 <MathTex math="P(w_i)" />:
               </p>
 
-              <div className="p-4 bg-[#EFECE6] border border-[#1A1816]/10 rounded font-mono text-[13px] text-center my-4 overflow-x-auto">
+              <div className="p-4 bg-[#FAF9F5] border border-[#1A1816]/15 rounded-[2px] font-mono text-[13px] text-center my-4 overflow-x-auto">
                 <MathTex
                   math="P(w_i) = \frac{\exp\left(z_i / T\right)}{\sum_{j=1}^{|V|} \exp\left(z_j / T\right)}"
                   block
@@ -2126,20 +2652,23 @@ export default function TransformersArticlePage() {
               </div>
 
               {/* Interactive Softmax Temperature Studio Box */}
-              <div className="p-5 bg-[#0C0E12] border border-white/10 rounded-[4px] font-mono text-white mb-6">
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-white/10 pb-4">
-                  <span className="text-[11px] text-[#00FFCC] font-bold uppercase">
-                    INTERACTIVE SOFTMAX TEMPERATURE &amp; TOP-K STUDIO
-                  </span>
+              <div className="border border-[#1A1816]/15 bg-[#FAF9F5] p-5 rounded-[2px] font-mono text-[#1A1816] mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-[#1A1816]/10 pb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D35]" />
+                    <span className="text-[11px] text-[#1A1816] font-bold uppercase">
+                      INTERACTIVE SOFTMAX TEMPERATURE &amp; TOP-K STUDIO
+                    </span>
+                  </div>
                   {/* Sampling Method Radio Buttons */}
                   <div className="flex flex-wrap gap-2 text-[11px]">
                     <button
                       type="button"
                       onClick={() => setSamplingMethod("temperature")}
-                      className={`px-3 py-1 rounded border transition-all cursor-pointer ${
+                      className={`px-3 py-1 rounded-[2px] border font-bold transition-all cursor-pointer ${
                         samplingMethod === "temperature"
-                          ? "bg-[#00FFCC] text-black border-[#00FFCC] font-bold"
-                          : "bg-white/10 border-white/20 text-white"
+                          ? "bg-[#1A1816] text-[#FAF9F5] border-[#1A1816]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#1A1816]"
                       }`}
                     >
                       Temperature (T)
@@ -2147,10 +2676,10 @@ export default function TransformersArticlePage() {
                     <button
                       type="button"
                       onClick={() => setSamplingMethod("topk")}
-                      className={`px-3 py-1 rounded border transition-all cursor-pointer ${
+                      className={`px-3 py-1 rounded-[2px] border font-bold transition-all cursor-pointer ${
                         samplingMethod === "topk"
-                          ? "bg-[#FFB703] text-black border-[#FFB703] font-bold"
-                          : "bg-white/10 border-white/20 text-white"
+                          ? "bg-[#DE5D35] text-[#FAF9F5] border-[#DE5D35]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#DE5D35]"
                       }`}
                     >
                       Top-K Truncation
@@ -2158,10 +2687,10 @@ export default function TransformersArticlePage() {
                     <button
                       type="button"
                       onClick={() => setSamplingMethod("greedy")}
-                      className={`px-3 py-1 rounded border transition-all cursor-pointer ${
+                      className={`px-3 py-1 rounded-[2px] border font-bold transition-all cursor-pointer ${
                         samplingMethod === "greedy"
-                          ? "bg-[#DE5D35] text-white border-[#DE5D35] font-bold"
-                          : "bg-white/10 border-white/20 text-white"
+                          ? "bg-[#1A1816] text-[#FAF9F5] border-[#1A1816]"
+                          : "bg-[#FAF9F5] border-[#1A1816]/20 text-[#1A1816] hover:border-[#1A1816]"
                       }`}
                     >
                       Greedy (ArgMax)
@@ -2170,11 +2699,11 @@ export default function TransformersArticlePage() {
                 </div>
 
                 {/* Slider Controls */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6 p-3 bg-black/40 border border-white/10 rounded">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6 p-4 bg-[#F4F1EA] border border-[#1A1816]/10 rounded-[2px]">
                   <div>
                     <div className="flex justify-between items-center mb-1 text-[11px]">
-                      <span className="text-white/70">TEMPERATURE (T):</span>
-                      <span className="text-[#00FFCC] font-bold">
+                      <span className="text-[#75716B]">TEMPERATURE (T):</span>
+                      <span className="text-[#DE5D35] font-bold">
                         {temperature.toFixed(2)}
                       </span>
                     </div>
@@ -2185,9 +2714,10 @@ export default function TransformersArticlePage() {
                       step="0.05"
                       value={temperature}
                       onChange={(e) => setTemperature(Number(e.target.value))}
-                      className="w-full accent-[#00FFCC]"
+                      className="w-full accent-[#DE5D35] cursor-pointer"
+                      aria-label="Temperature"
                     />
-                    <div className="flex justify-between text-[9px] text-white/40 mt-1">
+                    <div className="flex justify-between text-[9px] text-[#75716B] mt-1">
                       <span>0.1 (Greedy / Deterministic)</span>
                       <span>1.0 (Standard)</span>
                       <span>2.0 (High Entropy / Creative)</span>
@@ -2197,8 +2727,8 @@ export default function TransformersArticlePage() {
                   {samplingMethod === "topk" && (
                     <div>
                       <div className="flex justify-between items-center mb-1 text-[11px]">
-                        <span className="text-white/70">TOP-K CUTOFF:</span>
-                        <span className="text-[#FFB703] font-bold">
+                        <span className="text-[#75716B]">TOP-K CUTOFF:</span>
+                        <span className="text-[#DE5D35] font-bold">
                           K = {topK}
                         </span>
                       </div>
@@ -2209,9 +2739,10 @@ export default function TransformersArticlePage() {
                         step="1"
                         value={topK}
                         onChange={(e) => setTopK(Number(e.target.value))}
-                        className="w-full accent-[#FFB703]"
+                        className="w-full accent-[#DE5D35] cursor-pointer"
+                        aria-label="Top-K Cutoff"
                       />
-                      <div className="flex justify-between text-[9px] text-white/40 mt-1">
+                      <div className="flex justify-between text-[9px] text-[#75716B] mt-1">
                         <span>K=1 (Only #1 token)</span>
                         <span>K=5 (Top 5 tokens)</span>
                         <span>K=8 (All tokens)</span>
@@ -2222,7 +2753,7 @@ export default function TransformersArticlePage() {
 
                 {/* Live Softmax Probabilities Bar Chart */}
                 <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-[10px] text-white/50 uppercase border-b border-white/10 pb-1">
+                  <div className="flex justify-between text-[10px] text-[#75716B] uppercase border-b border-[#1A1816]/10 pb-1">
                     <span>CANDIDATE TOKEN (LOGIT z_i)</span>
                     <span>SOFTMAX PROBABILITY P(w_i)</span>
                   </div>
@@ -2230,32 +2761,38 @@ export default function TransformersArticlePage() {
                   {softmaxProbabilities.map((item, i) => (
                     <div
                       key={`soft-item-${item.word}`}
-                      className={`flex items-center gap-3 text-[12px] ${item.isFilteredOut ? "opacity-30" : "opacity-100"}`}
+                      className={`flex items-center gap-3 text-[12px] ${item.isFilteredOut ? "opacity-35" : "opacity-100"}`}
                     >
                       <div className="w-36 flex items-center justify-between text-left">
-                        <span className="font-bold text-white">
+                        <span className="font-bold text-[#1A1816]">
                           &ldquo;{item.word}&rdquo;
                         </span>
-                        <span className="text-[10px] text-white/40">
+                        <span className="text-[10px] text-[#75716B]">
                           (z={item.logit})
                         </span>
                       </div>
 
-                      <div className="grow bg-white/10 h-4 rounded-xs overflow-hidden relative">
+                      <div className="grow bg-[#EFECE6] h-4 rounded-[2px] overflow-hidden relative">
                         <div
                           className={`h-full transition-all duration-200 ${
                             item.isFilteredOut
-                              ? "bg-white/20"
+                              ? "bg-[#1A1816]/10"
                               : i === 0
-                                ? "bg-[#00FFCC]"
-                                : "bg-[#DE5D35]"
+                                ? "bg-[#DE5D35]"
+                                : "bg-[#1A1816]"
                           }`}
                           style={{ width: `${item.percent}%` }}
                         />
                       </div>
 
                       <span
-                        className={`w-14 text-right font-bold ${item.isFilteredOut ? "text-white/30" : "text-[#00FFCC]"}`}
+                        className={`w-14 text-right font-bold ${
+                          item.isFilteredOut
+                            ? "text-[#75716B] line-through"
+                            : i === 0
+                              ? "text-[#DE5D35]"
+                              : "text-[#1A1816]"
+                        }`}
                       >
                         {item.isFilteredOut ? "CUT" : `${item.percent}%`}
                       </span>
@@ -2263,11 +2800,12 @@ export default function TransformersArticlePage() {
                   ))}
                 </div>
 
-                <div className="text-[10px] text-white/50 p-2 bg-black/40 rounded">
+                <div className="text-[10px] text-[#4A4742] p-3 bg-[#F4F1EA] border border-[#1A1816]/10 rounded-[2px]">
                   💡 Notice: Lowering temperature to{" "}
-                  <span className="text-[#00FFCC]">T=0.2</span> collapses
-                  entropy onto the highest logit (&ldquo;transduction&rdquo;),
-                  while raising to <span className="text-[#DE5D35]">T=1.8</span>{" "}
+                  <span className="text-[#DE5D35] font-bold">T=0.2</span>{" "}
+                  collapses entropy onto the highest logit
+                  (&ldquo;transduction&rdquo;), while raising to{" "}
+                  <span className="text-[#1A1816] font-bold">T=1.8</span>{" "}
                   flattens the distribution across all candidates.
                 </div>
               </div>
