@@ -194,7 +194,7 @@ export default function TeamPage() {
                     OUR TEAM
                   </h1>
                 </div>
-                <span className="team-hero-edition absolute -top-1 -right-7 sm:-right-10 md:-right-12 font-mono text-[22px] sm:text-[32px] md:text-[38px] font-normal text-[#1A1816]/60 will-change-transform">
+                <span className="team-hero-edition absolute -top-1 right-0 font-mono text-[22px] sm:text-[32px] md:text-[38px] font-normal text-[#1A1816]/60 will-change-transform">
                   26–27
                 </span>
               </div>

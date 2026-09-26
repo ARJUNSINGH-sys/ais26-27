@@ -165,7 +165,7 @@ export default function Hero() {
 
           <div className="flex flex-col items-start gap-7 lg:w-[28%] lg:items-end">
             <p className="hero-subtext max-w-[40ch] text-[14px] leading-[1.55] text-ink-soft lg:text-right">
-              Bennett University&apos;s artificial intelligence society —
+              Bennett University&apos;s artificial intelligence society,
               engineering autonomous systems, neural architectures, and
               real-world intelligence.
             </p>

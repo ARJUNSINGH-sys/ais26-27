@@ -29,7 +29,7 @@ const NAV_LINKS = [
 const SOCIALS = [
   { label: "GitHub", href: "https://github.com" },
   { label: "LinkedIn", href: "https://linkedin.com" },
-  { label: "Instagram", href: "https://instagram.com" },
+  { label: "Instagram", href: "https://www.instagram.com/ais_bennett/" },
 ];
 
 export default function FoldMenu({

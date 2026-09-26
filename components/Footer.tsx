@@ -12,7 +12,7 @@ const INDEX_LINKS = [
 
 const CHANNELS = [
   { href: "https://github.com", label: "GitHub" },
-  { href: "https://instagram.com", label: "Instagram" },
+  { href: "https://www.instagram.com/ais_bennett/", label: "Instagram" },
   { href: "https://linkedin.com", label: "LinkedIn" },
   { href: "https://www.bennett.edu.in", label: "Bennett University" },
 ];
@@ -123,7 +123,7 @@ export default function Footer() {
                 <span className="text-accent">.</span>
               </h2>
               <p className="mt-5 max-w-[36ch] text-[14px] leading-[1.6] text-ink-soft">
-                Bennett University&apos;s artificial intelligence society —
+                Bennett University&apos;s artificial intelligence society,
                 training minds, one epoch at a time.
               </p>
             </div>
@@ -214,7 +214,7 @@ export default function Footer() {
       {/* Looping photo strip on the accent frame */}
       <div className="mt-2 flex items-stretch gap-2">
         <a
-          href="https://instagram.com"
+          href="https://www.instagram.com/ais_bennett/"
           target="_blank"
           rel="noopener noreferrer"
           className="hidden w-[140px] shrink-0 flex-col items-start justify-center rounded-2xl bg-ground px-4 py-3 sm:flex"
@@ -245,7 +245,7 @@ export default function Footer() {
         <div className="footer-text-ticker flex w-max whitespace-nowrap">
           {Array.from({ length: 8 }).map((_, i) => (
             <span key={i} className="flex items-center gap-0 px-0">
-              <span className="px-5">© {new Date().getFullYear()} AI Society — Bennett University</span>
+              <span className="px-5">© {new Date().getFullYear()} AI Society · Bennett University</span>
               <span aria-hidden className="opacity-40">.</span>
               <span className="px-5">Greater Noida · India</span>
               <span aria-hidden className="opacity-40">.</span>

@@ -106,7 +106,7 @@ const PUBLISHED_ARTICLES: ArticleMeta[] = [
     category: "DEEP LEARNING",
     title: "Neural Networks: A Visual Introduction",
     subtitle:
-      "Constructing feed-forward computational graphs from first principles — layer activations, synaptic weights, Adam optimization, and live backpropagation feedback loops.",
+      "Constructing feed-forward computational graphs from first principles: layer activations, synaptic weights, Adam optimization, and live backpropagation feedback loops.",
     readTime: "15 min read",
     date: "May 2024",
     author: "AIS Research Cohort",
